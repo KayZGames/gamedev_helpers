@@ -1,4 +1,5 @@
 gamedev_helpers
 ===============
 
-Usefull stuff for my gamedevelopment needs
+Useful stuff for my gamedevelopment needs. It's not supposed to be for general
+usage.
