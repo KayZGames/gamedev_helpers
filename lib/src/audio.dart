@@ -1,9 +1,8 @@
 part of gamedev_helpers;
 
-/// Expects sound assets in /assets/sfx
-AudioManager createAudioManager() {
-  int webIndex = window.location.href.lastIndexOf('/web/');
-  var baseUrl = window.location.href.substring(0, webIndex) + '/assets/sfx/';
+/// Expects sound assets in /asset/sfx
+AudioManager _createAudioManager(String appName) {
+  var baseUrl = 'assets/$appName/sfx/';
   var manager;
   try {
     // AudioManager needs this but some versions of Firefox don't have the gain property.
@@ -19,7 +18,7 @@ AudioManager createAudioManager() {
 }
 
 /// Loads AudioClips for the supported file format. ogg and mp3 files have to exist.
-Future<List<AudioClip>> loadAudioClips(AudioManager audioManager, List<String> namesWithoutExtension) {
+Future<List<AudioClip>> _loadAudioClips(AudioManager audioManager, List<String> namesWithoutExtension) {
   var audio = new AudioElement();
   var fileExtension = 'ogg';
   var goodAnswer = ['probably', 'maybe'];

@@ -4,3 +4,4 @@ author: Dennis Kaselow <Dennis.Kaselow+gamedev_helpers@gmail.com>
 dev_dependencies:
   simple_audio:
     git: https://github.com/johnmccutchan/simpleaudio.git
+  vector_math: any
