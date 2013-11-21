@@ -11,6 +11,7 @@ import 'package:vector_math/vector_math.dart';
 
 part 'src/assets.dart';
 part 'src/audio.dart';
+part 'src/dartemis/systems.dart';
 part 'src/game_base.dart';
 
 class GameHelper {

@@ -16,20 +16,16 @@ abstract class GameBase {
   /// which contains the assets. Usually the game itself.
   GameBase(String appName, String canvasSelector, int width, int height, {this.spriteSheetName: 'assets', this.bodyDefsName: 'assets'}) :
                                   canvas = querySelector(canvasSelector),
-                                  helper = new GameHelper(appName){
+                                  helper = new GameHelper(appName) {
     canvas.width = width;
     canvas.height = height;
+    canvas.context2D..textBaseline = "top"
+                    ..font = '12px Verdana';
   }
   /// [appName] is used to refernce assets and has to be the name of the library
   /// which contains the assets. Usually the game itself.
   GameBase.noAssets(String appName, String canvasSelector, int width, int height) :
-                                  spriteSheetName = null,
-                                  bodyDefsName = null,
-                                  canvas = querySelector(canvasSelector),
-                                  helper = new GameHelper(appName) {
-    canvas.width = width;
-    canvas.height = height;
-  }
+                                  this(appName, canvasSelector, width, height, spriteSheetName: null, bodyDefsName: null);
 
   Future _init() => _assetsLoaded().then((_) => onInit())
                                  .then((_) => _initGame())
