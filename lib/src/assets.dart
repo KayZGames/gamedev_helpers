@@ -53,6 +53,7 @@ class SpriteSheet {
   final ImageElement image;
   final Map<String, Sprite> sprites;
   SpriteSheet(this.image, this.sprites);
+  Sprite operator[](String name) => sprites[name];
 }
 
 class Sprite {
