@@ -3,6 +3,7 @@ part of gamedev_helpers;
 abstract class GameBase {
 
   final CanvasElement canvas;
+  final CanvasRenderingContext2D ctx;
   final World world = new World();
   final GameHelper helper;
   final String spriteSheetName;
@@ -16,7 +17,8 @@ abstract class GameBase {
   /// which contains the assets. Usually the game itself.
   GameBase(String appName, String canvasSelector, int width, int height, {this.spriteSheetName: 'assets', this.bodyDefsName: 'assets'}) :
                                   canvas = querySelector(canvasSelector),
-                                  helper = new GameHelper(appName) {
+                                  helper = new GameHelper(appName),
+                                  ctx = (querySelector(canvasSelector) as CanvasElement).context2D{
     canvas.width = width;
     canvas.height = height;
     canvas.context2D..textBaseline = "top"
