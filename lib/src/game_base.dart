@@ -51,7 +51,7 @@ abstract class GameBase {
     return Future.wait(loader).then((_) {
       if (null != bodyDefs) {
         bodyDefs.forEach((bodyId, shapes) {
-          var offset = spriteSheet.sprites['$bodyId.png'].offset;
+          var offset = spriteSheet.sprites['$bodyId.png'].offset - spriteSheet.sprites['$bodyId.png'].trimmed;
           shapes.forEach((shape) {
             shape.vertices = shape.vertices.map((vertex) => vertex + offset).toList();
           });

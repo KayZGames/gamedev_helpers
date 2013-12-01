@@ -60,6 +60,7 @@ class Sprite {
   Rectangle<int> src;
   Rectangle<int> dst;
   Vector2 offset;
+  Vector2 trimmed;
   Sprite(Map<String, dynamic> singleAsset) {
     _Asset asset = new _Asset(singleAsset);
     src = asset.frame;
@@ -74,6 +75,7 @@ class Sprite {
 
     dst = new Rectangle<int>(cx, cy, src.width, src.height);
     offset = new Vector2(cx.toDouble(), cy.toDouble());
+    trimmed = new Vector2(asset.spriteSourceSize.left.toDouble(), asset.spriteSourceSize.top.toDouble());
   }
 }
 
