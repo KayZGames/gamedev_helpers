@@ -5,15 +5,14 @@ import 'dart:convert';
 import 'dart:html';
 import 'dart:web_audio';
 
-import 'package:dartemis/dartemis.dart';
+import 'package:gamedev_helpers/gamedev_helpers_shared.dart';
 import 'package:simple_audio/simple_audio.dart';
 import 'package:vector_math/vector_math.dart';
 
-part 'src/assets.dart';
-part 'src/audio.dart';
-part 'src/dartemis/components.dart';
-part 'src/dartemis/systems.dart';
-part 'src/game_base.dart';
+part 'src/client/assets.dart';
+part 'src/client/audio.dart';
+part 'src/client/dartemis/systems/systems.dart';
+part 'src/client/game_base.dart';
 
 class GameHelper {
   final String _libName;
