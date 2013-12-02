@@ -11,8 +11,11 @@ import 'package:vector_math/vector_math.dart';
 
 part 'src/client/assets.dart';
 part 'src/client/audio.dart';
-part 'src/client/dartemis/systems/systems.dart';
 part 'src/client/game_base.dart';
+
+part 'src/client/dartemis/systems/debugging.dart';
+part 'src/client/dartemis/systems/rendering.dart';
+part 'src/client/dartemis/systems/sound.dart';
 
 class GameHelper {
   final String _libName;
