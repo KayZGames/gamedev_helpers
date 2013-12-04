@@ -24,9 +24,9 @@ class MenuRenderingSystem extends VoidEntitySystem {
   static const BORDER_X = 50;
   static const BORDER_Y = 50;
 
-  var itemStart = new _MenuItem('green', 'lightgreen');
-  var itemControls = new _MenuItem('green', 'lightgreen');
-  var itemCredits = new _MenuItem('green', 'lightgreen');
+  var itemStart = new _MenuItem('green', 'lightgreen', 'Start');
+  var itemControls = new _MenuItem('green', 'lightgreen', 'Controls');
+  var itemCredits = new _MenuItem('green', 'lightgreen', 'Credits');
   var items = new Map<int, _MenuItem>();
 
   MenuRenderingSystem(this.canvas) {
@@ -34,7 +34,7 @@ class MenuRenderingSystem extends VoidEntitySystem {
     height = canvas.height;
     buffer = new CanvasElement(width: width, height: height);
     ctx = buffer.context2D;
-    ctx..font = 'Verdana 12px'
+    ctx..font = '26px Verdana'
        ..strokeStyle = 'navy'
        ..fillStyle = 'darkred'
        ..lineWidth = 3;
@@ -44,9 +44,9 @@ class MenuRenderingSystem extends VoidEntitySystem {
 
     var hidden = new CanvasElement(width: width, height: height);
     var hiddenCtx = hidden.context2D;
-    _drawUpperLeft(hiddenCtx, itemStart.hiddenBgColor);
-    _drawUpperRight(hiddenCtx, itemControls.hiddenBgColor);
-    _drawLowerRight(hiddenCtx, itemCredits.hiddenBgColor);
+    _drawTopLeft(hiddenCtx, itemStart.hiddenBgColor);
+    _drawTopRight(hiddenCtx, itemControls.hiddenBgColor);
+    _drawBottomRight(hiddenCtx, itemCredits.hiddenBgColor);
     int idOfHighlighted;
     canvas.onMouseMove.listen((event) {
       var data = hiddenCtx.getImageData(event.offset.x, event.offset.y, 1, 1);
@@ -74,107 +74,122 @@ class MenuRenderingSystem extends VoidEntitySystem {
   }
 
   void processSystem() {
-//    ctx.beginPath();
-//    ctx.fillStyle = 'darkred';
-//    ctx.moveTo(BORDER_X, BORDER_Y);
-//    ctx.quadraticCurveTo(0, height, width - BORDER_X, height - BORDER_Y);
-//    ctx.quadraticCurveTo(width, 0, BORDER_X, BORDER_Y);
-//    ctx.moveTo(BORDER_X, height - BORDER_Y);
-//    ctx.quadraticCurveTo(width, height, width - BORDER_X, BORDER_Y);
-//    ctx.quadraticCurveTo(0, 0, BORDER_Y, height - BORDER_Y);
-//    ctx.stroke();
-//    ctx.fill();
+    _drawTopLeft(ctx, itemStart.fillStyle);
+    _drawTopRight(ctx, itemControls.fillStyle);
+    _drawBottomLeft();
+    _drawBottomRight(ctx, itemCredits.fillStyle);
 
-    _drawUpperLeft(ctx, itemStart.fillStyle);
-    _drawUpperRight(ctx, itemControls.fillStyle);
-    _drawLowerLeft();
-    _drawLowerRight(ctx, itemCredits.fillStyle);
+    ctx..font = itemStart.highlight ? '30px Verdana' : '26px Verdana'
+       ..fillStyle = itemStart.highlight ? 'red' : 'darkred'
+       ..strokeStyle = itemStart.highlight ? 'darkblue' : 'navy'
+       ..strokeText('Start', width ~/ 10, height ~/ 4)
+       ..fillText('Start', width ~/ 10, height ~/ 4);
+
     _drawContent();
   }
 
-  void _drawUpperLeft(CanvasRenderingContext2D ctx, String fillStyle) {
+  void _drawTopLeft(CanvasRenderingContext2D ctx, String fillStyle) {
     ctx..beginPath()
-       ..moveTo(BORDER_X * gRatio, height ~/ 2)
-       // middle left to upper left
-       ..bezierCurveTo(40, BORDER_Y + height ~/ 4, 40, BORDER_Y + height ~/ 8, BORDER_X, BORDER_Y)
-       // upper left to upper center
-       ..bezierCurveTo(BORDER_X + width ~/ 8, 40, BORDER_X + width ~/ 4, 40, width ~/ 2, BORDER_Y * gRatio)
-       // upper center to middle left
-       ..bezierCurveTo(3/8 * width, 1/8 * height, 1/8 * width, 3/8 * height, BORDER_X * gRatio, height ~/ 2)
-//       ..stroke()
+       ..moveTo(middleLeftX, middleLeftY)
+       // middle left to top left
+       ..bezierCurveTo(40, BORDER_Y + height ~/ 4, 40, BORDER_Y + height ~/ 8, topLeftX, topLeftY)
+       // top left to top center
+       ..bezierCurveTo(BORDER_X + width ~/ 8, 40 * gRatio * 2, BORDER_X + width ~/ 4, 40, topCenterX, topCenterY)
+       // top center to middle left
+       ..bezierCurveTo(3/8 * width, 1/8 * height, 1/8 * width, 1/6 * height, middleLeftX, middleLeftY)
        ..fillStyle = fillStyle
        ..fill();
   }
 
-  void _drawUpperRight(CanvasRenderingContext2D ctx, String fillStyle) {
+
+  void _drawTopRight(CanvasRenderingContext2D ctx, String fillStyle) {
     ctx..beginPath()
-       ..moveTo(width ~/ 2, BORDER_Y * gRatio)
-       // upper center to upper right
-       ..bezierCurveTo(width - BORDER_X - width ~/ 4, 40, width - BORDER_X - width ~/ 8, 40, width - BORDER_X, BORDER_Y)
-       // upper right to middle right
-       ..bezierCurveTo(width - 40, BORDER_Y + height ~/ 8, width - 40, BORDER_Y + height ~/ 4, width - BORDER_X * gRatio, height ~/ 2)
-       // middle right to upper center
-       ..bezierCurveTo(7/8 * width, 3/8 * height, 5/8 * width, 1/8 * height, width ~/ 2, BORDER_Y * gRatio)
-//     ..stroke()
+       ..moveTo(topCenterX, topCenterY)
+       // top center to top right
+       ..bezierCurveTo(width - BORDER_X - width ~/ 4, 80, width - BORDER_X - width ~/ 8, 20, topRightX, topRightY)
+       // top right to middle right
+       ..bezierCurveTo(width - 20, BORDER_Y + height ~/ 8, width - 80, BORDER_Y + height ~/ 6, middleRightX, middleRightY)
+       // middle right to top center
+       ..bezierCurveTo(7/8 * width, 2/8 * height, 6/8 * width, 1/8 * height, topCenterX, topCenterY)
        ..fillStyle = fillStyle
        ..fill();
   }
 
-  void _drawLowerLeft() {
+  void _drawBottomLeft() {
     ctx..beginPath()
-       ..moveTo(BORDER_X * gRatio, height ~/ 2)
-       // middle left to lower left
-       ..bezierCurveTo(40, height - BORDER_Y - height ~/ 4, 40, height - BORDER_Y - height ~/ 8, BORDER_X, height - BORDER_Y)
-       // lower left to lower center
-       ..bezierCurveTo(BORDER_X + width ~/ 8, height - 40, BORDER_X + width ~/ 4, height - 40, width ~/ 2, height - BORDER_Y * gRatio)
-       // lower center to middle left
-       ..bezierCurveTo(3/8 * width, 7/8 * height, 1/8 * width, 5/8 * height, BORDER_X * gRatio, height ~/ 2)
-//       ..stroke()
+       ..moveTo(middleLeftX, middleLeftY)
+       // middle left to bottom left
+       ..bezierCurveTo(40, bottomRightY - height ~/ 4, 40, bottomRightY - height ~/ 8, bottomLeftX, bottomLeftY)
+       // bottom left to bottom center
+       ..bezierCurveTo(BORDER_X + width ~/ 8, height - 40, BORDER_X + width ~/ 5, height - 80, bottomCenterX, bottomCenterY)
+       // bottom center to middle left
+       ..bezierCurveTo(2/8 * width, 7/8 * height, 1/8 * width, 6/8 * height, middleLeftX, middleLeftY)
        ..fillStyle = 'green'
        ..fill();
   }
 
-  void _drawLowerRight(CanvasRenderingContext2D ctx, String fillStyle) {
+  void _drawBottomRight(CanvasRenderingContext2D ctx, String fillStyle) {
     ctx..beginPath()
-       ..moveTo(width ~/ 2, height - BORDER_Y * gRatio)
-       // lower center to lower right
-       ..bezierCurveTo(width - BORDER_X - width ~/ 4, height - 40, width - BORDER_X - width ~/ 8, height - 40, width - BORDER_X, height - BORDER_Y)
-       // lower right to middle right
-       ..bezierCurveTo(width - 40, height - BORDER_Y - height ~/ 8, width - 40, height - BORDER_Y - height ~/ 4, width - BORDER_X * gRatio, height ~/ 2)
-       // middle right to lower center
-       ..bezierCurveTo(7/8 * width, 5/8 * height, 5/8 * width, 7/8 * height, width ~/ 2, height - BORDER_Y * gRatio)
-//       ..stroke()
+       ..moveTo(bottomCenterX, bottomCenterY)
+       // bottom center to bottom right
+       ..bezierCurveTo(bottomRightX - width ~/ 4, height - 40, bottomRightX - width ~/ 8, height - 40, bottomRightX, bottomRightY)
+       // bottom right to middle right
+       ..bezierCurveTo(width - 30, height - BORDER_Y - height ~/ 9, width - 90, height - BORDER_Y - height ~/ 8, middleRightX, middleRightY)
+       // middle right to bottom center
+       ..bezierCurveTo(7/8 * width, 6/8 * height, 6/8 * width, 7/8 * height, bottomCenterX, bottomCenterY)
        ..fillStyle = fillStyle
        ..fill();
   }
 
+
   void _drawContent() {
     ctx..beginPath()
-       ..moveTo(width ~/ 2, BORDER_Y * gRatio)
-       // upper center to middle right
-       ..bezierCurveTo(5/8 * width, 1/8 * height, 7/8 * width, 3/8 * height, width - BORDER_X * gRatio, height ~/ 2)
-       // middle right to lower center
-       ..bezierCurveTo(7/8 * width, 5/8 * height, 5/8 * width, 7/8 * height, width ~/ 2, height - BORDER_Y * gRatio)
-       // lower center to middle left
-       ..bezierCurveTo(3/8 * width, 7/8 * height, 1/8 * width, 5/8 * height, BORDER_X * gRatio, height ~/ 2)
-       // middle left to upper center
-       ..bezierCurveTo(1/8 * width, 3/8 * height, 3/8 * width, 1/8 * height, width ~/ 2, BORDER_Y * gRatio)
-//       ..stroke()
+       ..moveTo(topCenterX, topCenterY)
+       // top center to middle right
+       ..bezierCurveTo(6/8 * width, 1/8 * height, 7/8 * width, 2/8 * height, middleRightX, middleRightY)
+       // middle right to bottom center
+       ..bezierCurveTo(7/8 * width, 6/8 * height, 6/8 * width, 7/8 * height, bottomCenterX, bottomCenterY)
+       // bottom center to middle left
+       ..bezierCurveTo(2/8 * width, 7/8 * height, 1/8 * width, 6/8 * height, middleLeftX, middleLeftY)
+       // middle left to top center
+       ..bezierCurveTo(1/8 * width, 1/6 * height, 3/8 * width, 1/8 * height, topCenterX, topCenterY)
        ..fillStyle = 'navy'
        ..fill();
   }
 
+
   void end() {
     canvas.context2D.drawImage(buffer, 0, 0);
   }
+
+
+  num get topCenterX => 9/16 * width;
+  num get topCenterY => BORDER_Y * gRatio;
+  num get topRightX => width - BORDER_X;
+  num get topRightY => BORDER_Y*2;
+  num get middleRightX => width - BORDER_X * gRatio * 1.5;
+  num get middleRightY => 9/16 * height;
+  num get bottomRightX => width - BORDER_X * gRatio;
+  num get bottomRightY => height - BORDER_Y * gRatio;
+  num get bottomCenterX => 1/2 * width;
+  num get bottomCenterY => height - BORDER_Y * gRatio;
+  num get bottomLeftX => BORDER_X;
+  num get bottomLeftY => height - BORDER_Y;
+  num get middleLeftX => BORDER_X * gRatio * 1.5;
+  num get middleLeftY => 1/2 * height;
+  num get topLeftX => BORDER_X;
+  num get topLeftY => BORDER_Y;
+
+
 }
 
 class _MenuItem {
   static int nextId = 1;
   int id;
   String bgColor, bgSelectedColor, hiddenBgColor;
+  String initial;
   bool highlight = false;
-  _MenuItem(this.bgColor, this.bgSelectedColor) {
+  _MenuItem(this.bgColor, this.bgSelectedColor, this.initial) {
     id = nextId++;
     // should be changed if there ever is a reason to go beyond 256 menu items
     hiddenBgColor = 'rgb($id, 0, 0)';
