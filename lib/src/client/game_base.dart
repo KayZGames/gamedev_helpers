@@ -4,10 +4,10 @@ abstract class GameBase {
 
   final CanvasElement canvas;
   final CanvasRenderingContext2D ctx;
-  final World world = new World();
   final GameHelper helper;
   final String spriteSheetName;
   final String bodyDefsName;
+  World world;
   Map<String, List<Polygon>> bodyDefs;
   SpriteSheet spriteSheet;
   double _lastTime;
@@ -23,7 +23,10 @@ abstract class GameBase {
     canvas.height = height;
     canvas.context2D..textBaseline = "top"
                     ..font = '12px Verdana';
+    world = createWorld();
   }
+
+  World createWorld() => new World();
   /// [appName] is used to refernce assets and has to be the name of the library
   /// which contains the assets. Usually the game itself.
   GameBase.noAssets(String appName, String canvasSelector, int width, int height) :
@@ -36,9 +39,9 @@ abstract class GameBase {
 
   /// Do whatever you have to do before starting to create [Entity]s and
   /// [EntitySystem]s.
-  void onInit();
+  Future onInit();
   /// Do whatever you have to do after world.initialize() was called.
-  void onInitDone();
+  Future onInitDone();
 
   Future _assetsLoaded() {
     var loader = <Future>[];
@@ -60,7 +63,7 @@ abstract class GameBase {
     });
   }
 
-  void _initGame() {
+  Future _initGame() {
     createEntities();
     initSystems();
     world.initialize();
