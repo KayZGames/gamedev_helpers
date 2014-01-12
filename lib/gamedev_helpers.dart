@@ -1,6 +1,7 @@
 library gamedev_helpers;
 
 import 'dart:async';
+export 'dart:async';
 import 'dart:convert';
 import 'dart:html';
 import 'dart:web_audio';
