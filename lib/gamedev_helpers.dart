@@ -7,6 +7,7 @@ import 'dart:html';
 import 'dart:web_audio';
 
 import 'package:gamedev_helpers/gamedev_helpers_shared.dart';
+export 'package:gamedev_helpers/gamedev_helpers_shared.dart';
 import 'package:simple_audio/simple_audio.dart';
 import 'package:vector_math/vector_math.dart';
 
