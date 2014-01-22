@@ -94,10 +94,5 @@ abstract class GameBase {
 
   void initSystems() => getSystems().forEach((system) => world.addSystem(system));
 
-  Entity addEntity(List<Component> components) {
-    var entity = world.createEntity();
-    components.forEach((component) => entity.addComponent(component));
-    entity.addToWorld();
-    return entity;
-  }
+  Entity addEntity(List<Component> components) => world.createAndAddEntity(components);
 }
