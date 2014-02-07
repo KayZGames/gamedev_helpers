@@ -7,23 +7,33 @@ abstract class GameBase {
   final GameHelper helper;
   final String spriteSheetName;
   final String bodyDefsName;
+  final int _width;
+  final int _height;
   World world;
   Map<String, List<Polygon>> bodyDefs;
   SpriteSheet spriteSheet;
   double _lastTime;
-  bool _initSuccess = false;
+  var _initSuccess = false;
+  var fullscreen = false;
 
   /// [appName] is used to refernce assets and has to be the name of the library
   /// which contains the assets. Usually the game itself.
   GameBase(String appName, String canvasSelector, int width, int height, {this.spriteSheetName: 'assets', this.bodyDefsName: 'assets'}) :
                                   canvas = querySelector(canvasSelector),
                                   helper = new GameHelper(appName),
-                                  ctx = (querySelector(canvasSelector) as CanvasElement).context2D{
+                                  ctx = (querySelector(canvasSelector) as CanvasElement).context2D,
+                                  _width = width,
+                                  _height = height {
     canvas.width = width;
     canvas.height = height;
     canvas.context2D..textBaseline = "top"
                     ..font = '12px Verdana';
+    canvas.onFullscreenChange.listen(_handleFullscreen);
     world = createWorld();
+    var fullscreenButton = querySelector('button#fullscreen');
+    if (null != fullscreenButton) {
+      fullscreenButton.onClick.listen((_) => querySelector('canvas').requestFullscreen());
+    }
   }
 
   World createWorld() => new World();
@@ -86,6 +96,22 @@ abstract class GameBase {
     world.process();
     window.requestAnimationFrame(_update);
   }
+
+  void _handleFullscreen(Event e) {
+    fullscreen = !fullscreen;
+    if (fullscreen) {
+      canvas.width = window.screen.width;
+      canvas.height = window.screen.height;
+    } else {
+      canvas.width = _width;
+      canvas.height = _height;
+    }
+    canvas.context2D..textBaseline = "top"
+                    ..font = '12px Verdana';
+    handleResize(canvas.width, canvas.height);
+  }
+
+  void handleResize(int width, int height) {}
 
   /// Create your entities
   void createEntities();

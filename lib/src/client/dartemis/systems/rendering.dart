@@ -1,16 +1,13 @@
 part of gamedev_helpers;
 
 class CanvasCleaningSystem extends VoidEntitySystem {
-  CanvasRenderingContext2D ctx;
-  int width, height;
+  CanvasElement canvas;
 
-  CanvasCleaningSystem(CanvasElement canvas) : ctx = canvas.context2D,
-                                               width = canvas.width,
-                                               height = canvas.height;
+  CanvasCleaningSystem(this.canvas);
 
   void processSystem() {
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, width, height);
+    canvas.context2D..fillStyle = 'white'
+                    ..fillRect(0, 0, canvas.width, canvas.height);
   }
 }
 
