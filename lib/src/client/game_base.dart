@@ -3,12 +3,13 @@ part of gamedev_helpers;
 abstract class GameBase {
 
   final CanvasElement canvas;
-  final CanvasRenderingContext2D ctx;
+  final CanvasRenderingContext ctx;
   final GameHelper helper;
   final String spriteSheetName;
   final String bodyDefsName;
   final int _width;
   final int _height;
+  final bool webgl;
   World world;
   Map<String, List<Polygon>> bodyDefs;
   SpriteSheet spriteSheet;
@@ -18,16 +19,19 @@ abstract class GameBase {
 
   /// [appName] is used to refernce assets and has to be the name of the library
   /// which contains the assets. Usually the game itself.
-  GameBase(String appName, String canvasSelector, int width, int height, {this.spriteSheetName: 'assets', this.bodyDefsName: 'assets'}) :
+  GameBase(String appName, String canvasSelector, int width, int height, {this.spriteSheetName: 'assets', this.bodyDefsName: 'assets', bool webgl: false}) :
                                   canvas = querySelector(canvasSelector),
                                   helper = new GameHelper(appName),
-                                  ctx = (querySelector(canvasSelector) as CanvasElement).context2D,
+                                  webgl = webgl,
+                                  ctx = webgl ? (querySelector(canvasSelector) as CanvasElement).getContext3d() : (querySelector(canvasSelector) as CanvasElement).context2D,
                                   _width = width,
                                   _height = height {
     canvas.width = width;
     canvas.height = height;
-    canvas.context2D..textBaseline = "top"
-                    ..font = '12px Verdana';
+    if (!webgl) {
+      canvas.context2D..textBaseline = "top"
+                      ..font = '12px Verdana';
+    }
     canvas.onFullscreenChange.listen(_handleFullscreen);
     world = createWorld();
     var fullscreenButton = querySelector('button#fullscreen');
@@ -39,8 +43,8 @@ abstract class GameBase {
   World createWorld() => new World();
   /// [appName] is used to refernce assets and has to be the name of the library
   /// which contains the assets. Usually the game itself.
-  GameBase.noAssets(String appName, String canvasSelector, int width, int height) :
-                                  this(appName, canvasSelector, width, height, spriteSheetName: null, bodyDefsName: null);
+  GameBase.noAssets(String appName, String canvasSelector, int width, int height, {bool webgl: false}) :
+                                  this(appName, canvasSelector, width, height, spriteSheetName: null, bodyDefsName: null, webgl: webgl);
 
   Future _init() => _assetsLoaded().then((_) => onInit())
                                  .then((_) => _initGame())
@@ -106,8 +110,10 @@ abstract class GameBase {
       canvas.width = _width;
       canvas.height = _height;
     }
-    canvas.context2D..textBaseline = "top"
-                    ..font = '12px Verdana';
+    if (!webgl) {
+      canvas.context2D..textBaseline = "top"
+                      ..font = '12px Verdana';
+    }
     handleResize(canvas.width, canvas.height);
   }
 

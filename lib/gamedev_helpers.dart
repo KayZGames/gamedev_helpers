@@ -5,6 +5,7 @@ export 'dart:async';
 import 'dart:convert';
 import 'dart:html';
 import 'dart:web_audio';
+import 'dart:web_gl';
 
 import 'package:gamedev_helpers/gamedev_helpers_shared.dart';
 export 'package:gamedev_helpers/gamedev_helpers_shared.dart';
