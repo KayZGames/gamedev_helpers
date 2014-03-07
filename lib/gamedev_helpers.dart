@@ -10,7 +10,6 @@ import 'dart:web_gl';
 import 'package:gamedev_helpers/gamedev_helpers_shared.dart';
 export 'package:gamedev_helpers/gamedev_helpers_shared.dart';
 import 'package:simple_audio/simple_audio.dart';
-import 'package:vector_math/vector_math.dart';
 
 part 'src/client/assets.dart';
 part 'src/client/audio.dart';
