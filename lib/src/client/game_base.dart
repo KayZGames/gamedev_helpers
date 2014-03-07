@@ -53,9 +53,9 @@ abstract class GameBase {
 
   /// Do whatever you have to do before starting to create [Entity]s and
   /// [EntitySystem]s.
-  Future onInit();
+  Future onInit() => null;
   /// Do whatever you have to do after world.initialize() was called.
-  Future onInitDone();
+  Future onInitDone() => null;
 
   Future _assetsLoaded() {
     var loader = <Future>[];
