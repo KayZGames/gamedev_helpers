@@ -91,14 +91,14 @@ abstract class GameBase {
     _lastTime = time;
     world.delta = 16.66;
     world.process();
-    window.requestAnimationFrame(_update);
+    window.requestAnimationFrame((time) => update(time: time));
   }
 
-  void _update(double time) {
+  void update({double time}) {
     world.delta = time - _lastTime;
     _lastTime = time;
     world.process();
-    window.requestAnimationFrame(_update);
+    window.requestAnimationFrame((time) => update(time: time));
   }
 
   void _handleFullscreen(Event e) {
