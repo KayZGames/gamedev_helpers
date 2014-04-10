@@ -6,3 +6,4 @@ dependencies:
     git: https://github.com/johnmccutchan/simpleaudio
   vector_math: any
   dartemis: any
+  event_bus: any

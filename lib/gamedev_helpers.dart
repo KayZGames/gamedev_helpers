@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:html';
 import 'dart:web_audio';
 import 'dart:web_gl';
+import 'dart:js' as js;
 
 import 'package:gamedev_helpers/gamedev_helpers_shared.dart';
 export 'package:gamedev_helpers/gamedev_helpers_shared.dart';
@@ -15,6 +16,7 @@ part 'src/client/assets.dart';
 part 'src/client/audio.dart';
 part 'src/client/game_base.dart';
 
+part 'src/client/dartemis/systems/analytics.dart';
 part 'src/client/dartemis/systems/debugging.dart';
 part 'src/client/dartemis/systems/rendering.dart';
 part 'src/client/dartemis/systems/sound.dart';
