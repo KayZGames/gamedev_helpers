@@ -5,8 +5,9 @@ class AnalyticsSystem extends VoidEntitySystem {
   static const ITCHIO = 2;
   final bool trackLocal;
   final int accountId;
+  final String category;
   js.JsObject _gaq;
-  AnalyticsSystem(this.accountId, {this.trackLocal: false});
+  AnalyticsSystem(this.accountId, this.category, {this.trackLocal: false});
 
   @override
   void initialize() {
@@ -18,7 +19,7 @@ class AnalyticsSystem extends VoidEntitySystem {
       _gaq.callMethod('push', [new js.JsArray.from(['_trackPageview'])]);
     }
     eventBus.on(analyticsTrackEvent).listen((AnalyticsTrackEvent event) {
-      _gaq.callMethod('push', [new js.JsArray.from(['_trackEvent', event.category, event.action, event.label])]);
+      _gaq.callMethod('push', [new js.JsArray.from(['_trackEvent', category, event.action, event.label])]);
     });
   }
 
