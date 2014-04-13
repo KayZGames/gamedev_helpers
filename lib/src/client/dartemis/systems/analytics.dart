@@ -6,20 +6,20 @@ class AnalyticsSystem extends VoidEntitySystem {
   final bool trackLocal;
   final int accountId;
   final String category;
-  js.JsObject _gaq;
+  js.JsFunction _ga;
   AnalyticsSystem(this.accountId, this.category, {this.trackLocal: false});
 
   @override
   void initialize() {
     if (!trackLocal && '127.0.0.1' == window.location.hostname) {
-      _gaq = new _NopJsObject();
+      _ga = new _NopJsFunction();
     } else {
-      _gaq = js.context['_gaq'];
-      _gaq.callMethod('push', [new js.JsArray.from(['_setAccount', 'UA-40549999-$accountId'])]);
-      _gaq.callMethod('push', [new js.JsArray.from(['_trackPageview'])]);
+      _ga = js.context['ga'];
+      _ga.apply(['create', 'UA-40549999-$accountId']);
+      _ga.apply(['send', 'pageview']);
     }
     eventBus.on(analyticsTrackEvent).listen((AnalyticsTrackEvent event) {
-      _gaq.callMethod('push', [new js.JsArray.from(['_trackEvent', category, event.action, event.label])]);
+      _ga.apply(['send', 'event', category, event.action, event.label]);
     });
   }
 
@@ -32,13 +32,16 @@ class AnalyticsSystem extends VoidEntitySystem {
   bool checkProcessing() => false;
 }
 
-class _NopJsObject implements js.JsObject {
+class _NopJsFunction implements js.JsFunction {
 
   @override
   operator [](property) {}
 
   @override
   operator []=(property, value) {}
+
+  @override
+  apply(List args, {thisArg}) {}
 
   @override
   callMethod(String method, [List args]) {}
