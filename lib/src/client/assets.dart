@@ -1,16 +1,16 @@
 part of gamedev_helpers;
 
 Future<Map<String, String>> _loadAchievements(String libName) {
-  return HttpRequest.getString('assets/$libName/achievements.json').then(_processAssets);
+  return HttpRequest.getString('packages/$libName/assets/achievements.json').then(_processAssets);
 }
 
 Future<Map<String, List<Polygon>>> _loadPolygons(String libName, String name) {
-  return HttpRequest.getString('assets/$libName/img/$name.polygons.json').then(_processAssets).then(_createPolygonMap);
+  return HttpRequest.getString('packages/$libName/assets/img/$name.polygons.json').then(_processAssets).then(_createPolygonMap);
 }
 
 Future<SpriteSheet> _loadSpritesheet(String libName, String name) {
-  String imgPath = 'assets/$libName/img/$name.png';
-  return HttpRequest.getString('assets/$libName/img/$name.json')
+  String imgPath = 'packages/$libName/assets/img/$name.png';
+  return HttpRequest.getString('packages/$libName/assets/img/$name.json')
       .then(_processAssets).then((assets) => _createSpriteSheet(imgPath, assets));
 }
 

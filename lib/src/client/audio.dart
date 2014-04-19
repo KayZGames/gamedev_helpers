@@ -2,7 +2,7 @@ part of gamedev_helpers;
 
 /// Expects sound assets in /asset/sfx
 AudioManager _createAudioManager(String appName) {
-  var baseUrl = 'assets/$appName/sfx/';
+  var baseUrl = 'packages/$appName/assets/sfx/';
   var manager;
   try {
     // AudioManager needs this but some versions of Firefox don't have the gain property.
