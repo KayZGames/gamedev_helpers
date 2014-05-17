@@ -8,3 +8,4 @@ dependencies:
   vector_math: any
   dartemis: any
   event_bus: any
+  tweenengine: any
