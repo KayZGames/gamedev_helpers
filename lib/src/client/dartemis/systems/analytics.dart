@@ -18,7 +18,7 @@ class AnalyticsSystem extends VoidEntitySystem {
       _ga.apply(['create', 'UA-40549999-$accountId']);
       _ga.apply(['send', 'pageview']);
     }
-    eventBus.on(analyticsTrackEvent).listen((AnalyticsTrackEvent event) {
+    eventBus.on(AnalyticsTrackEvent).listen((AnalyticsTrackEvent event) {
       _ga.apply(['send', 'event', category, event.action, event.label]);
     });
   }

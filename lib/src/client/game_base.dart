@@ -81,6 +81,7 @@ abstract class GameBase {
     createEntities();
     initSystems();
     world.initialize();
+    return null;
   }
 
   void start() {

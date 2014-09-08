@@ -5,8 +5,6 @@ AudioManager _createAudioManager(String appName) {
   var baseUrl = 'packages/$appName/assets/sfx/';
   var manager;
   try {
-    // AudioManager needs this but some versions of Firefox don't have the gain property.
-    if (null == new AudioContext().createBufferSource().gain) throw 'this ain\'t no real AudioContext';
     manager = new AudioManager(baseUrl);
     var source = manager.makeSource('default');
     source.positional = false;
@@ -56,7 +54,7 @@ class AudioElementManager implements AudioManager {
     return null;
   }
 
-  dynamic noSuchMethod(Invocation im) {}
+  noSuchMethod(Invocation im) {}
 }
 
 /// AudioClip for browsers that don't support AudioContext.
@@ -90,5 +88,5 @@ class AudiElementClip implements AudioClip {
     audioElement.play();
   }
 
-  dynamic noSuchMethod(Invocation im) {}
+  noSuchMethod(Invocation im) {}
 }
