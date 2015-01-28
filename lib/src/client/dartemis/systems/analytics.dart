@@ -15,7 +15,7 @@ class AnalyticsSystem extends VoidEntitySystem {
       _ga = new _NopJsFunction();
     } else {
       _ga = js.context['ga'];
-      _ga.apply(['create', 'UA-40549999-$accountId']);
+      _ga.apply(['create', 'UA-56073673-$accountId']);
       _ga.apply(['send', 'pageview']);
     }
     eventBus.on(AnalyticsTrackEvent).listen((AnalyticsTrackEvent event) {
