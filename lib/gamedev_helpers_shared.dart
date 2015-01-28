@@ -4,8 +4,8 @@ import 'dart:math';
 export 'dart:math';
 import 'dart:async';
 
-import 'package:dartemis/dartemis_mirrors.dart';
-export 'package:dartemis/dartemis_mirrors.dart';
+import 'package:dartemis/dartemis.dart';
+export 'package:dartemis/dartemis.dart';
 
 import 'package:event_bus/event_bus.dart' as event_bus;
 import 'package:tweenengine/tweenengine.dart';

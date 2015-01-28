@@ -4,8 +4,14 @@ description: Useful stuff for my gamedevelopment needs
 author: Dennis Kaselow <Dennis.Kaselow+gamedev_helpers@gmail.com>
 dependencies:
   simple_audio:
-    git: https://github.com/johnmccutchan/simpleaudio
+#    git: https://github.com/johnmccutchan/simpleaudio
+    path: ../simple_audio
   vector_math: any
-  dartemis: any
+  dartemis:
+    path: ../dartemis
   event_bus: any
   tweenengine: any
+transformers:
+- dartemis:
+    additionalLibraries:
+    - dartemis/dartemis.dart
