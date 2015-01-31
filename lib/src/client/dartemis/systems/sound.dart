@@ -10,7 +10,7 @@ class SoundSystem extends EntityProcessingSystem {
   }
 
   processEntity(Entity e) {
-    helper.playClip(sm.get(e).clipName);
+    helper.playClip(sm[e].clipName);
     e.deleteFromWorld();
   }
 }
