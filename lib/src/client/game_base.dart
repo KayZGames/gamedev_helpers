@@ -79,9 +79,9 @@ abstract class GameBase {
 
   Future _initGame() {
     createEntities();
-    initSystems();
-    world.initialize();
-    return null;
+    return initSystems().then((_) {
+      world.initialize();
+    });
   }
 
   void start() {
@@ -125,7 +125,18 @@ abstract class GameBase {
   /// Return a list of all the [EntitySystem]s required for this game.
   List<EntitySystem> getSystems();
 
-  void initSystems() => getSystems().forEach((system) => world.addSystem(system));
+  Future initSystems() {
+    List<Future> shaderSourceFutures = new List();
+    getSystems().forEach((system) {
+      world.addSystem(system);
+      if (system is WebGlRenderingSystem) {
+        shaderSourceFutures.add(helper.loadShader(system.vShaderFile, system.fShaderFile).then((shaderSource) {
+          system.shaderSource = shaderSource;
+        }));
+      }
+    });
+    return Future.wait(shaderSourceFutures);
+  }
 
   Entity addEntity(List<Component> components) => world.createAndAddEntity(components);
 }

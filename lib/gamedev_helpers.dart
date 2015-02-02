@@ -4,6 +4,8 @@ import 'dart:async';
 export 'dart:async';
 import 'dart:convert';
 import 'dart:html';
+import 'dart:web_gl';
+import 'dart:typed_data';
 import 'dart:js' as js;
 
 import 'package:gamedev_helpers/gamedev_helpers_shared.dart';
@@ -17,7 +19,8 @@ part 'src/client/game_base.dart';
 part 'src/client/dartemis/systems/analytics.dart';
 part 'src/client/dartemis/systems/debugging.dart';
 part 'src/client/dartemis/systems/input.dart';
-part 'src/client/dartemis/systems/rendering.dart';
+part 'src/client/dartemis/systems/rendering_context2d.dart';
+part 'src/client/dartemis/systems/rendering_webgl.dart';
 part 'src/client/dartemis/systems/sound.dart';
 
 class GameHelper {
@@ -41,6 +44,9 @@ class GameHelper {
   /// Loads img/[name].png and img/[name].json.
   Future<SpriteSheet> loadSpritesheet(String name) =>
       _loadSpritesheet(_libName, name);
+  /// Loads shader/[vShaderFile].vert and shader/[fShaderFile].frag.
+  Future<ShaderSource> loadShader(String vShaderFile, String fShaderFile) =>
+      _loadShader(_libName, vShaderFile, fShaderFile);
 }
 
 class AudioHelper {
