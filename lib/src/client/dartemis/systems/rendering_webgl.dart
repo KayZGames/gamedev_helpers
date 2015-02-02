@@ -16,18 +16,14 @@ class WebGlCanvasCleaningSystem extends VoidEntitySystem {
   }
 }
 
-abstract class WebGlRenderingSystem extends EntitySystem {
+abstract class WebGlRenderingMixin {
   RenderingContext gl;
   Program program;
-  bool success = true;
-  Map<String, Buffer> buffers = <String, Buffer>{};
-  int maxLength = 0;
   ShaderSource shaderSource;
+  Map<String, Buffer> buffers = <String, Buffer>{};
+  bool success = true;
 
-  WebGlRenderingSystem(this.gl, Aspect aspect) : super(aspect);
-
-  @override
-  void initialize() {
+  void initProgram() {
     var vShader = _createShader(RenderingContext.VERTEX_SHADER, shaderSource.vShader);
     var fShader = _createShader(RenderingContext.FRAGMENT_SHADER, shaderSource.fShader);
 
@@ -58,6 +54,33 @@ abstract class WebGlRenderingSystem extends EntitySystem {
     return shader;
   }
 
+  void buffer(String attribute, Float32List items, int itemSize) {
+    var buffer = buffers[attribute];
+    if (null == buffer) {
+      buffer = gl.createBuffer();
+      buffers[attribute] = buffer;
+    }
+    var attribLocation = gl.getAttribLocation(program, attribute);
+    gl.bindBuffer(RenderingContext.ARRAY_BUFFER, buffer);
+    gl.bufferData(RenderingContext.ARRAY_BUFFER, items, RenderingContext.DYNAMIC_DRAW);
+    gl.vertexAttribPointer(attribLocation, itemSize, RenderingContext.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(attribLocation);
+  }
+  String get vShaderFile => this.runtimeType.toString();
+  String get fShaderFile => this.runtimeType.toString();
+}
+
+abstract class WebGlRenderingSystem extends EntitySystem with WebGlRenderingMixin {
+  RenderingContext gl;
+  int maxLength = 0;
+
+  WebGlRenderingSystem(this.gl, Aspect aspect) : super(aspect);
+
+  @override
+  void initialize() {
+    initProgram();
+  }
+
   @override
   void processEntities(Iterable<Entity> entities) {
     var length = entities.length;
@@ -75,25 +98,29 @@ abstract class WebGlRenderingSystem extends EntitySystem {
     }
   }
 
-  void buffer(String attribute, Float32List items, int itemSize) {
-    var buffer = buffers[attribute];
-    if (null == buffer) {
-      buffer = gl.createBuffer();
-      buffers[attribute] = buffer;
-    }
-    var attribLocation = gl.getAttribLocation(program, attribute);
-    gl.bindBuffer(RenderingContext.ARRAY_BUFFER, buffer);
-    gl.bufferData(RenderingContext.ARRAY_BUFFER, items, RenderingContext.DYNAMIC_DRAW);
-    gl.vertexAttribPointer(attribLocation, itemSize, RenderingContext.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(attribLocation);
-  }
-
   @override
   bool checkProcessing() => success;
 
   void updateLength(int length);
   void processEntity(int index, Entity entity);
   void render(int length);
-  String get vShaderFile => this.runtimeType.toString();
-  String get fShaderFile => this.runtimeType.toString();
+}
+
+abstract class VoidWebGlRenderingSystem extends VoidEntitySystem with WebGlRenderingMixin {
+  RenderingContext gl;
+
+  VoidWebGlRenderingSystem(this.gl);
+
+  @override
+  void initialize() {
+    initProgram();
+  }
+
+  @override
+  void processSystem() {
+    gl.useProgram(program);
+    render();
+  }
+
+  void render();
 }

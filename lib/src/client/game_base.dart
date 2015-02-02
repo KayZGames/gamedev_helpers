@@ -129,7 +129,7 @@ abstract class GameBase {
     List<Future> shaderSourceFutures = new List();
     getSystems().forEach((system) {
       world.addSystem(system);
-      if (system is WebGlRenderingSystem) {
+      if (system is WebGlRenderingMixin) {
         shaderSourceFutures.add(helper.loadShader(system.vShaderFile, system.fShaderFile).then((shaderSource) {
           system.shaderSource = shaderSource;
         }));
