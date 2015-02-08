@@ -12,14 +12,18 @@ class WebGlCanvasCleaningSystem extends VoidEntitySystem {
 
   @override
   void processSystem() {
-    gl.clear(RenderingContext.COLOR_BUFFER_BIT);
+    gl.clear(RenderingContext.COLOR_BUFFER_BIT | RenderingContext.DEPTH_BUFFER_BIT);
   }
 }
 
 abstract class WebGlRenderingMixin {
+  static const int fsize = Float32List.BYTES_PER_ELEMENT;
+
   RenderingContext gl;
   Program program;
   ShaderSource shaderSource;
+  Buffer elementBuffer;
+  Buffer indexBuffer;
   Map<String, Buffer> buffers = <String, Buffer>{};
   bool success = true;
 
@@ -66,8 +70,33 @@ abstract class WebGlRenderingMixin {
     gl.vertexAttribPointer(attribLocation, itemSize, RenderingContext.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(attribLocation);
   }
-  String get vShaderFile => this.runtimeType.toString();
-  String get fShaderFile => this.runtimeType.toString();
+
+  void bufferElements(List<Attrib> attributes, Float32List items, Uint8List indices) {
+    if (null == elementBuffer) {
+      elementBuffer = gl.createBuffer();
+      indexBuffer = gl.createBuffer();
+    }
+    gl.bindBuffer(RenderingContext.ARRAY_BUFFER, elementBuffer);
+    gl.bufferData(RenderingContext.ARRAY_BUFFER, items, RenderingContext.DYNAMIC_DRAW);
+    int offset = 0;
+    for (Attrib attribute in attributes) {
+      var attribLocation = gl.getAttribLocation(program, attribute.name);
+      gl.vertexAttribPointer(attribLocation, attribute.size, RenderingContext.FLOAT, false, fsize * 7, fsize * offset);
+      gl.enableVertexAttribArray(attribLocation);
+      offset += attribute.size;
+    }
+    gl.bindBuffer(RenderingContext.ELEMENT_ARRAY_BUFFER, indexBuffer);
+    gl.bufferData(RenderingContext.ELEMENT_ARRAY_BUFFER, indices, RenderingContext.DYNAMIC_DRAW);
+  }
+
+  String get vShaderFile;
+  String get fShaderFile;
+}
+
+class Attrib {
+  final String name;
+  final int size;
+  const Attrib(this.name, this.size);
 }
 
 abstract class WebGlRenderingSystem extends EntitySystem with WebGlRenderingMixin {

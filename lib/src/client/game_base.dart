@@ -29,8 +29,12 @@ abstract class GameBase {
     canvas.width = width;
     canvas.height = height;
     if (!webgl) {
-      canvas.context2D..textBaseline = "top"
-                      ..font = '12px Verdana';
+      (ctx as CanvasRenderingContext2D)..textBaseline = "top"
+         ..font = '12px Verdana';
+    } else {
+      (ctx as RenderingContext)..enable(RenderingContext.DEPTH_TEST)
+                               ..enable(RenderingContext.POLYGON_OFFSET_FILL)
+                               ..polygonOffset(1.0, 1.0);
     }
     canvas.onFullscreenChange.listen(_handleFullscreen);
     world = createWorld();
