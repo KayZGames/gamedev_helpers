@@ -71,7 +71,7 @@ abstract class WebGlRenderingMixin {
     gl.enableVertexAttribArray(attribLocation);
   }
 
-  void bufferElements(List<Attrib> attributes, Float32List items, Uint8List indices) {
+  void bufferElements(List<Attrib> attributes, Float32List items, List<int> indices) {
     if (null == elementBuffer) {
       elementBuffer = gl.createBuffer();
       indexBuffer = gl.createBuffer();
@@ -79,9 +79,13 @@ abstract class WebGlRenderingMixin {
     gl.bindBuffer(RenderingContext.ARRAY_BUFFER, elementBuffer);
     gl.bufferData(RenderingContext.ARRAY_BUFFER, items, RenderingContext.DYNAMIC_DRAW);
     int offset = 0;
+    int elementsPerItem = 0;
+    for (Attrib attribute in attributes) {
+      elementsPerItem += attribute.size;
+    }
     for (Attrib attribute in attributes) {
       var attribLocation = gl.getAttribLocation(program, attribute.name);
-      gl.vertexAttribPointer(attribLocation, attribute.size, RenderingContext.FLOAT, false, fsize * 7, fsize * offset);
+      gl.vertexAttribPointer(attribLocation, attribute.size, RenderingContext.FLOAT, false, fsize * elementsPerItem, fsize * offset);
       gl.enableVertexAttribArray(attribLocation);
       offset += attribute.size;
     }
