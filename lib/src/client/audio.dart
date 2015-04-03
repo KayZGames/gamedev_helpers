@@ -2,7 +2,7 @@ part of gamedev_helpers;
 
 /// Expects sound assets in /asset/sfx
 AudioManager _createAudioManager(String appName) {
-  var baseUrl = 'packages/$appName/assets/sfx/';
+  var baseUrl = 'packages/$appName/assets/sfx';
   var manager;
   try {
     manager = new AudioManager(baseUrl);

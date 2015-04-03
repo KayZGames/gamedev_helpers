@@ -7,7 +7,7 @@ class WebGlCanvasCleaningSystem extends VoidEntitySystem {
 
   @override
   void initialize() {
-    gl.clearColor(0, 0, 0, 1);
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
   }
 
   @override
@@ -58,7 +58,7 @@ abstract class WebGlRenderingMixin {
     return shader;
   }
 
-  void buffer(String attribute, Float32List items, int itemSize) {
+  void buffer(String attribute, Float32List items, int itemSize, {int usage: DYNAMIC_DRAW }) {
     var buffer = buffers[attribute];
     if (null == buffer) {
       buffer = gl.createBuffer();
@@ -66,7 +66,7 @@ abstract class WebGlRenderingMixin {
     }
     var attribLocation = gl.getAttribLocation(program, attribute);
     gl.bindBuffer(RenderingContext.ARRAY_BUFFER, buffer);
-    gl.bufferData(RenderingContext.ARRAY_BUFFER, items, RenderingContext.DYNAMIC_DRAW);
+    gl.bufferData(RenderingContext.ARRAY_BUFFER, items, usage);
     gl.vertexAttribPointer(attribLocation, itemSize, RenderingContext.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(attribLocation);
   }

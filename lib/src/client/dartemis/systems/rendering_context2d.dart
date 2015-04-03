@@ -8,7 +8,7 @@ class CanvasCleaningSystem extends VoidEntitySystem {
 
   void processSystem() {
     canvas.context2D..fillStyle = fillStyle
-                    ..fillRect(0, 0, canvas.width, canvas.height);
+                    ..clearRect(0, 0, canvas.width, canvas.height);
   }
 }
 

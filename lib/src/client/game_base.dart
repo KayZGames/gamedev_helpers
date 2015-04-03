@@ -32,9 +32,12 @@ abstract class GameBase {
       (ctx as CanvasRenderingContext2D)..textBaseline = "top"
          ..font = '12px Verdana';
     } else {
-      (ctx as RenderingContext)..enable(RenderingContext.DEPTH_TEST)
-                               ..enable(RenderingContext.POLYGON_OFFSET_FILL)
-                               ..polygonOffset(1.0, 1.0);
+      (ctx as RenderingContext)
+//                               ..enable(RenderingContext.DEPTH_TEST)
+//                               ..enable(RenderingContext.POLYGON_OFFSET_FILL)
+                               ..enable(BLEND)
+                               ..blendFunc(SRC_ALPHA, ONE_MINUS_SRC_ALPHA);
+//                               ..polygonOffset(1.0, 1.0);
     }
     canvas.onFullscreenChange.listen(_handleFullscreen);
     world = createWorld();
