@@ -14,7 +14,6 @@ abstract class GameBase {
   Map<String, List<Polygon>> bodyDefs;
   SpriteSheet spriteSheet;
   double _lastTime;
-  var _initSuccess = false;
   var fullscreen = false;
 
   /// [appName] is used to refernce assets and has to be the name of the library
@@ -55,8 +54,7 @@ abstract class GameBase {
 
   Future _init() => _assetsLoaded().then((_) => onInit())
                                  .then((_) => _initGame())
-                                 .then((_) => onInitDone())
-                                 .then((_) => _initSuccess = true);
+                                 .then((_) => onInitDone());
 
   /// Do whatever you have to do before starting to create [Entity]s and
   /// [EntitySystem]s.

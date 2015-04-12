@@ -44,7 +44,7 @@ class AudioElementManager implements AudioManager {
     if (clip != null) {
       return clip;
     }
-    clip = new AudiElementClip._internal(this, name, "$baseURL$url");
+    clip = new AudiElementClip._internal("$baseURL$url");
     _clips[name] = clip;
     return clip;
   }
@@ -59,11 +59,9 @@ class AudioElementManager implements AudioManager {
 
 /// AudioClip for browsers that don't support AudioContext.
 class AudiElementClip implements AudioClip {
-  final AudioManager _manager;
-  String _name;
   String _url;
   var audioElements = new List<AudioElement>();
-  AudiElementClip._internal(this._manager, this._name, this._url);
+  AudiElementClip._internal(this._url);
 
   Future<AudioClip> load() {
     var audioElement = new AudioElement();

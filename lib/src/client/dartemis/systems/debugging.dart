@@ -9,7 +9,7 @@ class FpsRenderingSystem extends VoidEntitySystem {
   FpsRenderingSystem(this.ctx, {this.fillStyle: 'black'});
 
   void processSystem() {
-    deltas[world.frame % _deltaCount] = world.delta;
+    deltas[frame % _deltaCount] = world.delta;
 
     var fps = _deltaCount / deltas.reduce((combined, current) => combined + current);
 
