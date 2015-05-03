@@ -19,7 +19,7 @@ part 'src/shared/event_bus.dart';
 
 final eventBus = new EventBus();
 
-final random = new Random();
+final Random random = new Random();
 
 final tweenManager = new TweenManager();
 

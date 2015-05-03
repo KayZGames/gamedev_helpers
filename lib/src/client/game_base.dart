@@ -90,7 +90,17 @@ abstract class GameBase {
   }
 
   void start() {
-    _init().then((_) => window.requestAnimationFrame(_firstUpdate));
+    _init().then((_) {
+      physicsLoop();
+      window.requestAnimationFrame(_firstUpdate);
+    });
+  }
+
+  void physicsLoop() {
+    world.delta = 1 / 120;
+    world.process(1);
+
+    new Future.delayed(new Duration(milliseconds: 5), physicsLoop);
   }
 
   void _firstUpdate(double time) {
@@ -128,17 +138,19 @@ abstract class GameBase {
   /// Create your entities
   void createEntities();
   /// Return a list of all the [EntitySystem]s required for this game.
-  List<EntitySystem> getSystems();
+  Map<int, List<EntitySystem>> getSystems();
 
   Future initSystems() {
     List<Future> shaderSourceFutures = new List();
-    getSystems().forEach((system) {
-      world.addSystem(system);
-      if (system is WebGlRenderingMixin) {
-        shaderSourceFutures.add(helper.loadShader(system.vShaderFile, system.fShaderFile).then((shaderSource) {
-          system.shaderSource = shaderSource;
-        }));
-      }
+    getSystems().forEach((group, systems) {
+      systems.forEach((system) {
+        world.addSystem(system, group: group);
+        if (system is WebGlRenderingMixin) {
+          shaderSourceFutures.add(helper.loadShader(system.vShaderFile, system.fShaderFile).then((shaderSource) {
+            system.shaderSource = shaderSource;
+          }));
+        }
+      });
     });
     return Future.wait(shaderSourceFutures);
   }
