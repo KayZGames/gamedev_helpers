@@ -17,4 +17,5 @@ dependencies:
 transformers:
 - dartemis_transformer
 executables:
-  ghp:
+  setup_game:
+  publish_game:

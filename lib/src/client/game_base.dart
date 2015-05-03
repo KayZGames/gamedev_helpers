@@ -2,6 +2,9 @@ part of gamedev_helpers;
 
 abstract class GameBase {
 
+  static const int rendering = 0;
+  static const int physics = 1;
+
   final CanvasElement canvas;
   final CanvasRenderingContext ctx;
   final GameHelper helper;
