@@ -11,5 +11,10 @@ dependencies:
   dartemis_transformer: any
   event_bus: any
   tweenengine: any
+  git: 0.4.4
+  path: any
+  which: any
 transformers:
 - dartemis_transformer
+executables:
+  ghp:
