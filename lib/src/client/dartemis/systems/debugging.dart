@@ -15,5 +15,6 @@ class FpsRenderingSystem extends VoidEntitySystem {
 
     ctx.fillStyle = fillStyle;
     ctx.fillText('FPS: ${fps.toStringAsFixed(2)}', 5, 5);
+    ctx.fillText('Entities: ${world.entityManager.activeEntityCount}', 5, 25);
   }
 }

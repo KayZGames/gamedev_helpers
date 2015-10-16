@@ -80,7 +80,7 @@ transformers:
     return """
 ${_name}
 ===========
-[Play on kaygames.github.io](http://kayzgames.github.io/${_name})
+[Play on kayzgames.github.io](http://kayzgames.github.io/${_name})
 """;
   }
 

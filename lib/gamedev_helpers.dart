@@ -15,6 +15,7 @@ import 'package:simple_audio/simple_audio.dart';
 part 'src/client/assets.dart';
 part 'src/client/audio.dart';
 part 'src/client/game_base.dart';
+part 'src/client/rendering.dart';
 
 part 'src/client/dartemis/systems/analytics.dart';
 part 'src/client/dartemis/systems/debugging.dart';
