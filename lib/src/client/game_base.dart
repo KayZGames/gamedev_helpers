@@ -125,7 +125,7 @@ abstract class GameBase {
   void start() {
     _init().then((_) {
       _lastTimeP = window.performance.now();
-      physicsLoop();
+//      physicsLoop();
       window.requestAnimationFrame(_firstUpdate);
     });
   }
@@ -147,7 +147,9 @@ abstract class GameBase {
   }
 
   void update({double time}) {
-    world.delta = time - _lastTime;
+    var delta = time - _lastTime;
+    delta = min(0.05, delta);
+    world.delta = delta;
     _lastTime = time;
     world.process();
     window.requestAnimationFrame((time) => update(time: time / 1000.0));
