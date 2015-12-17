@@ -29,6 +29,9 @@ class AnalyticsTrackEvent {
   AnalyticsTrackEvent(this.action, this.label);
 }
 
+/**
+ * Converts [h][s][l] to rgb. All values between 0.0 and 1.0.
+ */
 List<double> hslToRgb(double h, double s, double l) {
   double r, g, b;
   if (s == 0.0) {
@@ -50,4 +53,29 @@ num _hue2rgb(num p, num q, num t) {
   if (t < 1 / 2) return q;
   if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
   return p;
+}
+
+/**
+ * Converts [r][g][b] to hsl. All values between 0.0 and 1.0.
+ */
+List<double> rgbToHsl(double red, double green, double blue) {
+  int maxv = max(max(red, green), blue),
+      minv = min(min(red, green), blue);
+  double h, s, l = (maxv + minv) / 2.0;
+
+  if(maxv == minv) {
+    h = s = 0.0; // achromatic
+  } else {
+    num d = maxv - minv;
+    s = l > 0.5 ? d / (2.0 - maxv - minv) : d / (maxv + minv);
+    if (maxv == red) {
+      h = (green - blue) / d + (green < blue ? 6 : 0);
+    } else if (maxv == green) {
+      h = (blue - red) / d + 2;
+    } else if (maxv == blue) {
+      h = (red - green) / d + 4;
+    }
+    h /= 6.0;
+  }
+  return [h, s, l];
 }

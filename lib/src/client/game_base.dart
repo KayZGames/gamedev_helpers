@@ -40,11 +40,13 @@ abstract class GameBase {
         ..textBaseline = "top"
         ..font = '12px Verdana';
     } else {
-//      (ctx as RenderingContext)..enable(RenderingContext.DEPTH_TEST);
+      (ctx as RenderingContext)
+//                               ..enable(RenderingContext.DEPTH_TEST);
 //                               ..enable(RenderingContext.POLYGON_OFFSET_FILL);
-//                               ..enable(BLEND)
-//                               ..blendFunc(SRC_ALPHA, ONE_MINUS_SRC_ALPHA)
+        ..enable(BLEND)
+        ..blendFunc(SRC_ALPHA, ONE_MINUS_SRC_ALPHA)
 //                               ..polygonOffset(1.0, 1.0);
+          ;
     }
     canvas.onFullscreenChange.listen(_handleFullscreen);
     world = createWorld();
@@ -59,11 +61,11 @@ abstract class GameBase {
 
   /// [appName] is used to refernce assets and has to be the name of the library
   /// which contains the assets. Usually the game itself.
-  GameBase.noAssets(
-      String appName, String canvasSelector, int width, int height,
+  GameBase.noAssets(String appName, String canvasSelector, int width,
+      int height,
       {bool webgl: false})
       : this(appName, canvasSelector, width, height,
-            spriteSheetName: null, bodyDefsName: null, webgl: webgl);
+      spriteSheetName: null, bodyDefsName: null, webgl: webgl);
 
   GameBase.noCanvas(String appNahme)
       : canvas = null,
