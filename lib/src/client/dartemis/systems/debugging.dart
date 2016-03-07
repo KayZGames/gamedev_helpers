@@ -18,3 +18,19 @@ class FpsRenderingSystem extends VoidEntitySystem {
     ctx.fillText('Entities: ${world.entityManager.activeEntityCount}', 5, 25);
   }
 }
+
+class FpsPrintingSystem extends VoidEntitySystem {
+  static const _deltaCount = 20;
+  final List<double> deltas = new List.generate(_deltaCount, (_) => 0.0, growable: false);
+
+  FpsPrintingSystem();
+
+  void processSystem() {
+    deltas[frame % _deltaCount] = world.delta;
+
+    var fps = _deltaCount / deltas.reduce((combined, current) => combined + current);
+
+    print('FPS: ${fps.toStringAsFixed(2)}');
+    print('Entities: ${world.entityManager.activeEntityCount}');
+  }
+}

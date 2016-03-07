@@ -10,8 +10,7 @@ export 'package:dartemis/dartemis.dart';
 import 'package:event_bus/event_bus.dart' as event_bus;
 import 'package:tweenengine/tweenengine.dart';
 export 'package:tweenengine/tweenengine.dart';
-import 'package:vector_math/vector_math.dart';
-export 'package:vector_math/vector_math.dart';
+export 'package:vector_math/vector_math.dart' hide Quad;
 
 part 'src/shared/dartemis/systems/tweening.dart';
 part 'src/shared/dartemis/components.dart';
