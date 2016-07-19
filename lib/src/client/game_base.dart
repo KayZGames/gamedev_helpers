@@ -24,7 +24,9 @@ abstract class GameBase {
   GameBase(String appName, String canvasSelector, int width, int height,
       {this.spriteSheetName: 'assets',
       this.bodyDefsName: 'assets',
-      bool webgl: false})
+      bool webgl: false,
+      bool depthTest: true,
+      bool blending: true})
       : canvas = querySelector(canvasSelector),
         helper = new GameHelper(appName),
         webgl = webgl,
@@ -41,13 +43,18 @@ abstract class GameBase {
         ..textBaseline = "top"
         ..font = '12px Verdana';
     } else {
-      (ctx as RenderingContext)
-//                               ..enable(RenderingContext.DEPTH_TEST);
+      if (depthTest) {
+        (ctx as RenderingContext).enable(RenderingContext.DEPTH_TEST);
+      }
+      if (blending) {
+        (ctx as RenderingContext)
+          ..enable(BLEND)
+          ..blendFunc(SRC_ALPHA, ONE_MINUS_SRC_ALPHA);
+      }
+//      (ctx as RenderingContext)
 //                               ..enable(RenderingContext.POLYGON_OFFSET_FILL);
-            ..enable(BLEND)
-            ..blendFunc(SRC_ALPHA, ONE_MINUS_SRC_ALPHA)
 //                               ..polygonOffset(1.0, 1.0);
-          ;
+      ;
     }
     canvas.onFullscreenChange.listen(_handleFullscreen);
     world = createWorld();
@@ -64,9 +71,9 @@ abstract class GameBase {
   /// which contains the assets. Usually the game itself.
   GameBase.noAssets(
       String appName, String canvasSelector, int width, int height,
-      {bool webgl: false})
+      {bool webgl: false, bool depthTest: true, bool blending: true})
       : this(appName, canvasSelector, width, height,
-            spriteSheetName: null, bodyDefsName: null, webgl: webgl);
+            spriteSheetName: null, bodyDefsName: null, webgl: webgl, depthTest: depthTest, blending: blending);
 
   GameBase.noCanvas(String appNahme)
       : canvas = null,
@@ -128,7 +135,11 @@ abstract class GameBase {
   void start() {
     _init().then((_) {
       _lastTimeP = window.performance.now();
-//      physicsLoop();
+
+      var physicsSystem = world.systems.firstWhere((system) => system.group == 1, orElse: () => null);
+      if (null != physicsSystem) {
+        physicsLoop();
+      }
       window.requestAnimationFrame(_firstUpdate);
     });
   }
