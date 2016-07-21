@@ -17,7 +17,8 @@ abstract class GameBase {
   SpriteSheet spriteSheet;
   double _lastTime;
   double _lastTimeP;
-  var fullscreen = false;
+  bool fullscreen = false;
+  bool _stop = false;
 
   /// [appName] is used to refernce assets and has to be the name of the library
   /// which contains the assets. Usually the game itself.
@@ -144,13 +145,19 @@ abstract class GameBase {
     });
   }
 
+  void stop() {
+    _stop = true;
+  }
+
   void physicsLoop() {
     var time = window.performance.now();
     world.delta = (time - _lastTimeP) / 1000;
     _lastTimeP = time;
     world.process(1);
 
-    new Future.delayed(new Duration(milliseconds: 5), physicsLoop);
+    if (!_stop) {
+      new Future.delayed(new Duration(milliseconds: 5), physicsLoop);
+    }
   }
 
   void _firstUpdate(double time) {
@@ -166,7 +173,9 @@ abstract class GameBase {
     world.delta = delta;
     _lastTime = time;
     world.process();
-    window.requestAnimationFrame((time) => update(time: time / 1000.0));
+    if (!_stop) {
+      window.requestAnimationFrame((time) => update(time: time / 1000.0));
+    }
   }
 
   void _handleFullscreen(Event e) {
