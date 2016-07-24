@@ -19,6 +19,7 @@ abstract class GameBase {
   double _lastTimeP;
   bool fullscreen = false;
   bool _stop = false;
+  bool _pause = false;
 
   /// [appName] is used to refernce assets and has to be the name of the library
   /// which contains the assets. Usually the game itself.
@@ -133,20 +134,38 @@ abstract class GameBase {
     });
   }
 
-  void start() {
-    _init().then((_) {
-      _lastTimeP = window.performance.now();
-
-      var physicsSystem = world.systems.firstWhere((system) => system.group == 1, orElse: () => null);
-      if (null != physicsSystem) {
-        physicsLoop();
-      }
-      window.requestAnimationFrame(_firstUpdate);
+  Future<GameBase> start() {
+    return _init().then((_) {
+      _startGameLoops();
+      return this;
     });
+  }
+
+  void _startGameLoops() {
+    _lastTimeP = window.performance.now();
+
+    var physicsSystem = world.systems.firstWhere((system) => system.group == 1, orElse: () => null);
+    if (null != physicsSystem) {
+      physicsLoop();
+    }
+    window.requestAnimationFrame(_firstUpdate);
   }
 
   void stop() {
     _stop = true;
+  }
+
+  void pause() {
+    if (!_stop) {
+      _pause = true;
+    }
+  }
+
+  void resume() {
+    if (!_stop) {
+      _pause = false;
+      _startGameLoops();
+    }
   }
 
   void physicsLoop() {
@@ -155,7 +174,7 @@ abstract class GameBase {
     _lastTimeP = time;
     world.process(1);
 
-    if (!_stop) {
+    if (!_stop && !_pause) {
       new Future.delayed(new Duration(milliseconds: 5), physicsLoop);
     }
   }
@@ -173,7 +192,7 @@ abstract class GameBase {
     world.delta = delta;
     _lastTime = time;
     world.process();
-    if (!_stop) {
+    if (!_stop && !_pause) {
       window.requestAnimationFrame((time) => update(time: time / 1000.0));
     }
   }
