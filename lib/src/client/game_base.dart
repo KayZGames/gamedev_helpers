@@ -155,6 +155,8 @@ abstract class GameBase {
     _stop = true;
   }
 
+  bool get isStopped => _stop;
+
   void pause() {
     if (!_stop) {
       _pause = true;
