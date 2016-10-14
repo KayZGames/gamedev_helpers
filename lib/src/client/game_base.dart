@@ -171,7 +171,7 @@ abstract class GameBase {
   }
 
   void physicsLoop() {
-    var time = window.performance.now();
+    var time = window.performance.now().toDouble();
     world.delta = (time - _lastTimeP) / 1000;
     _lastTimeP = time;
     world.process(1);
