@@ -9,12 +9,14 @@ abstract class GameBase {
   final GameHelper helper;
   final String spriteSheetName;
   final String bodyDefsName;
+  final String musicName;
   final int _width;
   final int _height;
   final bool webgl;
   World world;
   Map<String, List<Polygon>> bodyDefs;
   SpriteSheet spriteSheet;
+  AudioBuffer music;
   double _lastTime;
   double _lastTimeP;
   bool fullscreen = false;
@@ -26,6 +28,7 @@ abstract class GameBase {
   GameBase(String appName, String canvasSelector, int width, int height,
       {this.spriteSheetName: 'assets',
       this.bodyDefsName: 'assets',
+      this.musicName: null,
       bool webgl: false,
       bool depthTest: true,
       bool blending: true})
@@ -75,7 +78,12 @@ abstract class GameBase {
       String appName, String canvasSelector, int width, int height,
       {bool webgl: false, bool depthTest: true, bool blending: true})
       : this(appName, canvasSelector, width, height,
-            spriteSheetName: null, bodyDefsName: null, webgl: webgl, depthTest: depthTest, blending: blending);
+            spriteSheetName: null,
+            bodyDefsName: null,
+            musicName: null,
+            webgl: webgl,
+            depthTest: depthTest,
+            blending: blending);
 
   GameBase.noCanvas(String appNahme)
       : canvas = null,
@@ -83,6 +91,7 @@ abstract class GameBase {
         helper = new GameHelper(appNahme),
         bodyDefsName = null,
         spriteSheetName = null,
+        musicName = null,
         _width = null,
         _height = null,
         webgl = false {
@@ -112,6 +121,9 @@ abstract class GameBase {
       loader.add(helper
           .loadPolygons(bodyDefsName)
           .then((result) => bodyDefs = result));
+    }
+    if (null != musicName) {
+      loader.add(helper.loadMusic(musicName).then((result) => music = result));
     }
     return Future.wait(loader).then((_) {
       if (null != bodyDefs) {
@@ -144,7 +156,8 @@ abstract class GameBase {
   void _startGameLoops() {
     _lastTimeP = window.performance.now();
 
-    var physicsSystem = world.systems.firstWhere((system) => system.group == 1, orElse: () => null);
+    var physicsSystem = world.systems
+        .firstWhere((system) => system.group == 1, orElse: () => null);
     if (null != physicsSystem) {
       physicsLoop();
     }

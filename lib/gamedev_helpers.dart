@@ -4,6 +4,7 @@ import 'dart:async';
 export 'dart:async';
 import 'dart:convert';
 import 'dart:html';
+import 'dart:web_audio';
 import 'dart:web_gl';
 import 'dart:typed_data';
 import 'dart:js' as js;
@@ -39,12 +40,18 @@ class GameHelper {
   /// Loads achievements.json.
   /// Format {name: desciption, otherName: otherDescription}
   Future<Map<String, String>> loadAchievements() => _loadAchievements(_libName);
+
   /// Loads img/[name].polygons.json. File has to be in PhysicsEditor format.
   Future<Map<String, List<Polygon>>> loadPolygons(String name) =>
       _loadPolygons(_libName, name);
+
   /// Loads img/[name].png and img/[name].json.
   Future<SpriteSheet> loadSpritesheet(String name) =>
       _loadSpritesheet(_libName, name);
+
+  /// Loads music/[name].ogg or music/[name].mp3 depending on browser support.
+  Future<AudioBuffer> loadMusic(String name) => _loadMusic(_libName, name);
+
   /// Loads shader/[vShaderFile].vert and shader/[fShaderFile].frag.
   Future<ShaderSource> loadShader(String vShaderFile, String fShaderFile) =>
       _loadShader(_libName, vShaderFile, fShaderFile);
@@ -53,12 +60,14 @@ class GameHelper {
 class AudioHelper {
   final String _libName;
   final AudioManager _audioManager;
-  AudioHelper(String libName) : _libName = libName,
-                                _audioManager = _createAudioManager(libName);
+  AudioHelper(String libName)
+      : _libName = libName,
+        _audioManager = _createAudioManager(libName);
 
   /// Loads .ogg and .mp3 files with [names] from sfx-directory.
   Future<List<AudioClip>> loadAudioClips(List<String> names) =>
       _loadAudioClips(_audioManager, names);
+
   /// Plays clip on default source
   void playClip(String clipName) {
     _audioManager.playClipFromSource('default', clipName);
