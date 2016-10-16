@@ -154,7 +154,7 @@ abstract class GameBase {
   }
 
   void _startGameLoops() {
-    _lastTimeP = window.performance.now();
+    _lastTimeP = window.performance.now().toDouble();
 
     var physicsSystem = world.systems
         .firstWhere((system) => system.group == 1, orElse: () => null);
