@@ -21,8 +21,8 @@ Future<SpriteSheet> _loadSpritesheet(String libName, String name) {
       .then((assets) => _createSpriteSheet(imgPath, assets));
 }
 
-Future<AudioBuffer> _loadMusic(String libName, String name) {
-  AudioContext audioContext = new AudioContext();
+Future<AudioBuffer> _loadMusic(
+    AudioContext audioContext, String libName, String name) {
   var audio = new AudioElement();
   var fileExtension = 'ogg';
   var goodAnswer = ['probably', 'maybe'];
@@ -34,14 +34,10 @@ Future<AudioBuffer> _loadMusic(String libName, String name) {
     fileExtension = 'mp3';
   }
   String musicPath = 'packages/$libName/assets/music/$name.$fileExtension';
-    return HttpRequest
-        .request(musicPath, responseType: 'arraybuffer')
-        .then((request) async {
-      var result =  audioContext.decodeAudioData(request.response);
-      try {
-        await audioContext.close();
-      } catch (e) {}
-      return result;
+  return HttpRequest
+      .request(musicPath, responseType: 'arraybuffer')
+      .then((request) async {
+    return audioContext.decodeAudioData(request.response);
   });
 }
 

@@ -17,6 +17,7 @@ abstract class GameBase {
   Map<String, List<Polygon>> bodyDefs;
   SpriteSheet spriteSheet;
   AudioBuffer music;
+  AudioContext audioContext;
   double _lastTime;
   double _lastTimeP;
   bool fullscreen = false;
@@ -29,11 +30,13 @@ abstract class GameBase {
       {this.spriteSheetName: 'assets',
       this.bodyDefsName: 'assets',
       this.musicName: null,
+      AudioContext audioContext: null,
       bool webgl: false,
       bool depthTest: true,
       bool blending: true})
       : canvas = querySelector(canvasSelector),
-        helper = new GameHelper(appName),
+        audioContext = audioContext,
+        helper = new GameHelper(appName, audioContext),
         webgl = webgl,
         ctx = webgl
             ? (querySelector(canvasSelector) as CanvasElement).getContext3d()
@@ -88,7 +91,7 @@ abstract class GameBase {
   GameBase.noCanvas(String appNahme)
       : canvas = null,
         ctx = null,
-        helper = new GameHelper(appNahme),
+        helper = new GameHelper(appNahme, null),
         bodyDefsName = null,
         spriteSheetName = null,
         musicName = null,
@@ -198,7 +201,7 @@ abstract class GameBase {
     _lastTime = time / 1000.0;
     world.delta = 1 / 60;
     world.process();
-    window.requestAnimationFrame((time) => update(time: time / 1000.0));
+    window.animationFrame.then((time) => update(time: time / 1000.0));
   }
 
   void update({double time}) {
@@ -208,7 +211,7 @@ abstract class GameBase {
     _lastTime = time;
     world.process();
     if (!_stop && !_pause) {
-      window.requestAnimationFrame((time) => update(time: time / 1000.0));
+      window.animationFrame.then((time) => update(time: time / 1000.0));
     }
   }
 

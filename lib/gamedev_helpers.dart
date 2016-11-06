@@ -28,7 +28,8 @@ part 'src/client/dartemis/systems/sound.dart';
 class GameHelper {
   final String _libName;
   AudioHelper _audioHelper;
-  GameHelper(this._libName);
+  AudioContext _audioContext;
+  GameHelper(this._libName, this._audioContext);
 
   AudioHelper get audioHelper {
     if (null == _audioHelper) {
@@ -50,7 +51,7 @@ class GameHelper {
       _loadSpritesheet(_libName, name);
 
   /// Loads music/[name].ogg or music/[name].mp3 depending on browser support.
-  Future<AudioBuffer> loadMusic(String name) => _loadMusic(_libName, name);
+  Future<AudioBuffer> loadMusic(String name) => _loadMusic(_audioContext, _libName, name);
 
   /// Loads shader/[vShaderFile].vert and shader/[fShaderFile].frag.
   Future<ShaderSource> loadShader(String vShaderFile, String fShaderFile) =>
