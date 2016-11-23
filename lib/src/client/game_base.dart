@@ -125,7 +125,7 @@ abstract class GameBase {
           .loadPolygons(bodyDefsName)
           .then((result) => bodyDefs = result));
     }
-    if (null != musicName) {
+    if (null != musicName && null != audioContext) {
       loader.add(helper.loadMusic(musicName).then((result) => music = result));
     }
     return Future.wait(loader).then((_) {
