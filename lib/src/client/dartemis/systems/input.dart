@@ -5,12 +5,20 @@ abstract class GenericInputHandlingSystem extends EntityProcessingSystem {
   var preventDefaultKeys = new Set.from([KeyCode.UP, KeyCode.DOWN, KeyCode.LEFT, KeyCode.RIGHT, KeyCode.SPACE]);
   var keyState = <int, bool>{};
   var unpress = <int, bool>{};
+  StreamSubscription _onKeyUpSubscription;
+  StreamSubscription _onKeyDownSubscription;
   GenericInputHandlingSystem(Aspect aspect) : super(aspect);
 
   @override
   void initialize() {
-    window.onKeyDown.listen((event) => handleInput(event, true));
-    window.onKeyUp.listen((event) => handleInput(event, false));
+    _onKeyDownSubscription = window.onKeyDown.listen((event) => handleInput(event, true));
+    _onKeyUpSubscription = window.onKeyUp.listen((event) => handleInput(event, false));
+  }
+
+  @override
+  void destroy() {
+    _onKeyDownSubscription.cancel();
+    _onKeyUpSubscription.cancel();
   }
 
   void handleInput(KeyboardEvent event, bool pressed) {

@@ -7,8 +7,10 @@ dependencies:
 #    git: https://github.com/johnmccutchan/simpleaudio
     path: ../simple_audio
   vector_math: any
-  dartemis: any
-  dartemis_transformer: any
+  dartemis:
+    path: ../dartemis
+  dartemis_transformer:
+    path: ../dartemis_transformer
   event_bus: any
   tweenengine: any
   git: 0.4.4
