@@ -180,7 +180,7 @@ abstract class GameBase {
   }
 
   void resume() {
-    if (!_stop) {
+    if (!_stop && _pause) {
       _pause = false;
       _startGameLoops();
     }
