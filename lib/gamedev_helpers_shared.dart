@@ -58,7 +58,7 @@ num _hue2rgb(num p, num q, num t) {
  * Converts [r][g][b] to hsl. All values between 0.0 and 1.0.
  */
 List<double> rgbToHsl(double red, double green, double blue) {
-  int maxv = max(max(red, green), blue),
+  double maxv = max(max(red, green), blue),
       minv = min(min(red, green), blue);
   double h, s, l = (maxv + minv) / 2.0;
 
@@ -68,11 +68,11 @@ List<double> rgbToHsl(double red, double green, double blue) {
     num d = maxv - minv;
     s = l > 0.5 ? d / (2.0 - maxv - minv) : d / (maxv + minv);
     if (maxv == red) {
-      h = (green - blue) / d + (green < blue ? 6 : 0);
+      h = (green - blue) / d + (green < blue ? 6.0 : 0.0);
     } else if (maxv == green) {
-      h = (blue - red) / d + 2;
+      h = (blue - red) / d + 2.0;
     } else if (maxv == blue) {
-      h = (red - green) / d + 4;
+      h = (red - green) / d + 4.0;
     }
     h /= 6.0;
   }
