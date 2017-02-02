@@ -179,6 +179,8 @@ abstract class GameBase {
     }
   }
 
+  bool get paused => _pause;
+
   void resume() {
     if (!_stop && _pause) {
       _pause = false;
