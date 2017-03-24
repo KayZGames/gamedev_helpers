@@ -4,6 +4,8 @@ abstract class GameBase {
   static const int rendering = 0;
   static const int physics = 1;
 
+  final StreamController<bool> _pauseStreamController =
+      new StreamController<bool>();
   final CanvasElement canvas;
   final CanvasRenderingContext ctx;
   final GameHelper helper;
@@ -41,7 +43,7 @@ abstract class GameBase {
         ctx = webgl
             ? (querySelector(canvasSelector) as CanvasElement).getContext3d()
             : (querySelector(canvasSelector) as CanvasElement).context2D
-            as CanvasRenderingContext,
+                as CanvasRenderingContext,
         _width = width,
         _height = height {
     canvas.width = width;
@@ -169,6 +171,7 @@ abstract class GameBase {
 
   void stop() {
     _stop = true;
+    _pauseStreamController.close();
   }
 
   bool get isStopped => _stop;
@@ -176,7 +179,12 @@ abstract class GameBase {
   void pause() {
     if (!_stop) {
       _pause = true;
+      _pauseStreamController.add(true);
     }
+  }
+
+  Stream<bool> onPause() {
+    return _pauseStreamController.stream;
   }
 
   bool get paused => _pause;
@@ -184,6 +192,7 @@ abstract class GameBase {
   void resume() {
     if (!_stop && _pause) {
       _pause = false;
+      _pauseStreamController.add(false);
       _startGameLoops();
     }
   }
