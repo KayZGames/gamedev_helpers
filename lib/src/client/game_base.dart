@@ -25,6 +25,7 @@ abstract class GameBase {
   bool fullscreen = false;
   bool _stop = false;
   bool _pause = false;
+  bool _errorInitializingWebGL = false;
 
   /// [appName] is used to refernce assets and has to be the name of the library
   /// which contains the assets. Usually the game itself.
@@ -52,7 +53,7 @@ abstract class GameBase {
       (ctx as CanvasRenderingContext2D)
         ..textBaseline = "top"
         ..font = '12px Verdana';
-    } else {
+    } else if (ctx is RenderingContext) {
       if (depthTest) {
         (ctx as RenderingContext).enable(RenderingContext.DEPTH_TEST);
       }
@@ -65,6 +66,8 @@ abstract class GameBase {
 //                               ..enable(RenderingContext.POLYGON_OFFSET_FILL);
 //                               ..polygonOffset(1.0, 1.0);
       ;
+    } else {
+      _errorInitializingWebGL = true;
     }
     canvas.onFullscreenChange.listen(_handleFullscreen);
     world = createWorld();
@@ -74,6 +77,8 @@ abstract class GameBase {
           .listen((_) => querySelector('canvas').requestFullscreen());
     }
   }
+
+  bool get webGlInitialized => webgl && !_errorInitializingWebGL;
 
   World createWorld() => new World();
 
