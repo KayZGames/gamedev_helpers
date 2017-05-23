@@ -3,9 +3,6 @@ version: 0.0.1-dev
 description: Useful stuff for my gamedevelopment needs
 author: Dennis Kaselow <Dennis.Kaselow+gamedev_helpers@gmail.com>
 dependencies:
-  simple_audio:
-#    git: https://github.com/johnmccutchan/simpleaudio
-    path: ../simple_audio
   vector_math: any
   dartemis:
     path: ../dartemis
