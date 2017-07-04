@@ -33,22 +33,21 @@ abstract class GameBase {
       {this.spriteSheetName: 'assets',
       this.bodyDefsName: 'assets',
       this.musicName: null,
-      AudioContext audioContext: null,
-      bool webgl: false,
+      this.audioContext: null,
+      this.webgl: false,
       bool depthTest: true,
       bool blending: true})
       : canvas = querySelector(canvasSelector),
-        audioContext = audioContext,
         helper = new GameHelper(appName, audioContext),
-        webgl = webgl,
         ctx = webgl
             ? (querySelector(canvasSelector) as CanvasElement).getContext3d()
             : (querySelector(canvasSelector) as CanvasElement).context2D
                 as CanvasRenderingContext,
         _width = width,
         _height = height {
-    canvas.width = width;
-    canvas.height = height;
+    canvas
+      ..width = width
+      ..height = height;
     if (!webgl) {
       (ctx as CanvasRenderingContext2D)
         ..textBaseline = "top"
@@ -65,22 +64,17 @@ abstract class GameBase {
 //      (ctx as RenderingContext)
 //                               ..enable(RenderingContext.POLYGON_OFFSET_FILL);
 //                               ..polygonOffset(1.0, 1.0);
-      ;
     } else {
       _errorInitializingWebGL = true;
     }
     canvas.onFullscreenChange.listen(_handleFullscreen);
     world = createWorld();
-    var fullscreenButton = querySelector('button#fullscreen');
+    final fullscreenButton = querySelector('button#fullscreen');
     if (null != fullscreenButton) {
       fullscreenButton.onClick
           .listen((_) => querySelector('canvas').requestFullscreen());
     }
   }
-
-  bool get webGlInitialized => webgl && !_errorInitializingWebGL;
-
-  World createWorld() => new World();
 
   /// [appName] is used to refernce assets and has to be the name of the library
   /// which contains the assets. Usually the game itself.
@@ -108,6 +102,10 @@ abstract class GameBase {
     world = createWorld();
   }
 
+  World createWorld() => new World();
+
+  bool get webGlInitialized => webgl && !_errorInitializingWebGL;
+
   Future _init() => _assetsLoaded()
       .then((_) => onInit())
       .then((_) => _initGame())
@@ -121,7 +119,7 @@ abstract class GameBase {
   Future onInitDone() => null;
 
   Future _assetsLoaded() {
-    var loader = <Future>[];
+    final loader = <Future>[];
     if (null != spriteSheetName) {
       loader.add(helper
           .loadSpritesheet(spriteSheetName)
@@ -138,7 +136,7 @@ abstract class GameBase {
     return Future.wait(loader).then((_) {
       if (null != bodyDefs) {
         bodyDefs.forEach((bodyId, shapes) {
-          var offset = spriteSheet.sprites['$bodyId.png'].offset -
+          final offset = spriteSheet.sprites['$bodyId.png'].offset -
               spriteSheet.sprites['$bodyId.png'].trimmed;
           shapes.forEach((shape) {
             shape.vertices =
@@ -156,17 +154,15 @@ abstract class GameBase {
     });
   }
 
-  Future<GameBase> start() {
-    return _init().then((_) {
-      _startGameLoops();
-      return this;
-    });
-  }
+  Future<GameBase> start() => _init().then((_) {
+        _startGameLoops();
+        return this;
+      });
 
   void _startGameLoops() {
     _lastTimeP = window.performance.now().toDouble();
 
-    var physicsSystem = world.systems
+    final physicsSystem = world.systems
         .firstWhere((system) => system.group == 1, orElse: () => null);
     if (null != physicsSystem) {
       physicsLoop();
@@ -188,9 +184,7 @@ abstract class GameBase {
     }
   }
 
-  Stream<bool> onPause() {
-    return _pauseStreamController.stream;
-  }
+  Stream<bool> onPause() => _pauseStreamController.stream;
 
   bool get paused => _pause;
 
@@ -203,20 +197,21 @@ abstract class GameBase {
   }
 
   void physicsLoop() {
-    var time = window.performance.now().toDouble();
+    final time = window.performance.now().toDouble();
     world.delta = (time - _lastTimeP) / 1000;
     _lastTimeP = time;
     world.process(1);
 
     if (!_stop && !_pause) {
-      new Future.delayed(new Duration(milliseconds: 5), physicsLoop);
+      new Future.delayed(const Duration(milliseconds: 5), physicsLoop);
     }
   }
 
   void _firstUpdate(double time) {
     _lastTime = time / 1000.0;
-    world.delta = 1 / 60;
-    world.process();
+    world
+      ..delta = 1 / 60
+      ..process();
     window.animationFrame.then((time) => update(time: time / 1000.0));
   }
 
@@ -234,11 +229,13 @@ abstract class GameBase {
   void _handleFullscreen(Event e) {
     fullscreen = !fullscreen;
     if (fullscreen) {
-      canvas.width = window.screen.width;
-      canvas.height = window.screen.height;
+      canvas
+        ..width = window.screen.width
+        ..height = window.screen.height;
     } else {
-      canvas.width = _width;
-      canvas.height = _height;
+      canvas
+        ..width = _width
+        ..height = _height;
     }
     if (!webgl) {
       canvas.context2D
@@ -257,18 +254,19 @@ abstract class GameBase {
   Map<int, List<EntitySystem>> getSystems();
 
   Future initSystems() {
-    List<Future> shaderSourceFutures = new List();
+    final List<Future> shaderSourceFutures = [];
     getSystems().forEach((group, systems) {
-      systems.forEach((system) {
+      for (EntitySystem system in systems) {
         world.addSystem(system, group: group);
         if (system is WebGlRenderingMixin) {
+          final webglMixin = system as WebGlRenderingMixin;
           shaderSourceFutures.add(helper
-              .loadShader(system.vShaderFile, system.fShaderFile)
+              .loadShader(webglMixin.vShaderFile, webglMixin.fShaderFile)
               .then((shaderSource) {
-            system.shaderSource = shaderSource;
+            webglMixin.shaderSource = shaderSource;
           }));
         }
-      });
+      }
     });
     return Future.wait(shaderSourceFutures);
   }

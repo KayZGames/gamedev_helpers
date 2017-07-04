@@ -5,7 +5,9 @@ author: Dennis Kaselow <Dennis.Kaselow+gamedev_helpers@gmail.com>
 dependencies:
   vector_math: any
   dartemis:
-    path: ../dartemis
+    git:
+      url: git://github.com/denniskaselow/dartemis.git
+      ref: develop
   dartemis_transformer:
     path: ../dartemis_transformer
   event_bus: any

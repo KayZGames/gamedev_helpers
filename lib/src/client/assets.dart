@@ -1,20 +1,18 @@
 part of gamedev_helpers;
 
-Future<Map<String, String>> _loadAchievements(String libName) {
-  return HttpRequest
-      .getString('packages/$libName/assets/achievements.json')
-      .then(_processAssets);
-}
+Future<Map<String, String>> _loadAchievements(String libName) => HttpRequest
+    .getString('packages/$libName/assets/achievements.json')
+    .then(_processAchievementAssets);
 
-Future<Map<String, List<Polygon>>> _loadPolygons(String libName, String name) {
-  return HttpRequest
-      .getString('packages/$libName/assets/img/$name.polygons.json')
-      .then(_processAssets)
-      .then(_createPolygonMap);
-}
+Future<Map<String, List<Polygon>>> _loadPolygons(
+        String libName, String name) =>
+    HttpRequest
+        .getString('packages/$libName/assets/img/$name.polygons.json')
+        .then(_processPolygonAssets)
+        .then(_createPolygonMap);
 
 Future<SpriteSheet> _loadSpritesheet(String libName, String name) {
-  String imgPath = 'packages/$libName/assets/img/$name.png';
+  final imgPath = 'packages/$libName/assets/img/$name.png';
   return HttpRequest
       .getString('packages/$libName/assets/img/$name.json')
       .then(_processAssets)
@@ -23,9 +21,9 @@ Future<SpriteSheet> _loadSpritesheet(String libName, String name) {
 
 Future<AudioBuffer> _loadMusic(
     AudioContext audioContext, String libName, String name) {
-  var audio = new AudioElement();
+  const goodAnswer = const ['probably', 'maybe'];
+  final audio = new AudioElement();
   var fileExtension = 'ogg';
-  var goodAnswer = ['probably', 'maybe'];
   if (goodAnswer.contains(audio.canPlayType('audio/ogg'))) {
     fileExtension = 'ogg';
   } else if (goodAnswer
@@ -33,19 +31,18 @@ Future<AudioBuffer> _loadMusic(
       goodAnswer.contains(audio.canPlayType('audio/mp3'))) {
     fileExtension = 'mp3';
   }
-  String musicPath = 'packages/$libName/assets/music/$name.$fileExtension';
+  final String musicPath =
+      'packages/$libName/assets/music/$name.$fileExtension';
   return HttpRequest
       .request(musicPath, responseType: 'arraybuffer')
-      .then((request) async {
-    return audioContext.decodeAudioData(request.response);
-  });
+      .then((request) async => audioContext.decodeAudioData(request.response));
 }
 
 Future<Map<String, List<Polygon>>> _createPolygonMap(
     Map<String, List<Map<String, List<double>>>> polygons) {
-  var result = new Map<String, List<Polygon>>();
+  final result = <String, List<Polygon>>{};
   polygons.forEach((bodyId, pointMaps) {
-    var polygonList = new List<Polygon>();
+    final polygonList = <Polygon>[];
     pointMaps
         .forEach((pointMap) => polygonList.add(new Polygon(pointMap['shape'])));
     result[bodyId] = polygonList;
@@ -55,14 +52,14 @@ Future<Map<String, List<Polygon>>> _createPolygonMap(
 
 Future<SpriteSheet> _createSpriteSheet(
     String imgPath, Map<String, Map<String, Map<String, dynamic>>> assets) {
-  var completer = new Completer<SpriteSheet>();
-  var img = new ImageElement();
+  final completer = new Completer<SpriteSheet>();
+  final img = new ImageElement();
   img.onLoad.listen((_) {
-    var sprites = new Map<String, Sprite>();
+    final sprites = <String, Sprite>{};
     assets['frames'].forEach((assetName, assetData) {
       sprites[assetName] = new Sprite(assetData);
     });
-    var sheet = new SpriteSheet(img, sprites);
+    final sheet = new SpriteSheet(img, sprites);
     completer.complete(sheet);
   });
   img.src = imgPath;
@@ -71,11 +68,10 @@ Future<SpriteSheet> _createSpriteSheet(
 
 Future<ShaderSource> _loadShader(
     String libName, String vShaderFile, String fShaderFile) {
-  List<Future> loaders = new List(2);
-  loaders[0] = HttpRequest
-      .getString('packages/$libName/assets/shader/$vShaderFile.vert');
-  loaders[1] = HttpRequest
-      .getString('packages/$libName/assets/shader/$fShaderFile.frag');
+  final List<Future> loaders = [
+    HttpRequest.getString('packages/$libName/assets/shader/$vShaderFile.vert'),
+    HttpRequest.getString('packages/$libName/assets/shader/$fShaderFile.frag')
+  ];
   return Future
       .wait(loaders)
       .then((shaders) => new ShaderSource(shaders[0], shaders[1]));
@@ -89,10 +85,9 @@ class ShaderSource {
 
 class LayeredSpriteSheet {
   List<SpriteSheet> sheets;
-  LayeredSpriteSheet(SpriteSheet initialSpriteSheet) {
-    sheets = new List<SpriteSheet>();
-    sheets.add(initialSpriteSheet);
-  }
+  LayeredSpriteSheet(SpriteSheet initialSpriteSheet)
+      : sheets = [initialSpriteSheet];
+
   void add(SpriteSheet sheet) => sheets.insert(0, sheet);
   SpriteSheet getLayerFor(String spriteId) =>
       sheets.where((sheet) => sheet.sprites.containsKey(spriteId)).first;
@@ -111,7 +106,7 @@ class Sprite {
   Vector2 offset;
   Vector2 trimmed;
   Sprite(Map<String, dynamic> singleAsset) {
-    _Asset asset = new _Asset(singleAsset);
+    final _Asset asset = new _Asset(singleAsset);
     src = asset.frame;
     var cx, cy;
     if (asset.trimmed) {
@@ -152,11 +147,17 @@ class _Asset {
         sourceSize = _createPoint(asset["sourceSize"]);
 }
 
-_createRectangle(Map<String, int> rect) =>
+Rectangle<int> _createRectangle(Map<String, int> rect) =>
     new Rectangle(rect['x'], rect['y'], rect['w'], rect['h']);
 
-_createPoint(Map<String, int> rect) => new Point(rect['w'], rect['h']);
+Point<int> _createPoint(Map<String, int> rect) =>
+    new Point(rect['w'], rect['h']);
 
-Future<Map<String, dynamic>> _processAssets(String assetJson) {
-  return new Future.value(JSON.decode(assetJson));
-}
+Future<Map<String, String>> _processAchievementAssets(String assetJson) =>
+    new Future.value(JSON.decode(assetJson));
+
+Future<Map<String, List<Map<String, List<double>>>>> _processPolygonAssets(String assetJson) =>
+    new Future.value(JSON.decode(assetJson));
+
+Future<Map<String, dynamic>> _processAssets(String assetJson) =>
+    new Future.value(JSON.decode(assetJson));

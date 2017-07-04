@@ -12,7 +12,8 @@ class WebGlCanvasCleaningSystem extends VoidEntitySystem {
 
   @override
   void processSystem() {
-    gl.clear(RenderingContext.COLOR_BUFFER_BIT | RenderingContext.DEPTH_BUFFER_BIT);
+    gl.clear(
+        RenderingContext.COLOR_BUFFER_BIT | RenderingContext.DEPTH_BUFFER_BIT);
   }
 }
 
@@ -28,69 +29,92 @@ abstract class WebGlRenderingMixin {
   bool success = true;
 
   void initProgram() {
-    var vShader = _createShader(RenderingContext.VERTEX_SHADER, shaderSource.vShader);
-    var fShader = _createShader(RenderingContext.FRAGMENT_SHADER, shaderSource.fShader);
+    final vShader =
+        _createShader(RenderingContext.VERTEX_SHADER, shaderSource.vShader);
+    final fShader =
+        _createShader(RenderingContext.FRAGMENT_SHADER, shaderSource.fShader);
 
     _createProgram(vShader, fShader);
   }
 
   void _createProgram(Shader vShader, Shader fShader) {
     program = gl.createProgram();
-    gl.attachShader(program, vShader);
-    gl.attachShader(program, fShader);
-    gl.linkProgram(program);
-    var linkSuccess = gl.getProgramParameter(program, RenderingContext.LINK_STATUS);
+    gl
+      ..attachShader(program, vShader)
+      ..attachShader(program, fShader)
+      ..linkProgram(program);
+    final linkSuccess =
+        gl.getProgramParameter(program, RenderingContext.LINK_STATUS);
     if (!linkSuccess) {
-      print('${this.runtimeType} - Error linking program: ${gl.getProgramInfoLog(program)}');
+      print(
+          '$runtimeType - Error linking program: ${gl.getProgramInfoLog(program)}');
       success = false;
     }
   }
 
   Shader _createShader(int type, String source) {
-    var shader = gl.createShader(type);
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-    var compileSuccess = gl.getShaderParameter(shader, RenderingContext.COMPILE_STATUS);
+    final shader = gl.createShader(type);
+    gl
+      ..shaderSource(shader, source)
+      ..compileShader(shader);
+    final compileSuccess =
+        gl.getShaderParameter(shader, RenderingContext.COMPILE_STATUS);
     if (!compileSuccess) {
-      print('${this.runtimeType} - Error compiling shader: ${gl.getShaderInfoLog(shader)}');
+      print(
+          '$runtimeType - Error compiling shader: ${gl.getShaderInfoLog(shader)}');
       success = false;
     }
     return shader;
   }
 
-  void buffer(String attribute, Float32List items, int itemSize, {int usage: DYNAMIC_DRAW }) {
+  void buffer(String attribute, Float32List items, int itemSize,
+      {int usage: DYNAMIC_DRAW}) {
     var buffer = buffers[attribute];
     if (null == buffer) {
       buffer = gl.createBuffer();
       buffers[attribute] = buffer;
     }
-    var attribLocation = gl.getAttribLocation(program, attribute);
-    gl.bindBuffer(RenderingContext.ARRAY_BUFFER, buffer);
-    gl.bufferData(RenderingContext.ARRAY_BUFFER, items, usage);
-    gl.vertexAttribPointer(attribLocation, itemSize, RenderingContext.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(attribLocation);
+    final attribLocation = gl.getAttribLocation(program, attribute);
+    gl
+      ..bindBuffer(RenderingContext.ARRAY_BUFFER, buffer)
+      ..bufferData(RenderingContext.ARRAY_BUFFER, items, usage)
+      ..vertexAttribPointer(
+          attribLocation, itemSize, RenderingContext.FLOAT, false, 0, 0)
+      ..enableVertexAttribArray(attribLocation);
   }
 
-  void bufferElements(List<Attrib> attributes, Float32List items, List<int> indices) {
+  void bufferElements(
+      List<Attrib> attributes, Float32List items, List<int> indices) {
     if (null == elementBuffer) {
       elementBuffer = gl.createBuffer();
       indexBuffer = gl.createBuffer();
     }
-    gl.bindBuffer(RenderingContext.ARRAY_BUFFER, elementBuffer);
-    gl.bufferData(RenderingContext.ARRAY_BUFFER, items, RenderingContext.DYNAMIC_DRAW);
+    gl
+      ..bindBuffer(RenderingContext.ARRAY_BUFFER, elementBuffer)
+      ..bufferData(
+          RenderingContext.ARRAY_BUFFER, items, RenderingContext.DYNAMIC_DRAW);
     int offset = 0;
     int elementsPerItem = 0;
     for (Attrib attribute in attributes) {
       elementsPerItem += attribute.size;
     }
     for (Attrib attribute in attributes) {
-      var attribLocation = gl.getAttribLocation(program, attribute.name);
-      gl.vertexAttribPointer(attribLocation, attribute.size, RenderingContext.FLOAT, false, fsize * elementsPerItem, fsize * offset);
-      gl.enableVertexAttribArray(attribLocation);
+      final attribLocation = gl.getAttribLocation(program, attribute.name);
+      gl
+        ..vertexAttribPointer(
+            attribLocation,
+            attribute.size,
+            RenderingContext.FLOAT,
+            false,
+            fsize * elementsPerItem,
+            fsize * offset)
+        ..enableVertexAttribArray(attribLocation);
       offset += attribute.size;
     }
-    gl.bindBuffer(RenderingContext.ELEMENT_ARRAY_BUFFER, indexBuffer);
-    gl.bufferData(RenderingContext.ELEMENT_ARRAY_BUFFER, indices, RenderingContext.DYNAMIC_DRAW);
+    gl
+      ..bindBuffer(RenderingContext.ELEMENT_ARRAY_BUFFER, indexBuffer)
+      ..bufferData(RenderingContext.ELEMENT_ARRAY_BUFFER, indices,
+          RenderingContext.DYNAMIC_DRAW);
   }
 
   String get vShaderFile;
@@ -103,11 +127,13 @@ class Attrib {
   const Attrib(this.name, this.size);
 }
 
-abstract class WebGlRenderingSystem extends EntitySystem with WebGlRenderingMixin {
-  RenderingContext gl;
+abstract class WebGlRenderingSystem extends EntitySystem
+    with WebGlRenderingMixin {
   int maxLength = 0;
 
-  WebGlRenderingSystem(this.gl, Aspect aspect) : super(aspect);
+  WebGlRenderingSystem(RenderingContext gl, Aspect aspect) : super(aspect) {
+    this.gl = gl;
+  }
 
   @override
   void initialize() {
@@ -116,7 +142,7 @@ abstract class WebGlRenderingSystem extends EntitySystem with WebGlRenderingMixi
 
   @override
   void processEntities(Iterable<Entity> entities) {
-    var length = entities.length;
+    final length = entities.length;
     if (length > 0) {
       gl.useProgram(program);
       if (length > maxLength) {
@@ -139,10 +165,11 @@ abstract class WebGlRenderingSystem extends EntitySystem with WebGlRenderingMixi
   void render(int length);
 }
 
-abstract class VoidWebGlRenderingSystem extends VoidEntitySystem with WebGlRenderingMixin {
-  RenderingContext gl;
-
-  VoidWebGlRenderingSystem(this.gl);
+abstract class VoidWebGlRenderingSystem extends VoidEntitySystem
+    with WebGlRenderingMixin {
+  VoidWebGlRenderingSystem(RenderingContext gl) {
+    this.gl = gl;
+  }
 
   @override
   void initialize() {

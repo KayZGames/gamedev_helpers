@@ -6,6 +6,7 @@ class CanvasCleaningSystem extends VoidEntitySystem {
 
   CanvasCleaningSystem(this.canvas, {this.fillStyle: 'white'});
 
+  @override
   void processSystem() {
     canvas.context2D..fillStyle = fillStyle
                     ..clearRect(0, 0, canvas.width, canvas.height);
