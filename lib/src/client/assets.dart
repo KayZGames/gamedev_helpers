@@ -4,8 +4,7 @@ Future<Map<String, String>> _loadAchievements(String libName) => HttpRequest
     .getString('packages/$libName/assets/achievements.json')
     .then(_processAchievementAssets);
 
-Future<Map<String, List<Polygon>>> _loadPolygons(
-        String libName, String name) =>
+Future<Map<String, List<Polygon>>> _loadPolygons(String libName, String name) =>
     HttpRequest
         .getString('packages/$libName/assets/img/$name.polygons.json')
         .then(_processPolygonAssets)
@@ -156,7 +155,8 @@ Point<int> _createPoint(Map<String, int> rect) =>
 Future<Map<String, String>> _processAchievementAssets(String assetJson) =>
     new Future.value(JSON.decode(assetJson));
 
-Future<Map<String, List<Map<String, List<double>>>>> _processPolygonAssets(String assetJson) =>
+Future<Map<String, List<Map<String, List<double>>>>> _processPolygonAssets(
+        String assetJson) =>
     new Future.value(JSON.decode(assetJson));
 
 Future<Map<String, dynamic>> _processAssets(String assetJson) =>

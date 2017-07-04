@@ -8,8 +8,8 @@ class CanvasCleaningSystem extends VoidEntitySystem {
 
   @override
   void processSystem() {
-    canvas.context2D..fillStyle = fillStyle
-                    ..clearRect(0, 0, canvas.width, canvas.height);
+    canvas.context2D
+      ..fillStyle = fillStyle
+      ..clearRect(0, 0, canvas.width, canvas.height);
   }
 }
-

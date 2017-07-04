@@ -40,7 +40,8 @@ class GameHelper {
       _loadSpritesheet(_libName, name);
 
   /// Loads music/[name].ogg or music/[name].mp3 depending on browser support.
-  Future<AudioBuffer> loadMusic(String name) => _loadMusic(_audioContext, _libName, name);
+  Future<AudioBuffer> loadMusic(String name) =>
+      _loadMusic(_audioContext, _libName, name);
 
   /// Loads shader/[vShaderFile].vert and shader/[fShaderFile].frag.
   Future<ShaderSource> loadShader(String vShaderFile, String fShaderFile) =>

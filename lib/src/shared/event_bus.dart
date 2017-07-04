@@ -26,6 +26,7 @@ class EventBus {
         sc.close();
       }
     }
+
     eventBus.on(eventType).listen(sc.add, onDone: done);
     eventBusSync.on(eventType).listen(sc.add, onDone: done);
     return sc.stream;
