@@ -44,6 +44,7 @@ class GameHelper {
       _loadMusic(_audioContext, _libName, name);
 
   /// Loads shader/[vShaderFile].vert and shader/[fShaderFile].frag.
-  Future<ShaderSource> loadShader(String vShaderFile, String fShaderFile) =>
-      _loadShader(_libName, vShaderFile, fShaderFile);
+  Future<ShaderSource> loadShader(String libName,
+          String vShaderFile, String fShaderFile) =>
+      _loadShader(libName ?? _libName, vShaderFile, fShaderFile);
 }

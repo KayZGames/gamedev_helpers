@@ -119,6 +119,7 @@ abstract class WebGlRenderingMixin {
 
   String get vShaderFile;
   String get fShaderFile;
+  String get libName => null;
 }
 
 class Attrib {
@@ -183,4 +184,62 @@ abstract class VoidWebGlRenderingSystem extends VoidEntitySystem
   }
 
   void render();
+}
+
+
+
+class ParticleRenderingSystem extends WebGlRenderingSystem {
+  Mapper<Position> pm;
+  Mapper<Color> cm;
+  WebGlViewProjectionMatrixManager vpmm;
+  TagManager tm;
+
+  Float32List positions;
+  Float32List colors;
+
+  ParticleRenderingSystem(RenderingContext gl)
+      : super(gl, new Aspect.forAllOf([Position, Particle, Color]));
+
+  @override
+  void processEntity(int index, Entity entity) {
+    final p = pm[entity];
+    final c = cm[entity];
+
+    final pOffset = index * 2;
+    final cOffset = index * 4;
+
+    positions[pOffset] = p.x;
+    positions[pOffset + 1] = p.y;
+
+    colors[cOffset] = c.r;
+    colors[cOffset + 1] = c.g;
+    colors[cOffset + 2] = c.b;
+    colors[cOffset + 3] = c.a;
+  }
+
+  @override
+  void render(int length) {
+    gl.uniformMatrix4fv(gl.getUniformLocation(program, 'uViewProjection'),
+        false, vpmm.create2dViewProjectionMatrix().storage);
+
+    buffer('aPosition', positions, 2);
+    buffer('aColor', colors, 4);
+
+    gl.drawArrays(POINTS, 0, length);
+  }
+
+  @override
+  void updateLength(int length) {
+    positions = new Float32List(length * 2);
+    colors = new Float32List(length * 4);
+  }
+
+  @override
+  String get vShaderFile => 'ParticleRenderingSystem';
+
+  @override
+  String get fShaderFile => 'ParticleRenderingSystem';
+
+  @override
+  String get libName => 'gamedev_helpers';
 }

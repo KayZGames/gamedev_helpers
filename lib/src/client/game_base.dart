@@ -261,7 +261,8 @@ abstract class GameBase {
         if (system is WebGlRenderingMixin) {
           final webglMixin = system as WebGlRenderingMixin;
           shaderSourceFutures.add(helper
-              .loadShader(webglMixin.vShaderFile, webglMixin.fShaderFile)
+              .loadShader(webglMixin.libName, webglMixin.vShaderFile,
+                  webglMixin.fShaderFile)
               .then((shaderSource) {
             webglMixin.shaderSource = shaderSource;
           }));

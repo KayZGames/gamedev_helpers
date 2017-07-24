@@ -7,6 +7,7 @@ import 'package:dartemis/dartemis.dart';
 
 import 'package:event_bus/event_bus.dart' as event_bus;
 import 'package:tweenengine/tweenengine.dart';
+import 'package:vector_math/vector_math.dart' hide Quad;
 
 export 'dart:math';
 export 'package:dartemis/dartemis.dart';
@@ -14,6 +15,8 @@ export 'package:tweenengine/tweenengine.dart';
 export 'package:vector_math/vector_math.dart' hide Quad;
 
 part 'src/shared/dartemis/systems/tweening.dart';
+part 'src/shared/dartemis/managers/web_gl_view_projection_matrix_manager.dart';
+part 'src/shared/dartemis/managers/camera_manager.dart';
 part 'src/shared/dartemis/components.dart';
 part 'src/shared/event_bus.dart';
 
@@ -22,6 +25,7 @@ final EventBus eventBus = new EventBus();
 final Random random = new Random();
 
 final TweenManager tweenManager = new TweenManager();
+const String playerTag = 'player';
 
 class AnalyticsTrackEvent {
   String action;
