@@ -15,6 +15,7 @@ export 'package:tweenengine/tweenengine.dart';
 export 'package:vector_math/vector_math.dart' hide Quad;
 
 part 'src/shared/dartemis/systems/tweening.dart';
+part 'src/shared/dartemis/systems/animation_system.dart';
 part 'src/shared/dartemis/managers/web_gl_view_projection_matrix_manager.dart';
 part 'src/shared/dartemis/managers/camera_manager.dart';
 part 'src/shared/dartemis/components.dart';

@@ -47,4 +47,5 @@ class WebGlViewProjectionMatrixManager extends Manager {
 //  return threedViewProjextionMatrix * camera.three + twodOrthographicMatrix * camera.two;
     return twodOrthographicMatrix; // * rotationMatrix;
   }
+
 }

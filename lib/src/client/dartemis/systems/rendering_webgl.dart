@@ -186,8 +186,6 @@ abstract class VoidWebGlRenderingSystem extends VoidEntitySystem
   void render();
 }
 
-
-
 class ParticleRenderingSystem extends WebGlRenderingSystem {
   Mapper<Position> pm;
   Mapper<Color> cm;
@@ -239,6 +237,130 @@ class ParticleRenderingSystem extends WebGlRenderingSystem {
 
   @override
   String get fShaderFile => 'ParticleRenderingSystem';
+
+  @override
+  String get libName => 'gamedev_helpers';
+}
+
+abstract class WebGlSpriteRenderingSystem extends WebGlRenderingSystem {
+  Mapper<Position> pm;
+  Mapper<Renderable> rm;
+  TagManager tm;
+  WebGlViewProjectionMatrixManager vpmm;
+
+  SpriteSheet sheet;
+
+  List<Attrib> attributes = [
+    const Attrib('aPosition', 2),
+    const Attrib('aTexCoord', 2)
+  ];
+  Float32List values;
+  Uint16List indices;
+
+  WebGlSpriteRenderingSystem(RenderingContext gl, this.sheet, Aspect aspect)
+      : super(gl, aspect..allOf([Renderable]));
+
+  @override
+  void initialize() {
+    super.initialize();
+
+    final texture = gl.createTexture();
+    final uTexture = gl.getUniformLocation(program, 'uTexture');
+
+    gl
+      ..useProgram(program)
+      ..pixelStorei(UNPACK_FLIP_Y_WEBGL, 0)
+      ..activeTexture(TEXTURE0)
+      ..bindTexture(TEXTURE_2D, texture)
+      ..texParameteri(TEXTURE_2D, TEXTURE_MIN_FILTER, LINEAR)
+      ..texParameteri(TEXTURE_2D, TEXTURE_WRAP_S, CLAMP_TO_EDGE)
+      ..texImage2D(TEXTURE_2D, 0, RGBA, RGBA, UNSIGNED_BYTE, sheet.image)
+      ..uniform1i(uTexture, 0)
+      ..uniform2f(gl.getUniformLocation(program, 'uSize'), sheet.image.width,
+          sheet.image.height);
+  }
+
+  @override
+  void processEntity(int index, Entity entity) {
+    final p = getPosition(entity);
+    final r = rm[entity];
+    final sprite = sheet.sprites[r.name];
+    final dst = sprite.dst;
+    final src = sprite.src;
+    double right;
+    double left;
+    int dstLeft;
+    int dstRight;
+    if (r.facesRight) {
+      left = src.left.toDouble() + 1.0;
+      right = src.right.toDouble() - 1.0;
+      dstLeft = (dst.left * r.scale).toInt();
+      dstRight = (dst.right * r.scale).toInt();
+    } else {
+      right = src.left.toDouble() + 1.0;
+      left = src.right.toDouble() - 1.0;
+      dstLeft = (-dst.right * r.scale).toInt();
+      dstRight = (-dst.left * r.scale).toInt();
+    }
+    final dstTop = (dst.top * r.scale).toInt();
+    final dstBottom = (dst.bottom * r.scale).toInt();
+
+    final bottom = src.bottom.toDouble();
+    final top = src.top.toDouble();
+
+    values[index * 16] = p.x + dstLeft;
+    values[index * 16 + 1] = p.y - dstBottom;
+    values[index * 16 + 2] = left;
+    values[index * 16 + 3] = bottom;
+
+    values[index * 16 + 4] = p.x + dstRight;
+    values[index * 16 + 5] = p.y - dstBottom;
+    values[index * 16 + 6] = right;
+    values[index * 16 + 7] = bottom;
+
+    values[index * 16 + 8] = p.x + dstLeft;
+    values[index * 16 + 9] = p.y - dstTop;
+    values[index * 16 + 10] = left;
+    values[index * 16 + 11] = top;
+
+    values[index * 16 + 12] = p.x + dstRight;
+    values[index * 16 + 13] = p.y - dstTop;
+    values[index * 16 + 14] = right;
+    values[index * 16 + 15] = top;
+
+    indices[index * 6] = index * 4;
+    indices[index * 6 + 1] = index * 4 + 2;
+    indices[index * 6 + 2] = index * 4 + 3;
+    indices[index * 6 + 3] = index * 4;
+    indices[index * 6 + 4] = index * 4 + 3;
+    indices[index * 6 + 5] = index * 4 + 1;
+  }
+
+  Position getPosition(Entity entity) => pm[entity];
+
+  @override
+  void render(int length) {
+    bufferElements(attributes, values, indices);
+
+    gl
+      ..uniformMatrix4fv(gl.getUniformLocation(program, 'uViewProjection'),
+          false, create2dViewProjectionMatrix().storage)
+      ..drawElements(TRIANGLES, length * 6, UNSIGNED_SHORT, 0);
+  }
+
+  Matrix4 create2dViewProjectionMatrix() => vpmm.create2dViewProjectionMatrix();
+
+  @override
+  void updateLength(int length) {
+    values = new Float32List(length * 4 * 2 * 2);
+    indices = new Uint16List(length * 6);
+  }
+
+  @override
+  String get vShaderFile => 'SpriteRenderingSystem';
+
+  @override
+  String get fShaderFile => 'SpriteRenderingSystem';
 
   @override
   String get libName => 'gamedev_helpers';
