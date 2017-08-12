@@ -52,7 +52,6 @@ class Color extends Component {
 
 class Renderable extends Component {
   String _name;
-  String _state;
   int maxFrames;
   double timePerFrame;
   double time;
@@ -63,30 +62,14 @@ class Renderable extends Component {
       this.timePerFrame = 0.2,
       this.facesRight = true,
       this.time = 0.0,
-      this.scale = 1.0,
-      String state = ''})
-      : _state = state;
+      this.scale = 1.0});
 
-  Renderable.fromRenderable(Renderable other, this.scale)
+  Renderable.fromRenderable(Renderable other, this.time, this.scale)
       : _name = other._name,
         maxFrames = other.maxFrames,
         timePerFrame = other.timePerFrame,
-        facesRight = other.facesRight,
-        time = other.time,
-        _state = other._state;
+        facesRight = other.facesRight;
 
   String get name =>
-      '${_name}_$state${maxFrames - (time / timePerFrame % maxFrames).toInt() - 1}';
-  String get state => _state;
-  set state(String value) {
-    if (value != _state) {
-      time = 0.0;
-      if (value == 'a') {
-        maxFrames = 2;
-      } else {
-        maxFrames = 1;
-      }
-    }
-    _state = value;
-  }
+      '${_name}_${maxFrames - (time / timePerFrame % maxFrames).toInt() - 1}';
 }

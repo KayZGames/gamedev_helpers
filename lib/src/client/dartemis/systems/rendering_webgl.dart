@@ -244,6 +244,7 @@ class ParticleRenderingSystem extends WebGlRenderingSystem {
 
 abstract class WebGlSpriteRenderingSystem extends WebGlRenderingSystem {
   Mapper<Position> pm;
+  Mapper<Orientation> om;
   Mapper<Renderable> rm;
   TagManager tm;
   WebGlViewProjectionMatrixManager vpmm;
@@ -258,7 +259,7 @@ abstract class WebGlSpriteRenderingSystem extends WebGlRenderingSystem {
   Uint16List indices;
 
   WebGlSpriteRenderingSystem(RenderingContext gl, this.sheet, Aspect aspect)
-      : super(gl, aspect..allOf([Renderable]));
+      : super(gl, aspect..allOf([Orientation, Renderable]));
 
   @override
   void initialize() {
@@ -283,6 +284,7 @@ abstract class WebGlSpriteRenderingSystem extends WebGlRenderingSystem {
   @override
   void processEntity(int index, Entity entity) {
     final p = getPosition(entity);
+    final o = om[entity];
     final r = rm[entity];
     final sprite = sheet.sprites[r.name];
     final dst = sprite.dst;
@@ -308,23 +310,27 @@ abstract class WebGlSpriteRenderingSystem extends WebGlRenderingSystem {
     final bottom = src.bottom.toDouble();
     final top = src.top.toDouble();
 
-    values[index * 16] = p.x + dstLeft;
-    values[index * 16 + 1] = p.y - dstBottom;
+    var bottomLeftAngle = atan2(dstBottom, dstLeft);
+    values[index * 16] = p.x + dstLeft * cos(o.angle + bottomLeftAngle)/cos(bottomLeftAngle);
+    values[index * 16 + 1] = p.y + dstBottom * sin(o.angle + bottomLeftAngle)/sin(bottomLeftAngle);
     values[index * 16 + 2] = left;
     values[index * 16 + 3] = bottom;
 
-    values[index * 16 + 4] = p.x + dstRight;
-    values[index * 16 + 5] = p.y - dstBottom;
+    var bottomRightAngle = atan2(dstBottom, dstRight);
+    values[index * 16 + 4] = p.x + dstRight * cos(o.angle + bottomRightAngle)/cos(bottomRightAngle);
+    values[index * 16 + 5] = p.y + dstBottom * sin(o.angle + bottomRightAngle)/sin(bottomRightAngle);
     values[index * 16 + 6] = right;
     values[index * 16 + 7] = bottom;
 
-    values[index * 16 + 8] = p.x + dstLeft;
-    values[index * 16 + 9] = p.y - dstTop;
+    var topLeftAngle = atan2(dstTop, dstLeft);
+    values[index * 16 + 8] = p.x + dstLeft * cos(o.angle + topLeftAngle)/cos(topLeftAngle);
+    values[index * 16 + 9] = p.y + dstTop * sin(o.angle + topLeftAngle)/sin(topLeftAngle);
     values[index * 16 + 10] = left;
     values[index * 16 + 11] = top;
 
-    values[index * 16 + 12] = p.x + dstRight;
-    values[index * 16 + 13] = p.y - dstTop;
+    var topRightAngle = atan2(dstTop, dstRight);
+    values[index * 16 + 12] = p.x + dstRight * cos(o.angle + topRightAngle)/cos(topRightAngle);
+    values[index * 16 + 13] = p.y + dstTop * sin(o.angle + topRightAngle)/sin(topRightAngle);
     values[index * 16 + 14] = right;
     values[index * 16 + 15] = top;
 
