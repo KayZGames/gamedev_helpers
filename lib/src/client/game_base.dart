@@ -7,7 +7,8 @@ abstract class GameBase {
   final StreamController<bool> _pauseStreamController =
       new StreamController<bool>();
   final CanvasElement canvas;
-  final CanvasRenderingContext ctx;
+  final CanvasRenderingContext2D ctx;
+  final RenderingContext2 gl;
   final GameHelper helper;
   final String spriteSheetName;
   final String bodyDefsName;
@@ -32,36 +33,39 @@ abstract class GameBase {
   GameBase(String appName, String canvasSelector, int width, int height,
       {this.spriteSheetName: 'assets',
       this.bodyDefsName: 'assets',
-      this.musicName: null,
-      this.audioContext: null,
+      this.musicName,
+      this.audioContext,
       this.webgl: false,
       bool depthTest: true,
       bool blending: true})
       : canvas = querySelector(canvasSelector),
         helper = new GameHelper(appName, audioContext),
         ctx = webgl
-            ? (querySelector(canvasSelector) as CanvasElement).getContext3d()
-            : (querySelector(canvasSelector) as CanvasElement).context2D
-                as CanvasRenderingContext,
+            ? null
+            : (querySelector(canvasSelector) as CanvasElement).context2D,
+        gl = webgl
+            ? (querySelector(canvasSelector) as CanvasElement)
+                .getContext('webgl2')
+            : null,
         _width = width,
         _height = height {
     canvas
       ..width = width
       ..height = height;
-    if (!webgl) {
-      (ctx as CanvasRenderingContext2D)
+    if (ctx != null) {
+      ctx
         ..textBaseline = "top"
         ..font = '12px Verdana';
-    } else if (ctx is RenderingContext) {
+    } else if (gl != null) {
       if (depthTest) {
-        (ctx as RenderingContext).enable(RenderingContext.DEPTH_TEST);
+        gl.enable(RenderingContext.DEPTH_TEST);
       }
       if (blending) {
-        (ctx as RenderingContext)
+        gl
           ..enable(BLEND)
           ..blendFunc(SRC_ALPHA, ONE_MINUS_SRC_ALPHA);
       }
-//      (ctx as RenderingContext)
+//      (ctx as RenderingContext2)
 //                               ..enable(RenderingContext.POLYGON_OFFSET_FILL);
 //                               ..polygonOffset(1.0, 1.0);
     } else {
@@ -92,6 +96,7 @@ abstract class GameBase {
   GameBase.noCanvas(String appNahme)
       : canvas = null,
         ctx = null,
+        gl = null,
         helper = new GameHelper(appNahme, null),
         bodyDefsName = null,
         spriteSheetName = null,
@@ -216,6 +221,9 @@ abstract class GameBase {
   }
 
   void update({double time}) {
+    if (null != canvas) {
+      handleResize(canvas.clientWidth, canvas.height);
+    }
     var delta = time - _lastTime;
     delta = min(0.05, delta);
     world.delta = delta;
@@ -242,7 +250,7 @@ abstract class GameBase {
         ..textBaseline = "top"
         ..font = '12px Verdana';
     }
-    handleResize(canvas.width, canvas.height);
+    handleResize(canvas.clientWidth, canvas.clientWidth);
   }
 
   void handleResize(int width, int height) {}

@@ -1,7 +1,7 @@
 part of gamedev_helpers;
 
 class WebGlCanvasCleaningSystem extends VoidEntitySystem {
-  RenderingContext gl;
+  RenderingContext2 gl;
 
   WebGlCanvasCleaningSystem(this.gl);
 
@@ -13,14 +13,14 @@ class WebGlCanvasCleaningSystem extends VoidEntitySystem {
   @override
   void processSystem() {
     gl.clear(
-        RenderingContext.COLOR_BUFFER_BIT | RenderingContext.DEPTH_BUFFER_BIT);
+        RenderingContext2.COLOR_BUFFER_BIT | RenderingContext2.DEPTH_BUFFER_BIT);
   }
 }
 
 abstract class WebGlRenderingMixin {
   static const int fsize = Float32List.BYTES_PER_ELEMENT;
 
-  RenderingContext gl;
+  RenderingContext2 gl;
   Program program;
   ShaderSource shaderSource;
   Buffer elementBuffer;
@@ -44,7 +44,7 @@ abstract class WebGlRenderingMixin {
       ..attachShader(program, fShader)
       ..linkProgram(program);
     final linkSuccess =
-        gl.getProgramParameter(program, RenderingContext.LINK_STATUS);
+        gl.getProgramParameter(program, RenderingContext2.LINK_STATUS);
     if (!linkSuccess) {
       print(
           '$runtimeType - Error linking program: ${gl.getProgramInfoLog(program)}');
@@ -58,7 +58,7 @@ abstract class WebGlRenderingMixin {
       ..shaderSource(shader, source)
       ..compileShader(shader);
     final compileSuccess =
-        gl.getShaderParameter(shader, RenderingContext.COMPILE_STATUS);
+        gl.getShaderParameter(shader, RenderingContext2.COMPILE_STATUS);
     if (!compileSuccess) {
       print(
           '$runtimeType - Error compiling shader: ${gl.getShaderInfoLog(shader)}');
@@ -79,7 +79,7 @@ abstract class WebGlRenderingMixin {
       ..bindBuffer(RenderingContext.ARRAY_BUFFER, buffer)
       ..bufferData(RenderingContext.ARRAY_BUFFER, items, usage)
       ..vertexAttribPointer(
-          attribLocation, itemSize, RenderingContext.FLOAT, false, 0, 0)
+          attribLocation, itemSize, RenderingContext2.FLOAT, false, 0, 0)
       ..enableVertexAttribArray(attribLocation);
   }
 
@@ -92,7 +92,7 @@ abstract class WebGlRenderingMixin {
     gl
       ..bindBuffer(RenderingContext.ARRAY_BUFFER, elementBuffer)
       ..bufferData(
-          RenderingContext.ARRAY_BUFFER, items, RenderingContext.DYNAMIC_DRAW);
+          RenderingContext2.ARRAY_BUFFER, items, RenderingContext2.DYNAMIC_DRAW);
     int offset = 0;
     int elementsPerItem = 0;
     for (Attrib attribute in attributes) {
@@ -104,7 +104,7 @@ abstract class WebGlRenderingMixin {
         ..vertexAttribPointer(
             attribLocation,
             attribute.size,
-            RenderingContext.FLOAT,
+            RenderingContext2.FLOAT,
             false,
             fsize * elementsPerItem,
             fsize * offset)
@@ -114,7 +114,7 @@ abstract class WebGlRenderingMixin {
     gl
       ..bindBuffer(RenderingContext.ELEMENT_ARRAY_BUFFER, indexBuffer)
       ..bufferData(RenderingContext.ELEMENT_ARRAY_BUFFER, indices,
-          RenderingContext.DYNAMIC_DRAW);
+          RenderingContext2.DYNAMIC_DRAW);
   }
 
   String get vShaderFile;
@@ -132,7 +132,7 @@ abstract class WebGlRenderingSystem extends EntitySystem
     with WebGlRenderingMixin {
   int maxLength = 0;
 
-  WebGlRenderingSystem(RenderingContext gl, Aspect aspect) : super(aspect) {
+  WebGlRenderingSystem(RenderingContext2 gl, Aspect aspect) : super(aspect) {
     this.gl = gl;
   }
 
@@ -168,7 +168,7 @@ abstract class WebGlRenderingSystem extends EntitySystem
 
 abstract class VoidWebGlRenderingSystem extends VoidEntitySystem
     with WebGlRenderingMixin {
-  VoidWebGlRenderingSystem(RenderingContext gl) {
+  VoidWebGlRenderingSystem(RenderingContext2 gl) {
     this.gl = gl;
   }
 
@@ -195,7 +195,7 @@ class ParticleRenderingSystem extends WebGlRenderingSystem {
   Float32List positions;
   Float32List colors;
 
-  ParticleRenderingSystem(RenderingContext gl)
+  ParticleRenderingSystem(RenderingContext2 gl)
       : super(gl, new Aspect.forAllOf([Position, Particle, Color]));
 
   @override
@@ -258,7 +258,7 @@ abstract class WebGlSpriteRenderingSystem extends WebGlRenderingSystem {
   Float32List values;
   Uint16List indices;
 
-  WebGlSpriteRenderingSystem(RenderingContext gl, this.sheet, Aspect aspect)
+  WebGlSpriteRenderingSystem(RenderingContext2 gl, this.sheet, Aspect aspect)
       : super(gl, aspect..allOf([Orientation, Renderable]));
 
   @override
@@ -310,25 +310,25 @@ abstract class WebGlSpriteRenderingSystem extends WebGlRenderingSystem {
     final bottom = src.bottom.toDouble();
     final top = src.top.toDouble();
 
-    var bottomLeftAngle = atan2(dstBottom, dstLeft);
+    final bottomLeftAngle = atan2(dstBottom, dstLeft);
     values[index * 16] = p.x + dstLeft * cos(o.angle + bottomLeftAngle)/cos(bottomLeftAngle);
     values[index * 16 + 1] = p.y + dstBottom * sin(o.angle + bottomLeftAngle)/sin(bottomLeftAngle);
     values[index * 16 + 2] = left;
     values[index * 16 + 3] = bottom;
 
-    var bottomRightAngle = atan2(dstBottom, dstRight);
+    final bottomRightAngle = atan2(dstBottom, dstRight);
     values[index * 16 + 4] = p.x + dstRight * cos(o.angle + bottomRightAngle)/cos(bottomRightAngle);
     values[index * 16 + 5] = p.y + dstBottom * sin(o.angle + bottomRightAngle)/sin(bottomRightAngle);
     values[index * 16 + 6] = right;
     values[index * 16 + 7] = bottom;
 
-    var topLeftAngle = atan2(dstTop, dstLeft);
+    final topLeftAngle = atan2(dstTop, dstLeft);
     values[index * 16 + 8] = p.x + dstLeft * cos(o.angle + topLeftAngle)/cos(topLeftAngle);
     values[index * 16 + 9] = p.y + dstTop * sin(o.angle + topLeftAngle)/sin(topLeftAngle);
     values[index * 16 + 10] = left;
     values[index * 16 + 11] = top;
 
-    var topRightAngle = atan2(dstTop, dstRight);
+    final topRightAngle = atan2(dstTop, dstRight);
     values[index * 16 + 12] = p.x + dstRight * cos(o.angle + topRightAngle)/cos(topRightAngle);
     values[index * 16 + 13] = p.y + dstTop * sin(o.angle + topRightAngle)/sin(topRightAngle);
     values[index * 16 + 14] = right;
