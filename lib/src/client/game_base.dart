@@ -212,6 +212,9 @@ abstract class GameBase {
   }
 
   void _firstUpdate(double time) {
+    if (null != canvas) {
+      handleResize(canvas.clientWidth, canvas.clientHeight);
+    }
     _lastTime = time / 1000.0;
     world
       ..delta = 1 / 60
