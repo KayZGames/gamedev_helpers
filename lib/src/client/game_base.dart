@@ -30,7 +30,7 @@ abstract class GameBase {
 
   /// [appName] is used to refernce assets and has to be the name of the library
   /// which contains the assets. Usually the game itself.
-  GameBase(String appName, String canvasSelector, int width, int height,
+  GameBase(String appName, String canvasSelector,
       {this.spriteSheetName: 'assets',
       this.bodyDefsName: 'assets',
       this.musicName,
@@ -47,14 +47,14 @@ abstract class GameBase {
             ? (querySelector(canvasSelector) as CanvasElement)
                 .getContext('webgl2')
             : null,
-        _width = width,
-        _height = height {
+        _width = querySelector(canvasSelector).clientWidth,
+        _height = querySelector(canvasSelector).clientHeight {
     canvas
-      ..width = width
-      ..height = height;
+      ..width = canvas.clientWidth
+      ..height = canvas.clientHeight;
     if (ctx != null) {
       ctx
-        ..textBaseline = "top"
+        ..textBaseline = 'top'
         ..font = '12px Verdana';
     } else if (gl != null) {
       if (depthTest) {
@@ -72,7 +72,7 @@ abstract class GameBase {
       _errorInitializingWebGL = true;
     }
     canvas.onFullscreenChange.listen(_handleFullscreen);
-    world = createWorld();
+    world = createWorld()..addManager(new CameraManager());
     final fullscreenButton = querySelector('button#fullscreen');
     if (null != fullscreenButton) {
       fullscreenButton.onClick
@@ -82,10 +82,9 @@ abstract class GameBase {
 
   /// [appName] is used to refernce assets and has to be the name of the library
   /// which contains the assets. Usually the game itself.
-  GameBase.noAssets(
-      String appName, String canvasSelector, int width, int height,
+  GameBase.noAssets(String appName, String canvasSelector,
       {bool webgl: false, bool depthTest: true, bool blending: true})
-      : this(appName, canvasSelector, width, height,
+      : this(appName, canvasSelector,
             spriteSheetName: null,
             bodyDefsName: null,
             musicName: null,
@@ -222,7 +221,7 @@ abstract class GameBase {
 
   void update({double time}) {
     if (null != canvas) {
-      handleResize(canvas.clientWidth, canvas.height);
+      handleResize(canvas.clientWidth, canvas.clientHeight);
     }
     var delta = time - _lastTime;
     delta = min(0.05, delta);
@@ -245,15 +244,25 @@ abstract class GameBase {
         ..width = _width
         ..height = _height;
     }
+    handleResize(canvas.clientWidth, canvas.clientWidth);
+  }
+
+  void handleResize(int width, int height) {
+    resizeCanvas(canvas, width, height);
+    (world.getManager(CameraManager) as CameraManager)
+      ..width = width
+      ..height = height;
+    if (paused || isStopped) {
+      world
+        ..delta = 0.0
+        ..process(GameBase.rendering);
+    }
     if (!webgl) {
       canvas.context2D
         ..textBaseline = "top"
         ..font = '12px Verdana';
     }
-    handleResize(canvas.clientWidth, canvas.clientWidth);
   }
-
-  void handleResize(int width, int height) {}
 
   /// Create your entities
   void createEntities();
@@ -282,4 +291,10 @@ abstract class GameBase {
 
   Entity addEntity(List<Component> components) =>
       world.createAndAddEntity(components);
+
+  void resizeCanvas(CanvasElement canvas, int width, int height) {
+    canvas
+      ..width = width
+      ..height = height;
+  }
 }
