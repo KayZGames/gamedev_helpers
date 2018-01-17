@@ -155,6 +155,7 @@ transformers:
 - dartemis_transformer:
     additionalLibraries:
     - gamedev_helpers/gamedev_helpers.dart
+    - gamedev_helpers/gamedev_helpers_shared.dart
 """;
 
   String _readme() => """
