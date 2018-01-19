@@ -43,11 +43,17 @@ Future<Null> main() async {
 Future<Null> execute(String exec, List<String> args) async {
   final Process process = await Process.start(exec, args);
 
-  process.stdout.transform(_lineDecoder).listen((line) {
+  process.stdout
+      .transform(SYSTEM_ENCODING.decoder)
+      .transform(const LineSplitter())
+      .listen((line) {
     stdout.writeln(line);
   });
 
-  process.stderr.transform(_lineDecoder).listen((line) {
+  process.stderr
+      .transform(SYSTEM_ENCODING.decoder)
+      .transform(const LineSplitter())
+      .listen((line) {
     stderr.writeln(line);
   });
 
@@ -60,6 +66,3 @@ Future<Null> execute(String exec, List<String> args) async {
 
 int _secondsSinceEpoch = new DateTime.now().toUtc().millisecondsSinceEpoch;
 
-final Converter<List<int>, List<String>> _lineDecoder = SYSTEM_ENCODING.decoder
-    .fuse<List<String>>(
-        const LineSplitter() as Converter<String, List<String>>);
