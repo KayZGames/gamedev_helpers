@@ -261,8 +261,8 @@ import 'src/shared/systems/logic.dart';
 library client;
 
 import 'package:$_name/shared.dart';
+import 'package:$_name/src/shared/components.dart';
 import 'package:gamedev_helpers/gamedev_helpers.dart';
-import 'package:templatetest/src/shared/components.dart';
 
 import 'src/client/systems/events.dart';
 import 'src/client/systems/rendering.dart';
@@ -304,8 +304,8 @@ library client;
 
 import 'dart:html';
 import 'package:$_name/shared.dart';
+import 'package:$_name/src/shared/components.dart';
 import 'package:gamedev_helpers/gamedev_helpers.dart';
-import 'package:templatetest/src/shared/components.dart';
 
 import 'src/client/systems/events.dart';
 import 'src/client/systems/rendering.dart';
@@ -353,7 +353,7 @@ class Game extends GameBase {
 
   String _events() => """
 import 'package:gamedev_helpers/gamedev_helpers.dart';
-import 'package:templatetest/src/shared/components.dart';
+import 'package:$_name/src/shared/components.dart';
 
 class ControllerSystem extends GenericInputHandlingSystem {
   Mapper<Controller> cm;
