@@ -215,13 +215,19 @@ void main() {
 body {
   margin: 0;
   padding: 0;
+  width: 100vw;
+  height: 100vh;
+  min-width: 800px;
+  min-height: 450px;
+  background-color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 canvas {
   display: block;
-  min-width: 800px;
   width: 100vw;
-  min-height: 600px;
   height: 100vh;
 }
 """;
@@ -293,7 +299,12 @@ class Game extends GameBase {
   @override
   void handleResize(int width, int height) {
     width = max(800, width);
-    height = max(600, height);
+    height = max(450, height);
+    if (width / height > 16 / 9) {
+      width = (16 * height) ~/ 9;
+    } else if (width / height < 16 / 9) {
+      height = (9 * width) ~/ 16;
+    }
     super.handleResize(width, height);
   }
 }

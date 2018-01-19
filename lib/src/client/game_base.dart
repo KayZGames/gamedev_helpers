@@ -13,8 +13,6 @@ abstract class GameBase {
   final String spriteSheetName;
   final String bodyDefsName;
   final String musicName;
-  final int _width;
-  final int _height;
   final bool webgl;
   World world;
   Map<String, List<Polygon>> bodyDefs;
@@ -46,12 +44,7 @@ abstract class GameBase {
         gl = webgl
             ? (querySelector(canvasSelector) as CanvasElement)
                 .getContext('webgl2')
-            : null,
-        _width = querySelector(canvasSelector).clientWidth,
-        _height = querySelector(canvasSelector).clientHeight {
-    canvas
-      ..width = canvas.clientWidth
-      ..height = canvas.clientHeight;
+            : null {
     if (ctx != null) {
       ctx
         ..textBaseline = 'top'
@@ -100,8 +93,6 @@ abstract class GameBase {
         bodyDefsName = null,
         spriteSheetName = null,
         musicName = null,
-        _width = null,
-        _height = null,
         webgl = false {
     world = createWorld();
   }
@@ -212,9 +203,7 @@ abstract class GameBase {
   }
 
   void _firstUpdate(double time) {
-    if (null != canvas) {
-      handleResize(canvas.clientWidth, canvas.clientHeight);
-    }
+    _resize();
     _lastTime = time / 1000.0;
     world
       ..delta = 1 / 60
@@ -223,9 +212,7 @@ abstract class GameBase {
   }
 
   void update({double time}) {
-    if (null != canvas) {
-      handleResize(canvas.clientWidth, canvas.clientHeight);
-    }
+    _resize();
     var delta = time - _lastTime;
     delta = min(0.05, delta);
     world.delta = delta;
@@ -238,16 +225,13 @@ abstract class GameBase {
 
   void _handleFullscreen(Event e) {
     fullscreen = !fullscreen;
-    if (fullscreen) {
-      canvas
-        ..width = window.screen.width
-        ..height = window.screen.height;
-    } else {
-      canvas
-        ..width = _width
-        ..height = _height;
+    _resize();
+  }
+
+  void _resize() {
+    if (null != canvas) {
+      handleResize(document.body.clientWidth, document.body.clientHeight);
     }
-    handleResize(canvas.clientWidth, canvas.clientWidth);
   }
 
   void handleResize(int width, int height) {
@@ -299,5 +283,8 @@ abstract class GameBase {
     canvas
       ..width = width
       ..height = height;
+    canvas.style
+      ..width = '${width}px'
+      ..height = '${height}px';
   }
 }
