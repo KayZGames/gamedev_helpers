@@ -248,6 +248,8 @@ abstract class GameBase {
       canvas.context2D
         ..textBaseline = "top"
         ..font = '12px Verdana';
+    } else {
+      gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
     }
   }
 

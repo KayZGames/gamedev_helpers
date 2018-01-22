@@ -234,23 +234,31 @@ canvas {
 
   String _cssWebGl() => """
 body {
-  text-align: center;
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  min-width: 800px;
+  min-height: 450px;
+  background-color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 #gamecontainer {
   position: relative;
-  display: inline-block;
-  width: 800px;
-  height: 600px;
-  margin: auto;
+  display: block;
+  width: 100vw;
+  height: 100vh;
 }
 
 canvas {
   position: absolute;
-  left: 0px;
-  top: 0px;
-  width: 800px;
-  height: 600px;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
 }
 """;
 
@@ -324,13 +332,13 @@ import 'src/client/systems/rendering.dart';
 class Game extends GameBase {
   CanvasElement hudCanvas;
   CanvasRenderingContext2D hudCtx;
+  DivElement container;
 
   Game() : super.noAssets('$_name', '#game', webgl: true) {
+    container = querySelector('#gamecontainer');
     hudCanvas = querySelector('#hud');
     hudCtx = hudCanvas.context2D;
-    hudCtx
-      ..textBaseline = 'top'
-      ..font = '16px Verdana';
+    _configureHud();
   }
 
   @override
@@ -356,8 +364,24 @@ class Game extends GameBase {
   @override
   void handleResize(int width, int height) {
     width = max(800, width);
-    height = max(600, height);
+    height = max(450, height);
+    if (width / height > 16 / 9) {
+      width = (16 * height) ~/ 9;
+    } else if (width / height < 16 / 9) {
+      height = (9 * width) ~/ 16;
+    }
+    container.style
+      ..width = '\${width}px'
+      ..height = '\${height}px';
+    resizeCanvas(hudCanvas, width, height);
+    _configureHud();
     super.handleResize(width, height);
+  }
+
+  void _configureHud() {
+    hudCtx
+      ..textBaseline = 'top'
+      ..font = '16px Verdana';
   }
 }
 """;
