@@ -26,10 +26,11 @@ class DartemisApp {
       "web/styles.css": useWebGl ? _cssWebGl() : _css(),
       "lib/shared.dart": _shared(),
       "lib/src/shared/components.dart": _components(),
-      "lib/src/shared/systems/logic.dart": _emptyString(),
+      "lib/src/shared/systems/logic.dart": _logic(),
       "lib/client.dart": useWebGl ? _clientWebGl() : _client(),
       "lib/src/client/systems/events.dart": _events(),
-      "lib/src/client/systems/rendering.dart": _emptyString(),
+      "lib/src/client/systems/rendering.dart":
+          useWebGl ? _emptyString() : _rendering(),
       "lib/assets/img": null,
       "lib/assets/sfx": null,
       "lib/assets/shader": null,
@@ -161,7 +162,7 @@ transformers:
   String _readme() => """
 $_name
 ===========
-[Play on kayzgames.github.io](http://kayzgames.github.io/$_name)
+[Play on kayzgames.github.io](http://kayzgames.github.io/$_name/)
 """;
 
   String _main() => """
@@ -265,17 +266,16 @@ canvas {
   String _shared() => """
 library shared;
 
-import 'package:gamedev_helpers/gamedev_helpers_shared.dart';
+export 'package:gamedev_helpers/gamedev_helpers_shared.dart';
 
-import 'src/shared/components.dart';
-import 'src/shared/systems/logic.dart';
+export 'src/shared/components.dart';
+export 'src/shared/systems/logic.dart';
 """;
 
   String _client() => """
 library client;
 
 import 'package:$_name/shared.dart';
-import 'package:$_name/src/shared/components.dart';
 import 'package:gamedev_helpers/gamedev_helpers.dart';
 
 import 'src/client/systems/events.dart';
@@ -287,7 +287,13 @@ class Game extends GameBase {
 
   @override
   void createEntities() {
-    addEntity([new Controller()]);
+    addEntity([
+      new Controller(),
+      new Position(0.5, 0.0),
+      new Acceleration(0.0, 0.0),
+      new Velocity(0.0, 0.0),
+      new Mass(),
+    ]);
   }
 
   @override
@@ -295,8 +301,14 @@ class Game extends GameBase {
     return {
       GameBase.rendering: [
         new ControllerSystem(),
+        new ResetAccelerationSystem(),
+        new ControllerToActionSystem(),
+        new SimpleGravitySystem(),
+        new SimpleAccelerationSystem(),
+        new SimpleMovementSystem(),
         new CanvasCleaningSystem(canvas),
-        new FpsRenderingSystem(ctx, fillStyle: 'black'),
+        new PositionRenderingSystem(ctx),
+        new FpsRenderingSystem(ctx, fillStyle: 'white'),
       ],
       GameBase.physics: [
         // add at least one
@@ -323,7 +335,6 @@ library client;
 
 import 'dart:html';
 import 'package:$_name/shared.dart';
-import 'package:$_name/src/shared/components.dart';
 import 'package:gamedev_helpers/gamedev_helpers.dart';
 
 import 'src/client/systems/events.dart';
@@ -397,17 +408,96 @@ class ControllerSystem extends GenericInputHandlingSystem {
 
   @override
   void processEntity(Entity entity) {
-    final c = cm[entity];
+    final c = cm[entity]..reset();
     if (up) {
-      c.up = true;
+      if (left) {
+        c.upleft = true;
+      } else if (right) {
+        c.upright = true;
+      } else {
+        c.up = true;
+      }
     } else if (down) {
-      c.down = true;
-    }
-
-    if (left) {
+      if (left) {
+        c.downleft = true;
+      } else if (right) {
+        c.downright = true;
+      } else {
+        c.down = true;
+      }
+    } else if (left) {
       c.left = true;
     } else if (right) {
       c.right = true;
+    }
+  }
+}
+""";
+
+  String _rendering() => """
+import 'dart:html';
+
+import 'package:gamedev_helpers/gamedev_helpers.dart';
+import 'package:$_name/src/shared/components.dart';
+
+class PositionRenderingSystem extends EntityProcessingSystem {
+  Mapper<Position> positionMapper;
+  CameraManager cameraManager;
+
+  CanvasRenderingContext2D ctx;
+  PositionRenderingSystem(this.ctx) : super(new Aspect.forAllOf([Position]));
+
+  @override
+  void processEntity(Entity entity) {
+    final position = positionMapper[entity];
+
+    ctx
+      ..fillStyle = 'white'
+      ..fillRect(
+          position.x * cameraManager.width,
+          position.y * cameraManager.height,
+          0.01 * cameraManager.width,
+          0.01 * cameraManager.height);
+  }
+}
+""";
+  String _logic() => """
+import 'package:dartemis/dartemis.dart';
+import 'package:gamedev_helpers/gamedev_helpers_shared.dart';
+import 'package:$_name/src/shared/components.dart';
+
+class ControllerToActionSystem extends EntityProcessingSystem {
+  final _acc = 50.0;
+  final _sqrttwo = 1.4142;
+  Mapper<Controller> controllerMapper;
+  Mapper<Acceleration> accelerationMapper;
+  ControllerToActionSystem()
+      : super(new Aspect.forAllOf([Controller, Acceleration]));
+
+  @override
+  void processEntity(Entity entity) {
+    final controller = controllerMapper[entity];
+    final acceleration = accelerationMapper[entity];
+    if (controller.up) {
+      acceleration.y -= _acc * world.delta;
+    } else if (controller.down) {
+      acceleration.y += _acc * world.delta;
+    } else if (controller.left) {
+      acceleration.x -= _acc * world.delta;
+    } else if (controller.right) {
+      acceleration.x += _acc * world.delta;
+    } else if (controller.upleft) {
+      acceleration.y -= _acc * world.delta / _sqrttwo;
+      acceleration.x -= _acc * world.delta / _sqrttwo;
+    } else if (controller.upright) {
+      acceleration.y -= _acc * world.delta / _sqrttwo;
+      acceleration.x += _acc * world.delta / _sqrttwo;
+    } else if (controller.downleft) {
+      acceleration.y += _acc * world.delta / _sqrttwo;
+      acceleration.x -= _acc * world.delta / _sqrttwo;
+    } else if (controller.downright) {
+      acceleration.y += _acc * world.delta / _sqrttwo;
+      acceleration.x += _acc * world.delta / _sqrttwo;
     }
   }
 }
@@ -418,9 +508,28 @@ import 'package:dartemis/dartemis.dart';
 
 class Controller extends Component {
   bool up, down, left, right;
-  
+  bool upleft, upright, downleft, downright;
+
   Controller(
-      {this.up: false, this.down: false, this.left: false, this.right: false});
+      {this.up: false,
+      this.down: false,
+      this.left: false,
+      this.right: false,
+      this.upleft: false,
+      this.upright: false,
+      this.downleft: false,
+      this.downright: false});
+
+  void reset() {
+    up = false;
+    down = false;
+    left = false;
+    right = false;
+    upleft = false;
+    upright = false;
+    downleft = false;
+    downright = false;
+  }
 }
 """;
 

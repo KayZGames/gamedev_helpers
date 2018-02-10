@@ -5,11 +5,25 @@ class Sound extends Component {
   Sound(this.clipName);
 }
 
+class Acceleration extends Component {
+  double x, y;
+
+  Acceleration(this.x, this.y);
+}
+
+class Velocity extends Component {
+  double x, y;
+
+  Velocity(this.x, this.y);
+}
+
 class Position extends Component {
   double x, y;
 
   Position(this.x, this.y);
 }
+
+class Mass extends Component {}
 
 class Orientation extends Component {
   double angle;
