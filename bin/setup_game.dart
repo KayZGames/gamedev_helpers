@@ -141,7 +141,7 @@ doc/api/
 targets:
   $default:
     builders:
-      dartemis_builder|systemBuilder
+      dartemis_builder|systemBuilder:
       build_web_compilers|entrypoint:
         generate_for:
           - web/main.dart
