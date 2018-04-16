@@ -1,9 +1,7 @@
 part of gamedev_helpers_shared;
 
-class ResetAccelerationSystem extends EntityProcessingSystem {
-  Mapper<Acceleration> accelerationMapper;
-  ResetAccelerationSystem() : super(new Aspect.forAllOf([Acceleration]));
-
+@Generate(EntityProcessingSystem, allOf: const [Acceleration])
+class ResetAccelerationSystem extends _$ResetAccelerationSystem {
   @override
   void processEntity(Entity entity) {
     accelerationMapper[entity]
@@ -12,12 +10,8 @@ class ResetAccelerationSystem extends EntityProcessingSystem {
   }
 }
 
-class SimpleAccelerationSystem extends EntityProcessingSystem {
-  Mapper<Acceleration> accelerationMapper;
-  Mapper<Velocity> velocityMapper;
-  SimpleAccelerationSystem()
-      : super(new Aspect.forAllOf([Acceleration, Velocity]));
-
+@Generate(EntityProcessingSystem, allOf: [Acceleration, Velocity])
+class SimpleAccelerationSystem extends _$SimpleAccelerationSystem {
   @override
   void processEntity(Entity entity) {
     final acceleration = accelerationMapper[entity];

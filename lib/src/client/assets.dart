@@ -153,11 +153,11 @@ Point<int> _createPoint(Map<String, int> rect) =>
     new Point(rect['w'], rect['h']);
 
 Future<Map<String, String>> _processAchievementAssets(String assetJson) =>
-    new Future.value(JSON.decode(assetJson));
+    new Future.value(json.decode(assetJson));
 
 Future<Map<String, List<Map<String, List<double>>>>> _processPolygonAssets(
         String assetJson) =>
-    new Future.value(JSON.decode(assetJson));
+    new Future.value(json.decode(assetJson));
 
 Future<Map<String, dynamic>> _processAssets(String assetJson) =>
-    new Future.value(JSON.decode(assetJson));
+    new Future.value(json.decode(assetJson));

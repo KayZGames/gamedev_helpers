@@ -1,12 +1,11 @@
 part of gamedev_helpers_shared;
 
-class AnimationSystem extends EntityProcessingSystem {
-  Mapper<Renderable> rm;
-
-  AnimationSystem() : super(new Aspect.forAllOf([Renderable]));
+@Generate(EntityProcessingSystem, allOf: const [Renderable])
+class AnimationSystem extends _$AnimationSystem {
+  Mapper<Renderable> renderableMapper;
 
   @override
   void processEntity(Entity entity) {
-    rm[entity].time += world.delta;
+    renderableMapper[entity].time += world.delta;
   }
 }

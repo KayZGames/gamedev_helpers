@@ -22,6 +22,8 @@ part 'src/client/dartemis/systems/input.dart';
 part 'src/client/dartemis/systems/rendering_context2d.dart';
 part 'src/client/dartemis/systems/rendering_webgl.dart';
 
+part 'gamedev_helpers.g.dart';
+
 class GameHelper {
   final String _libName;
   AudioContext _audioContext;
@@ -44,7 +46,7 @@ class GameHelper {
       _loadMusic(_audioContext, _libName, name);
 
   /// Loads shader/[vShaderFile].vert and shader/[fShaderFile].frag.
-  Future<ShaderSource> loadShader(String libName,
-          String vShaderFile, String fShaderFile) =>
+  Future<ShaderSource> loadShader(
+          String libName, String vShaderFile, String fShaderFile) =>
       _loadShader(libName ?? _libName, vShaderFile, fShaderFile);
 }

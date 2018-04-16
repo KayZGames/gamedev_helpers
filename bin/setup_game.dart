@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -18,6 +19,7 @@ class DartemisApp {
     _name = path.basename(_dir);
     _project = {
       "pubspec.yaml": _pubspec(),
+      "build.yaml": _buildyaml(),
       "analysis_options.yaml": _analysisOptions(),
       ".gitignore": _gitignore(),
       "README.md": _readme(),
@@ -52,6 +54,8 @@ class DartemisApp {
         f.writeAsStringSync(content);
       }
     });
+    await execute('pub.bat', ['get']);
+    await execute('pub.bat', ['run', 'build_runner', 'build']);
     final gitDir = await GitDir.fromExisting(path.current);
     var result = await gitDir.runCommand(['add', '.']);
     assert(result.exitCode == 0);
@@ -111,6 +115,7 @@ linter:
 .packages
 .project
 .pub/
+.dart_tool/
 build/
 **/packages/
 
@@ -132,31 +137,40 @@ doc/api/
 .idea/
 """;
 
+  String _buildyaml() => r"""
+targets:
+  $default:
+    builders:
+      dartemis_builder|systemBuilder
+      build_web_compilers|entrypoint:
+        generate_for:
+          - web/main.dart
+        options:
+          compiler: dartdevc
+          dart2js_args:
+            - --fast-startup
+            - --trust-type-annotations
+            - --trust-primitives
+""";
+
   String _pubspec() => """
 name: $_name
 description: A $_name game
 publish_to: none
 dependencies:
-  browser: ^0.10.0+2
   dartemis:
     git:
       url: git://github.com/denniskaselow/dartemis.git
-      ref: feature/ddc
-  dartemis_transformer:
-    git:
-      url: git://github.com/denniskaselow/dartemis_transformer.git
       ref: feature/ddc
   gamedev_helpers:
     git:
       url: git://github.com/kayzgames/gamedev_helpers.git
       ref: feature/ddc
-  dart_to_js_script_rewriter: ^1.0.3
-transformers:
-- dart_to_js_script_rewriter
-- dartemis_transformer:
-    additionalLibraries:
-    - gamedev_helpers/gamedev_helpers.dart
-    - gamedev_helpers/gamedev_helpers_shared.dart
+dev_dependencies:
+  build_runner: ^0.8.0
+  build_web_compilers: any  
+  dartemis_builder:
+    git: git://github.com/denniskaselow/dartemis_builder.git
 """;
 
   String _readme() => """
@@ -182,8 +196,7 @@ void main() {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>$_name</title>
     <link rel="stylesheet" href="styles.css">
-    <script defer src="main.dart" type="application/dart"></script>
-    <script defer src="packages/browser/dart.js"></script>
+    <script defer src="main.dart.js" type="application/javascript"></script>
   </head>
   <body>
     <canvas id="game"></canvas>
@@ -200,8 +213,7 @@ void main() {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>$_name</title>
     <link rel="stylesheet" href="styles.css">
-    <script defer src="main.dart" type="application/dart"></script>
-    <script defer src="packages/browser/dart.js"></script>
+    <script defer src="main.dart.js" type="application/javascript"></script>
   </head>
   <body>
     <div id="gamecontainer">
@@ -401,14 +413,14 @@ class Game extends GameBase {
 import 'package:gamedev_helpers/gamedev_helpers.dart';
 import 'package:$_name/src/shared/components.dart';
 
-class ControllerSystem extends GenericInputHandlingSystem {
-  Mapper<Controller> cm;
+part 'events.g.dart';
 
-  ControllerSystem() : super(new Aspect.forAllOf([Controller]));
+@Generate(GenericInputHandlingSystem, allOf: const [Controller])
+class ControllerSystem extends _\$ControllerSystem {
 
   @override
   void processEntity(Entity entity) {
-    final c = cm[entity]..reset();
+    final c = controllerMapper[entity]..reset();
     if (up) {
       if (left) {
         c.upleft = true;
@@ -438,14 +450,15 @@ class ControllerSystem extends GenericInputHandlingSystem {
 import 'dart:html';
 
 import 'package:gamedev_helpers/gamedev_helpers.dart';
-import 'package:$_name/src/shared/components.dart';
 
-class PositionRenderingSystem extends EntityProcessingSystem {
-  Mapper<Position> positionMapper;
-  CameraManager cameraManager;
+part 'rendering.g.dart';
+
+@Generate(EntityProcessingSystem,
+    allOf: const [Position], manager: const [CameraManager])
+class PositionRenderingSystem extends _\$PositionRenderingSystem {
 
   CanvasRenderingContext2D ctx;
-  PositionRenderingSystem(this.ctx) : super(new Aspect.forAllOf([Position]));
+  PositionRenderingSystem(this.ctx);
 
   @override
   void processEntity(Entity entity) {
@@ -460,19 +473,19 @@ class PositionRenderingSystem extends EntityProcessingSystem {
           0.01 * cameraManager.height);
   }
 }
+
 """;
   String _logic() => """
 import 'package:dartemis/dartemis.dart';
 import 'package:gamedev_helpers/gamedev_helpers_shared.dart';
 import 'package:$_name/src/shared/components.dart';
 
-class ControllerToActionSystem extends EntityProcessingSystem {
+part 'logic.g.dart';
+
+@Generate(EntityProcessingSystem, allOf: const [Controller, Acceleration])
+class ControllerToActionSystem extends _\$ControllerToActionSystem {
   final _acc = 50.0;
   final _sqrttwo = 1.4142;
-  Mapper<Controller> controllerMapper;
-  Mapper<Acceleration> accelerationMapper;
-  ControllerToActionSystem()
-      : super(new Aspect.forAllOf([Controller, Acceleration]));
 
   @override
   void processEntity(Entity entity) {
@@ -562,4 +575,29 @@ class Controller extends Component {
     </struct>
 </data>
 """;
+}
+
+
+Future<Null> execute(String exec, List<String> args) async {
+  final Process process = await Process.start(exec, args);
+
+  process.stdout
+      .transform(SYSTEM_ENCODING.decoder)
+      .transform(const LineSplitter())
+      .listen((line) {
+    stdout.writeln(line);
+  });
+
+  process.stderr
+      .transform(SYSTEM_ENCODING.decoder)
+      .transform(const LineSplitter())
+      .listen((line) {
+    stderr.writeln(line);
+  });
+
+  final exitCode = await process.exitCode;
+
+  if (exitCode != 0) {
+    throw 'Error running $exec ${args.join(' ')}';
+  }
 }

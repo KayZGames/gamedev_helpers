@@ -24,6 +24,8 @@ part 'src/shared/dartemis/managers/camera_manager.dart';
 part 'src/shared/dartemis/components.dart';
 part 'src/shared/event_bus.dart';
 
+part 'gamedev_helpers_shared.g.dart';
+
 final EventBus eventBus = new EventBus();
 
 final Random random = new Random();

@@ -1,10 +1,7 @@
 part of gamedev_helpers_shared;
 
-class SimpleMovementSystem extends EntityProcessingSystem {
-  Mapper<Velocity> velocityMapper;
-  Mapper<Position> positionMapper;
-  SimpleMovementSystem() : super(new Aspect.forAllOf([Velocity, Position]));
-
+@Generate(EntityProcessingSystem, allOf: [Velocity, Position])
+class SimpleMovementSystem extends _$SimpleMovementSystem {
   @override
   void processEntity(Entity entity) {
     final velocity = velocityMapper[entity];

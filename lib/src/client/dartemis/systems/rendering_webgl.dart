@@ -12,13 +12,13 @@ class WebGlCanvasCleaningSystem extends VoidEntitySystem {
 
   @override
   void processSystem() {
-    gl.clear(
-        RenderingContext2.COLOR_BUFFER_BIT | RenderingContext2.DEPTH_BUFFER_BIT);
+    gl.clear(RenderingContext2.COLOR_BUFFER_BIT |
+        RenderingContext2.DEPTH_BUFFER_BIT);
   }
 }
 
 abstract class WebGlRenderingMixin {
-  static const int fsize = Float32List.BYTES_PER_ELEMENT;
+  static const int fsize = Float32List.bytesPerElement;
 
   RenderingContext2 gl;
   Program program;
@@ -91,8 +91,8 @@ abstract class WebGlRenderingMixin {
     }
     gl
       ..bindBuffer(RenderingContext.ARRAY_BUFFER, elementBuffer)
-      ..bufferData(
-          RenderingContext2.ARRAY_BUFFER, items, RenderingContext2.DYNAMIC_DRAW);
+      ..bufferData(RenderingContext2.ARRAY_BUFFER, items,
+          RenderingContext2.DYNAMIC_DRAW);
     int offset = 0;
     int elementsPerItem = 0;
     for (Attrib attribute in attributes) {
@@ -186,22 +186,19 @@ abstract class VoidWebGlRenderingSystem extends VoidEntitySystem
   void render();
 }
 
-class ParticleRenderingSystem extends WebGlRenderingSystem {
-  Mapper<Position> pm;
-  Mapper<Color> cm;
-  WebGlViewProjectionMatrixManager vpmm;
-  TagManager tm;
-
+@Generate(WebGlRenderingSystem,
+    allOf: const [Position, Particle, Color],
+    manager: const [WebGlViewProjectionMatrixManager, TagManager])
+class ParticleRenderingSystem extends _$ParticleRenderingSystem {
   Float32List positions;
   Float32List colors;
 
-  ParticleRenderingSystem(RenderingContext2 gl)
-      : super(gl, new Aspect.forAllOf([Position, Particle, Color]));
+  ParticleRenderingSystem(RenderingContext2 gl) : super(gl);
 
   @override
   void processEntity(int index, Entity entity) {
-    final p = pm[entity];
-    final c = cm[entity];
+    final p = positionMapper[entity];
+    final c = colorMapper[entity];
 
     final pOffset = index * 2;
     final cOffset = index * 4;
@@ -217,8 +214,12 @@ class ParticleRenderingSystem extends WebGlRenderingSystem {
 
   @override
   void render(int length) {
-    gl.uniformMatrix4fv(gl.getUniformLocation(program, 'uViewProjection'),
-        false, vpmm.create2dViewProjectionMatrix().storage);
+    gl.uniformMatrix4fv(
+        gl.getUniformLocation(program, 'uViewProjection'),
+        false,
+        webGlViewProjectionMatrixManager
+            .create2dViewProjectionMatrix()
+            .storage);
 
     buffer('aPosition', positions, 2);
     buffer('aColor', colors, 4);
@@ -242,13 +243,11 @@ class ParticleRenderingSystem extends WebGlRenderingSystem {
   String get libName => 'gamedev_helpers';
 }
 
-abstract class WebGlSpriteRenderingSystem extends WebGlRenderingSystem {
-  Mapper<Position> pm;
-  Mapper<Orientation> om;
-  Mapper<Renderable> rm;
-  TagManager tm;
-  WebGlViewProjectionMatrixManager vpmm;
-
+@Generate(WebGlRenderingSystem,
+    allOf: [Orientation, Renderable],
+    mapper: const [Position],
+    manager: const [TagManager, WebGlViewProjectionMatrixManager])
+abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
   SpriteSheet sheet;
 
   List<Attrib> attributes = [
@@ -259,7 +258,7 @@ abstract class WebGlSpriteRenderingSystem extends WebGlRenderingSystem {
   Uint16List indices;
 
   WebGlSpriteRenderingSystem(RenderingContext2 gl, this.sheet, Aspect aspect)
-      : super(gl, aspect..allOf([Orientation, Renderable]));
+      : super(gl, aspect);
 
   @override
   void initialize() {
@@ -284,8 +283,8 @@ abstract class WebGlSpriteRenderingSystem extends WebGlRenderingSystem {
   @override
   void processEntity(int index, Entity entity) {
     final p = getPosition(entity);
-    final o = om[entity];
-    final r = rm[entity];
+    final o = orientationMapper[entity];
+    final r = renderableMapper[entity];
     final sprite = sheet.sprites[r.name];
     final dst = sprite.dst;
     final src = sprite.src;
@@ -311,26 +310,34 @@ abstract class WebGlSpriteRenderingSystem extends WebGlRenderingSystem {
     final top = src.top.toDouble();
 
     final bottomLeftAngle = atan2(dstBottom, dstLeft);
-    values[index * 16] = p.x + dstLeft * cos(o.angle + bottomLeftAngle)/cos(bottomLeftAngle);
-    values[index * 16 + 1] = p.y + dstBottom * sin(o.angle + bottomLeftAngle)/sin(bottomLeftAngle);
+    values[index * 16] =
+        p.x + dstLeft * cos(o.angle + bottomLeftAngle) / cos(bottomLeftAngle);
+    values[index * 16 + 1] =
+        p.y + dstBottom * sin(o.angle + bottomLeftAngle) / sin(bottomLeftAngle);
     values[index * 16 + 2] = left;
     values[index * 16 + 3] = bottom;
 
     final bottomRightAngle = atan2(dstBottom, dstRight);
-    values[index * 16 + 4] = p.x + dstRight * cos(o.angle + bottomRightAngle)/cos(bottomRightAngle);
-    values[index * 16 + 5] = p.y + dstBottom * sin(o.angle + bottomRightAngle)/sin(bottomRightAngle);
+    values[index * 16 + 4] = p.x +
+        dstRight * cos(o.angle + bottomRightAngle) / cos(bottomRightAngle);
+    values[index * 16 + 5] = p.y +
+        dstBottom * sin(o.angle + bottomRightAngle) / sin(bottomRightAngle);
     values[index * 16 + 6] = right;
     values[index * 16 + 7] = bottom;
 
     final topLeftAngle = atan2(dstTop, dstLeft);
-    values[index * 16 + 8] = p.x + dstLeft * cos(o.angle + topLeftAngle)/cos(topLeftAngle);
-    values[index * 16 + 9] = p.y + dstTop * sin(o.angle + topLeftAngle)/sin(topLeftAngle);
+    values[index * 16 + 8] =
+        p.x + dstLeft * cos(o.angle + topLeftAngle) / cos(topLeftAngle);
+    values[index * 16 + 9] =
+        p.y + dstTop * sin(o.angle + topLeftAngle) / sin(topLeftAngle);
     values[index * 16 + 10] = left;
     values[index * 16 + 11] = top;
 
     final topRightAngle = atan2(dstTop, dstRight);
-    values[index * 16 + 12] = p.x + dstRight * cos(o.angle + topRightAngle)/cos(topRightAngle);
-    values[index * 16 + 13] = p.y + dstTop * sin(o.angle + topRightAngle)/sin(topRightAngle);
+    values[index * 16 + 12] =
+        p.x + dstRight * cos(o.angle + topRightAngle) / cos(topRightAngle);
+    values[index * 16 + 13] =
+        p.y + dstTop * sin(o.angle + topRightAngle) / sin(topRightAngle);
     values[index * 16 + 14] = right;
     values[index * 16 + 15] = top;
 
@@ -342,7 +349,7 @@ abstract class WebGlSpriteRenderingSystem extends WebGlRenderingSystem {
     indices[index * 6 + 5] = index * 4 + 1;
   }
 
-  Position getPosition(Entity entity) => pm[entity];
+  Position getPosition(Entity entity) => positionMapper[entity];
 
   @override
   void render(int length) {
@@ -354,7 +361,8 @@ abstract class WebGlSpriteRenderingSystem extends WebGlRenderingSystem {
       ..drawElements(TRIANGLES, length * 6, UNSIGNED_SHORT, 0);
   }
 
-  Matrix4 create2dViewProjectionMatrix() => vpmm.create2dViewProjectionMatrix();
+  Matrix4 create2dViewProjectionMatrix() =>
+      webGlViewProjectionMatrixManager.create2dViewProjectionMatrix();
 
   @override
   void updateLength(int length) {

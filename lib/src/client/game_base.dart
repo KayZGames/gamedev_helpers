@@ -202,7 +202,7 @@ abstract class GameBase {
     }
   }
 
-  void _firstUpdate(double time) {
+  void _firstUpdate(num time) {
     _resize();
     _lastTime = time / 1000.0;
     world
@@ -211,7 +211,7 @@ abstract class GameBase {
     window.animationFrame.then((time) => update(time: time / 1000.0));
   }
 
-  void update({double time}) {
+  void update({num time}) {
     _resize();
     var delta = time - _lastTime;
     delta = min(0.05, delta);
