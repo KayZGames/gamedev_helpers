@@ -17,9 +17,13 @@ class FpsRenderingSystem extends VoidEntitySystem {
         _deltaCount / deltas.reduce((combined, current) => combined + current);
 
     ctx
+      ..save()
+      ..font = '20px Verdana'
+      ..textBaseline = 'top'
       ..fillStyle = fillStyle
       ..fillText('FPS: ${fps.toStringAsFixed(2)}', 5, 5)
-      ..fillText('Entities: ${world.entityManager.activeEntityCount}', 5, 25);
+      ..fillText('Entities: ${world.entityManager.activeEntityCount}', 5, 25)
+      ..restore();
   }
 }
 
