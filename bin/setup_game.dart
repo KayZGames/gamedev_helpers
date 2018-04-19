@@ -163,7 +163,7 @@ targets:
         generate_for:
           - web/main.dart
         options:
-          compiler: dartedevc
+          compiler: dartdevc
 """;
 
   String _pubspec() => """
