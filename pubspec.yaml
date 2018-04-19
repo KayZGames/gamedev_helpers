@@ -10,7 +10,7 @@ dependencies:
       ref: feature/ddc
   event_bus: 0.4.1
   tweenengine:
-    path: ../tween-engine-dart
+    git: git://github.com/KayZGames/tween-engine-dart.git
   git: ^0.5.1
   path: ^1.5.1
 executables:
