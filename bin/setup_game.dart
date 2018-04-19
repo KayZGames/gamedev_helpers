@@ -19,7 +19,8 @@ class DartemisApp {
     _name = path.basename(_dir);
     _project = {
       "pubspec.yaml": _pubspec(),
-      "build.yaml": _buildyaml(),
+      "build.yaml": _buildYaml(),
+      "build.dev.yaml": _buildDevYaml(),
       "analysis_options.yaml": _analysisOptions(),
       ".gitignore": _gitignore(),
       "README.md": _readme(),
@@ -137,20 +138,32 @@ doc/api/
 .idea/
 """;
 
-  String _buildyaml() => r"""
+  String _buildYaml() => r"""
 targets:
   $default:
     builders:
-      dartemis_builder|systemBuilder:
       build_web_compilers|entrypoint:
         generate_for:
           - web/main.dart
         options:
-          compiler: dartdevc
+          compiler: dart2js
           dart2js_args:
             - --fast-startup
             - --trust-type-annotations
             - --trust-primitives
+            - --minify
+            - --no-source-maps
+""";
+
+  String _buildDevYaml() => r"""
+targets:
+  $default:
+    builders:
+      build_web_compilers|entrypoint:
+        generate_for:
+          - web/main.dart
+        options:
+          compiler: dartedevc
 """;
 
   String _pubspec() => """
