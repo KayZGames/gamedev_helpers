@@ -84,7 +84,7 @@ abstract class WebGlRenderingMixin {
   }
 
   void bufferElements(
-      List<Attrib> attributes, Float32List items, List<int> indices) {
+      List<Attrib> attributes, Float32List items, Uint16List indices) {
     if (null == elementBuffer) {
       elementBuffer = gl.createBuffer();
       indexBuffer = gl.createBuffer();
@@ -115,6 +115,20 @@ abstract class WebGlRenderingMixin {
       ..bindBuffer(RenderingContext.ELEMENT_ARRAY_BUFFER, indexBuffer)
       ..bufferData(RenderingContext.ELEMENT_ARRAY_BUFFER, indices,
           RenderingContext2.DYNAMIC_DRAW);
+  }
+
+  void drawTriangles(
+      List<Attrib> attributes, Float32List items, Uint16List indices) {
+    bufferElements(attributes, items, indices);
+    gl.drawElements(RenderingContext2.TRIANGLES, indices.length,
+        RenderingContext2.UNSIGNED_SHORT, 0);
+  }
+
+  void drawPoints(
+      List<Attrib> attributes, Float32List items, Uint16List indices) {
+    bufferElements(attributes, items, indices);
+    gl.drawElements(RenderingContext2.POINTS, indices.length,
+        RenderingContext2.UNSIGNED_SHORT, 0);
   }
 
   String get vShaderFile;
