@@ -299,7 +299,7 @@ abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
     final p = getPosition(entity);
     final o = orientationMapper[entity];
     final r = renderableMapper[entity];
-    final sprite = sheet.sprites[r.name];
+    final sprite = sheet.sprites[r.spriteName];
     final dst = sprite.dst;
     final src = sprite.src;
     double right;
