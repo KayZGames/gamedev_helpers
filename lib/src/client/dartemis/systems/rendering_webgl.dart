@@ -60,9 +60,9 @@ abstract class WebGlRenderingMixin {
     final compileSuccess =
         gl.getShaderParameter(shader, RenderingContext2.COMPILE_STATUS);
     if (!compileSuccess) {
-      print(
-          '$runtimeType - Error compiling shader: ${gl.getShaderInfoLog(shader)}');
       success = false;
+      throw new ArgumentError(
+          '$runtimeType - Error compiling shader $vShaderFile or $fShaderFile: ${gl.getShaderInfoLog(shader)}');
     }
     return shader;
   }
@@ -75,6 +75,10 @@ abstract class WebGlRenderingMixin {
       buffers[attribute] = buffer;
     }
     final attribLocation = gl.getAttribLocation(program, attribute);
+    if (attribLocation == -1) {
+      throw new ArgumentError(
+          'Attribute $attribute not found in shader $vShaderFile}');
+    }
     gl
       ..bindBuffer(RenderingContext.ARRAY_BUFFER, buffer)
       ..bufferData(RenderingContext.ARRAY_BUFFER, items, usage)
@@ -100,6 +104,10 @@ abstract class WebGlRenderingMixin {
     }
     for (Attrib attribute in attributes) {
       final attribLocation = gl.getAttribLocation(program, attribute.name);
+      if (attribLocation == -1) {
+        throw new ArgumentError(
+            'Attribute ${attribute.name} not found in shader $vShaderFile}');
+      }
       gl
         ..vertexAttribPointer(
             attribLocation,
