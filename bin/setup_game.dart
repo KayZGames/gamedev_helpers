@@ -149,7 +149,7 @@ targets:
           compiler: dart2js
           dart2js_args:
             - --fast-startup
-            - --trust-type-annotations
+            - --omit-implicit-checks
             - --trust-primitives
             - --minify
             - --no-source-maps
