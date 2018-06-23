@@ -595,14 +595,14 @@ Future<Null> execute(String exec, List<String> args) async {
   final Process process = await Process.start(exec, args);
 
   process.stdout
-      .transform(SYSTEM_ENCODING.decoder)
+      .transform(systemEncoding.decoder)
       .transform(const LineSplitter())
       .listen((line) {
     stdout.writeln(line);
   });
 
   process.stderr
-      .transform(SYSTEM_ENCODING.decoder)
+      .transform(systemEncoding.decoder)
       .transform(const LineSplitter())
       .listen((line) {
     stderr.writeln(line);

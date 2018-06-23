@@ -51,15 +51,15 @@ abstract class GameBase {
         ..font = '12px Verdana';
     } else if (gl != null) {
       if (depthTest) {
-        gl.enable(RenderingContext.DEPTH_TEST);
+        gl.enable(WebGL.DEPTH_TEST);
       }
       if (blending) {
         gl
-          ..enable(BLEND)
-          ..blendFunc(SRC_ALPHA, ONE_MINUS_SRC_ALPHA);
+          ..enable(WebGL.BLEND)
+          ..blendFunc(WebGL.SRC_ALPHA, WebGL.ONE_MINUS_SRC_ALPHA);
       }
 //      (ctx as RenderingContext2)
-//                               ..enable(RenderingContext.POLYGON_OFFSET_FILL);
+//                               ..enable(WebGL.POLYGON_OFFSET_FILL);
 //                               ..polygonOffset(1.0, 1.0);
     } else {
       _errorInitializingWebGL = true;
