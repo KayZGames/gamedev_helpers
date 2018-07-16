@@ -17,7 +17,7 @@ class WebGlViewProjectionMatrixManager
     final viewMatrix = Matrix4.identity();
     final projMatrix = Matrix4.identity();
     setViewMatrix(viewMatrix, Vector3(400.0 + 100 * sin(angle), 550.0, -150.0),
-        Vector3(400.0, 200.0, 150.0), Vector3(0.0, -1.0, 0.0));
+        Vector3(400.0, 200.0, 150.0), Vector3(0.0, 1.0, 0.0));
     setPerspectiveMatrix(projMatrix, pi / 2, 4 / 3, 1.0, 1000.0);
 //    final threedViewProjextionMatrix = projMatrix * viewMatrix;
     final twodOrthographicMatrix = Matrix4.identity();

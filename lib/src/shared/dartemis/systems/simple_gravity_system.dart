@@ -4,6 +4,6 @@ part of gamedev_helpers_shared;
 class SimpleGravitySystem extends _$SimpleGravitySystem {
   @override
   void processEntity(Entity entity) {
-    accelerationMapper[entity].y += 9.81 * world.delta;
+    accelerationMapper[entity].y -= 9.81 * world.delta;
   }
 }

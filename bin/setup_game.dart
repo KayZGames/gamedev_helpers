@@ -38,13 +38,19 @@ class DartemisApp {
       "lib/client.dart": useWebGl ? _clientWebGl() : _client(),
       "lib/src/client/systems/events.dart": _events(),
       "lib/src/client/systems/rendering.dart":
-          useWebGl ? _emptyString() : _rendering(),
+          useWebGl ? _renderingWebGl() : _rendering(),
       "lib/assets/img": null,
       "lib/assets/sfx": null,
       "lib/assets/shader": null,
       "assetOrigs/img/assets.tps": _texturePacker(),
       "assetOrigs/sfx": null
     };
+    if (useWebGl) {
+      _project['lib/assets/shader/PositionRenderingSystem.vert'] =
+          _positionRenderingSystemVert();
+      _project['lib/assets/shader/PositionRenderingSystem.frag'] =
+          _positionRenderingSystemFrag();
+    }
   }
 
   Future<Null> create() async {
@@ -381,7 +387,19 @@ class Game extends GameBase {
 
   @override
   void createEntities() {
-    addEntity([new Controller()]);
+    final tagManager = TagManager();
+    world.addManager(tagManager);
+    world.addManager(WebGlViewProjectionMatrixManager());
+    addEntity([
+      Controller(),
+      Position(0.0, 0.0),
+      Acceleration(0.0, 0.0),
+      Velocity(0.0, 0.0),
+      Mass(),
+    ]);
+
+    final player = addEntity([Position(0.0, 0.0)]);
+    tagManager.register(player, playerTag);
   }
 
   @override
@@ -389,7 +407,13 @@ class Game extends GameBase {
     return {
       GameBase.rendering: [
         ControllerSystem(),
+        ResetAccelerationSystem(),
+        ControllerToActionSystem(),
+        SimpleGravitySystem(),
+        SimpleAccelerationSystem(),
+        SimpleMovementSystem(),
         WebGlCanvasCleaningSystem(gl),
+        PositionRenderingSystem(gl),
         CanvasCleaningSystem(hudCanvas),
         FpsRenderingSystem(hudCtx, fillStyle: 'white'),
       ],
@@ -430,9 +454,8 @@ import 'package:$_name/src/shared/components.dart';
 
 part 'events.g.dart';
 
-@Generate(GenericInputHandlingSystem, allOf: const [Controller])
+@Generate(GenericInputHandlingSystem, allOf: [Controller])
 class ControllerSystem extends _\$ControllerSystem {
-
   @override
   void processEntity(Entity entity) {
     final c = controllerMapper[entity]..reset();
@@ -490,6 +513,83 @@ class PositionRenderingSystem extends _\$PositionRenderingSystem {
 }
 
 """;
+  String _renderingWebGl() => """
+import 'dart:typed_data';
+import 'dart:web_gl';
+
+import 'package:gamedev_helpers/gamedev_helpers.dart';
+
+part 'rendering.g.dart';
+
+@Generate(
+  WebGlRenderingSystem,
+  allOf: [
+    Position,
+  ],
+  manager: [
+    CameraManager,
+    WebGlViewProjectionMatrixManager,
+  ],
+)
+class PositionRenderingSystem extends _\$PositionRenderingSystem {
+  List<Attrib> attributes;
+
+  Float32List items;
+  Uint16List indices;
+
+  PositionRenderingSystem(RenderingContext2 gl) : super(gl) {
+    attributes = [Attrib('pos', 2)];
+  }
+
+  @override
+  void processEntity(int index, Entity entity) {
+    final position = positionMapper[entity];
+    final itemOffset = index * 2 * 4;
+    final indexOffset = index * 3 * 2;
+    final vertexOffset = index * 4;
+
+    items[itemOffset] = position.x * cameraManager.width;
+    items[itemOffset + 1] = position.y * cameraManager.height;
+    items[itemOffset + 2] = (position.x + 0.01) * cameraManager.width;
+    items[itemOffset + 3] = position.y * cameraManager.height;
+    items[itemOffset + 4] = position.x * cameraManager.width;
+    items[itemOffset + 5] = (position.y + 0.01) * cameraManager.height;
+    items[itemOffset + 6] = (position.x + 0.01) * cameraManager.width;
+    items[itemOffset + 7] = (position.y + 0.01) * cameraManager.height;
+
+    indices[indexOffset] = vertexOffset;
+    indices[indexOffset + 1] = vertexOffset + 1;
+    indices[indexOffset + 2] = vertexOffset + 2;
+    indices[indexOffset + 3] = vertexOffset + 1;
+    indices[indexOffset + 4] = vertexOffset + 3;
+    indices[indexOffset + 5] = vertexOffset + 2;
+  }
+
+  @override
+  void render(int length) {
+    gl.uniformMatrix4fv(
+        gl.getUniformLocation(program, 'viewProjectionMatrix'),
+        false,
+        webGlViewProjectionMatrixManager
+            .create2dViewProjectionMatrix()
+            .storage);
+
+    drawTriangles(attributes, items, indices);
+  }
+
+  @override
+  void updateLength(int length) {
+    items = Float32List(length * 2 * 4);
+    indices = Uint16List(length * 3 * 2);
+  }
+
+  @override
+  String get vShaderFile => 'PositionRenderingSystem';
+  @override
+  String get fShaderFile => 'PositionRenderingSystem';
+}
+""";
+
   String _logic() => """
 import 'package:dartemis/dartemis.dart';
 import 'package:gamedev_helpers/gamedev_helpers_shared.dart';
@@ -507,24 +607,24 @@ class ControllerToActionSystem extends _\$ControllerToActionSystem {
     final controller = controllerMapper[entity];
     final acceleration = accelerationMapper[entity];
     if (controller.up) {
-      acceleration.y -= _acc * world.delta;
-    } else if (controller.down) {
       acceleration.y += _acc * world.delta;
+    } else if (controller.down) {
+      acceleration.y -= _acc * world.delta;
     } else if (controller.left) {
       acceleration.x -= _acc * world.delta;
     } else if (controller.right) {
       acceleration.x += _acc * world.delta;
     } else if (controller.upleft) {
-      acceleration.y -= _acc * world.delta / _sqrttwo;
+      acceleration.y += _acc * world.delta / _sqrttwo;
       acceleration.x -= _acc * world.delta / _sqrttwo;
     } else if (controller.upright) {
-      acceleration.y -= _acc * world.delta / _sqrttwo;
+      acceleration.y += _acc * world.delta / _sqrttwo;
       acceleration.x += _acc * world.delta / _sqrttwo;
     } else if (controller.downleft) {
-      acceleration.y += _acc * world.delta / _sqrttwo;
+      acceleration.y -= _acc * world.delta / _sqrttwo;
       acceleration.x -= _acc * world.delta / _sqrttwo;
     } else if (controller.downright) {
-      acceleration.y += _acc * world.delta / _sqrttwo;
+      acceleration.y -= _acc * world.delta / _sqrttwo;
       acceleration.x += _acc * world.delta / _sqrttwo;
     }
   }
@@ -539,14 +639,14 @@ class Controller extends Component {
   bool upleft, upright, downleft, downright;
 
   Controller(
-      {this.up: false,
-      this.down: false,
-      this.left: false,
-      this.right: false,
-      this.upleft: false,
-      this.upright: false,
-      this.downleft: false,
-      this.downright: false});
+      {this.up = false,
+      this.down = false,
+      this.left = false,
+      this.right = false,
+      this.upleft = false,
+      this.upright = false,
+      this.downleft = false,
+      this.downright = false});
 
   void reset() {
     up = false;
@@ -560,8 +660,6 @@ class Controller extends Component {
   }
 }
 """;
-
-  String _emptyString() => '';
 
   String _texturePacker() => """
 <?xml version="1.0" encoding="UTF-8"?>
@@ -590,6 +688,27 @@ class Controller extends Component {
     </struct>
 </data>
 """;
+
+  String _positionRenderingSystemVert() => '''
+#version 300 es
+
+uniform mat4 viewProjectionMatrix;
+in vec2 pos;
+
+void main() {
+	gl_Position = viewProjectionMatrix * vec4(pos, 0.0, 1.0);
+}''';
+
+  String _positionRenderingSystemFrag() => '''
+#version 300 es
+
+precision mediump float;
+
+out vec4 color;
+
+void main() {
+	color = vec4(1.0, 1.0, 1.0, 1.0);
+}''';
 }
 
 Future<Null> execute(String exec, List<String> args) async {
