@@ -12,8 +12,7 @@ class WebGlCanvasCleaningSystem extends VoidEntitySystem {
 
   @override
   void processSystem() {
-    gl.clear(WebGL.COLOR_BUFFER_BIT |
-    WebGL.DEPTH_BUFFER_BIT);
+    gl.clear(WebGL.COLOR_BUFFER_BIT | WebGL.DEPTH_BUFFER_BIT);
   }
 }
 
@@ -29,10 +28,8 @@ abstract class WebGlRenderingMixin {
   bool success = true;
 
   void initProgram() {
-    final vShader =
-        _createShader(WebGL.VERTEX_SHADER, shaderSource.vShader);
-    final fShader =
-        _createShader(WebGL.FRAGMENT_SHADER, shaderSource.fShader);
+    final vShader = _createShader(WebGL.VERTEX_SHADER, shaderSource.vShader);
+    final fShader = _createShader(WebGL.FRAGMENT_SHADER, shaderSource.fShader);
 
     _createProgram(vShader, fShader);
   }
@@ -43,8 +40,7 @@ abstract class WebGlRenderingMixin {
       ..attachShader(program, vShader)
       ..attachShader(program, fShader)
       ..linkProgram(program);
-    final linkSuccess =
-        gl.getProgramParameter(program, WebGL.LINK_STATUS);
+    final linkSuccess = gl.getProgramParameter(program, WebGL.LINK_STATUS);
     if (!linkSuccess) {
       print(
           '$runtimeType - Error linking program: ${gl.getProgramInfoLog(program)}');
@@ -57,18 +53,17 @@ abstract class WebGlRenderingMixin {
     gl
       ..shaderSource(shader, source)
       ..compileShader(shader);
-    final compileSuccess =
-        gl.getShaderParameter(shader, WebGL.COMPILE_STATUS);
+    final compileSuccess = gl.getShaderParameter(shader, WebGL.COMPILE_STATUS);
     if (!compileSuccess) {
       success = false;
-      throw new ArgumentError(
+      throw ArgumentError(
           '$runtimeType - Error compiling shader $vShaderFile or $fShaderFile: ${gl.getShaderInfoLog(shader)}');
     }
     return shader;
   }
 
   void buffer(String attribute, Float32List items, int itemSize,
-      {int usage: WebGL.DYNAMIC_DRAW}) {
+      {int usage = WebGL.DYNAMIC_DRAW}) {
     var buffer = buffers[attribute];
     if (null == buffer) {
       buffer = gl.createBuffer();
@@ -76,14 +71,13 @@ abstract class WebGlRenderingMixin {
     }
     final attribLocation = gl.getAttribLocation(program, attribute);
     if (attribLocation == -1) {
-      throw new ArgumentError(
+      throw ArgumentError(
           'Attribute $attribute not found in shader $vShaderFile}');
     }
     gl
       ..bindBuffer(WebGL.ARRAY_BUFFER, buffer)
       ..bufferData(WebGL.ARRAY_BUFFER, items, usage)
-      ..vertexAttribPointer(
-          attribLocation, itemSize, WebGL.FLOAT, false, 0, 0)
+      ..vertexAttribPointer(attribLocation, itemSize, WebGL.FLOAT, false, 0, 0)
       ..enableVertexAttribArray(attribLocation);
   }
 
@@ -95,8 +89,7 @@ abstract class WebGlRenderingMixin {
     }
     gl
       ..bindBuffer(WebGL.ARRAY_BUFFER, elementBuffer)
-      ..bufferData(WebGL.ARRAY_BUFFER, items,
-          WebGL.DYNAMIC_DRAW);
+      ..bufferData(WebGL.ARRAY_BUFFER, items, WebGL.DYNAMIC_DRAW);
     int offset = 0;
     int elementsPerItem = 0;
     for (Attrib attribute in attributes) {
@@ -105,38 +98,30 @@ abstract class WebGlRenderingMixin {
     for (Attrib attribute in attributes) {
       final attribLocation = gl.getAttribLocation(program, attribute.name);
       if (attribLocation == -1) {
-        throw new ArgumentError(
+        throw ArgumentError(
             'Attribute ${attribute.name} not found in shader $vShaderFile}');
       }
       gl
-        ..vertexAttribPointer(
-            attribLocation,
-            attribute.size,
-            WebGL.FLOAT,
-            false,
-            fsize * elementsPerItem,
-            fsize * offset)
+        ..vertexAttribPointer(attribLocation, attribute.size, WebGL.FLOAT,
+            false, fsize * elementsPerItem, fsize * offset)
         ..enableVertexAttribArray(attribLocation);
       offset += attribute.size;
     }
     gl
       ..bindBuffer(WebGL.ELEMENT_ARRAY_BUFFER, indexBuffer)
-      ..bufferData(WebGL.ELEMENT_ARRAY_BUFFER, indices,
-          WebGL.DYNAMIC_DRAW);
+      ..bufferData(WebGL.ELEMENT_ARRAY_BUFFER, indices, WebGL.DYNAMIC_DRAW);
   }
 
   void drawTriangles(
       List<Attrib> attributes, Float32List items, Uint16List indices) {
     bufferElements(attributes, items, indices);
-    gl.drawElements(WebGL.TRIANGLES, indices.length,
-        WebGL.UNSIGNED_SHORT, 0);
+    gl.drawElements(WebGL.TRIANGLES, indices.length, WebGL.UNSIGNED_SHORT, 0);
   }
 
   void drawPoints(
       List<Attrib> attributes, Float32List items, Uint16List indices) {
     bufferElements(attributes, items, indices);
-    gl.drawElements(WebGL.POINTS, indices.length,
-        WebGL.UNSIGNED_SHORT, 0);
+    gl.drawElements(WebGL.POINTS, indices.length, WebGL.UNSIGNED_SHORT, 0);
   }
 
   String get vShaderFile;
@@ -209,8 +194,8 @@ abstract class VoidWebGlRenderingSystem extends VoidEntitySystem
 }
 
 @Generate(WebGlRenderingSystem,
-    allOf: const [Position, Particle, Color],
-    manager: const [WebGlViewProjectionMatrixManager, TagManager])
+    allOf: [Position, Particle, Color],
+    manager: [WebGlViewProjectionMatrixManager, TagManager])
 class ParticleRenderingSystem extends _$ParticleRenderingSystem {
   Float32List positions;
   Float32List colors;
@@ -251,8 +236,8 @@ class ParticleRenderingSystem extends _$ParticleRenderingSystem {
 
   @override
   void updateLength(int length) {
-    positions = new Float32List(length * 2);
-    colors = new Float32List(length * 4);
+    positions = Float32List(length * 2);
+    colors = Float32List(length * 4);
   }
 
   @override
@@ -267,8 +252,8 @@ class ParticleRenderingSystem extends _$ParticleRenderingSystem {
 
 @Generate(WebGlRenderingSystem,
     allOf: [Orientation, Renderable],
-    mapper: const [Position],
-    manager: const [TagManager, WebGlViewProjectionMatrixManager])
+    mapper: [Position],
+    manager: [TagManager, WebGlViewProjectionMatrixManager])
 abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
   SpriteSheet sheet;
 
@@ -295,8 +280,10 @@ abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
       ..activeTexture(WebGL.TEXTURE0)
       ..bindTexture(WebGL.TEXTURE_2D, texture)
       ..texParameteri(WebGL.TEXTURE_2D, WebGL.TEXTURE_MIN_FILTER, WebGL.LINEAR)
-      ..texParameteri(WebGL.TEXTURE_2D, WebGL.TEXTURE_WRAP_S, WebGL.CLAMP_TO_EDGE)
-      ..texImage2D(WebGL.TEXTURE_2D, 0, WebGL.RGBA, WebGL.RGBA, WebGL.UNSIGNED_BYTE, sheet.image)
+      ..texParameteri(
+          WebGL.TEXTURE_2D, WebGL.TEXTURE_WRAP_S, WebGL.CLAMP_TO_EDGE)
+      ..texImage2D(WebGL.TEXTURE_2D, 0, WebGL.RGBA, WebGL.RGBA,
+          WebGL.UNSIGNED_BYTE, sheet.image)
       ..uniform1i(uTexture, 0)
       ..uniform2f(gl.getUniformLocation(program, 'uSize'), sheet.image.width,
           sheet.image.height);
@@ -388,8 +375,8 @@ abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
 
   @override
   void updateLength(int length) {
-    values = new Float32List(length * 4 * 2 * 2);
-    indices = new Uint16List(length * 6);
+    values = Float32List(length * 4 * 2 * 2);
+    indices = Uint16List(length * 6);
   }
 
   @override

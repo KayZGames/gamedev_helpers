@@ -1,6 +1,6 @@
 part of gamedev_helpers_shared;
 
-@Generate(EntityProcessingSystem, allOf: const [Acceleration])
+@Generate(EntityProcessingSystem, allOf: [Acceleration])
 class ResetAccelerationSystem extends _$ResetAccelerationSystem {
   @override
   void processEntity(Entity entity) {

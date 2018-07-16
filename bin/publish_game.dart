@@ -62,4 +62,4 @@ Future<Null> execute(String exec, List<String> args) async {
   }
 }
 
-int _secondsSinceEpoch = new DateTime.now().toUtc().millisecondsSinceEpoch;
+int _secondsSinceEpoch = DateTime.now().toUtc().millisecondsSinceEpoch;

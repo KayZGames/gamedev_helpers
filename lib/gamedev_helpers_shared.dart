@@ -26,11 +26,11 @@ part 'src/shared/event_bus.dart';
 
 part 'gamedev_helpers_shared.g.dart';
 
-final EventBus eventBus = new EventBus();
+final EventBus eventBus = EventBus();
 
-final Random random = new Random();
+final Random random = Random();
 
-final TweenManager tweenManager = new TweenManager();
+final TweenManager tweenManager = TweenManager();
 const String playerTag = 'player';
 
 class AnalyticsTrackEvent {

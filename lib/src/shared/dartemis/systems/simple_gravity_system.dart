@@ -1,6 +1,6 @@
 part of gamedev_helpers_shared;
 
-@Generate(EntityProcessingSystem, allOf: const [Acceleration, Mass])
+@Generate(EntityProcessingSystem, allOf: [Acceleration, Mass])
 class SimpleGravitySystem extends _$SimpleGravitySystem {
   @override
   void processEntity(Entity entity) {

@@ -6,8 +6,11 @@ import 'package:path/path.dart' as path;
 import 'package:git/git.dart';
 
 Future<Null> main(List<String> args) async {
+  if (args.isEmpty) {
+    print('use webgl to create a project supporting WebGL');
+  }
   final useWebGl = args.length == 1 && args[0] == 'webgl';
-  await new DartemisApp(useWebGl: useWebGl).create();
+  await DartemisApp(useWebGl: useWebGl).create();
 }
 
 class DartemisApp {
@@ -15,8 +18,10 @@ class DartemisApp {
   Map<String, String> _project = <String, String>{};
   final String _dir = path.current;
 
-  DartemisApp({bool useWebGl: false}) {
+  DartemisApp({bool useWebGl = false}) {
     _name = path.basename(_dir);
+    print(
+        'Project $_name ${useWebGl ? 'with' : 'without'} WebGL support is being created...');
     _project = {
       "pubspec.yaml": _pubspec(),
       "build.yaml": _buildYaml(),
@@ -45,9 +50,9 @@ class DartemisApp {
   Future<Null> create() async {
     _project.forEach((file, content) {
       if (content == null) {
-        new Directory("$_dir/$file").createSync(recursive: true);
+        Directory("$_dir/$file").createSync(recursive: true);
       } else {
-        final f = new File("$_dir/$file");
+        final f = File("$_dir/$file");
         final dir = f.parent;
         if (!dir.existsSync()) {
           dir.createSync(recursive: true);
@@ -71,7 +76,6 @@ class DartemisApp {
 
   String _analysisOptions() => """
 analyzer:
-  strong-mode: true
   errors:
     unused_element: error
     unused_import: error
@@ -115,7 +119,6 @@ linter:
 .buildlog
 .packages
 .project
-.pub/
 .dart_tool/
 build/
 **/packages/
@@ -134,7 +137,6 @@ build/
 # Directory created by dartdoc
 doc/api/
 
-# (Library packages only! Remove pattern if developing an application package)
 .idea/
 """;
 
@@ -313,11 +315,11 @@ class Game extends GameBase {
   @override
   void createEntities() {
     addEntity([
-      new Controller(),
-      new Position(0.5, 0.0),
-      new Acceleration(0.0, 0.0),
-      new Velocity(0.0, 0.0),
-      new Mass(),
+      Controller(),
+      Position(0.5, 0.0),
+      Acceleration(0.0, 0.0),
+      Velocity(0.0, 0.0),
+      Mass(),
     ]);
   }
 
@@ -325,15 +327,15 @@ class Game extends GameBase {
   Map<int, List<EntitySystem>> getSystems() {
     return {
       GameBase.rendering: [
-        new ControllerSystem(),
-        new ResetAccelerationSystem(),
-        new ControllerToActionSystem(),
-        new SimpleGravitySystem(),
-        new SimpleAccelerationSystem(),
-        new SimpleMovementSystem(),
-        new CanvasCleaningSystem(canvas),
-        new PositionRenderingSystem(ctx),
-        new FpsRenderingSystem(ctx, fillStyle: 'white'),
+        ControllerSystem(),
+        ResetAccelerationSystem(),
+        ControllerToActionSystem(),
+        SimpleGravitySystem(),
+        SimpleAccelerationSystem(),
+        SimpleMovementSystem(),
+        CanvasCleaningSystem(canvas),
+        PositionRenderingSystem(ctx),
+        FpsRenderingSystem(ctx, fillStyle: 'white'),
       ],
       GameBase.physics: [
         // add at least one
@@ -386,10 +388,10 @@ class Game extends GameBase {
   Map<int, List<EntitySystem>> getSystems() {
     return {
       GameBase.rendering: [
-        new ControllerSystem(),
-        new WebGlCanvasCleaningSystem(gl),
-        new CanvasCleaningSystem(hudCanvas),
-        new FpsRenderingSystem(hudCtx, fillStyle: 'white'),
+        ControllerSystem(),
+        WebGlCanvasCleaningSystem(gl),
+        CanvasCleaningSystem(hudCanvas),
+        FpsRenderingSystem(hudCtx, fillStyle: 'white'),
       ],
       GameBase.physics: [
         // add at least one
@@ -589,7 +591,6 @@ class Controller extends Component {
 </data>
 """;
 }
-
 
 Future<Null> execute(String exec, List<String> args) async {
   final Process process = await Process.start(exec, args);

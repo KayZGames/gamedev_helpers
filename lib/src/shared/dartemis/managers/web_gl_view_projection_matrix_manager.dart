@@ -1,8 +1,7 @@
 part of gamedev_helpers_shared;
 
 @Generate(Manager,
-    mapper: const [Position, Orientation],
-    manager: const [CameraManager, TagManager])
+    mapper: [Position, Orientation], manager: [CameraManager, TagManager])
 class WebGlViewProjectionMatrixManager
     extends _$WebGlViewProjectionMatrixManager {
   Matrix4 create2dViewProjectionMatrix() {
@@ -15,16 +14,13 @@ class WebGlViewProjectionMatrixManager
     final playerEntity = tagManager.getEntity(playerTag);
     final orientation = orientationMapper[playerEntity];
     final angle = 0.0;
-    final viewMatrix = new Matrix4.identity();
-    final projMatrix = new Matrix4.identity();
-    setViewMatrix(
-        viewMatrix,
-        new Vector3(400.0 + 100 * sin(angle), 550.0, -150.0),
-        new Vector3(400.0, 200.0, 150.0),
-        new Vector3(0.0, -1.0, 0.0));
+    final viewMatrix = Matrix4.identity();
+    final projMatrix = Matrix4.identity();
+    setViewMatrix(viewMatrix, Vector3(400.0 + 100 * sin(angle), 550.0, -150.0),
+        Vector3(400.0, 200.0, 150.0), Vector3(0.0, -1.0, 0.0));
     setPerspectiveMatrix(projMatrix, pi / 2, 4 / 3, 1.0, 1000.0);
 //    final threedViewProjextionMatrix = projMatrix * viewMatrix;
-    final twodOrthographicMatrix = new Matrix4.identity();
+    final twodOrthographicMatrix = Matrix4.identity();
     final factor = cameraManager.width / cameraManager.height;
     var width = 800;
     var height = 600;
@@ -39,7 +35,7 @@ class WebGlViewProjectionMatrixManager
       twodOrthographicMatrix
         ..translate(px, py)
         ..rotate(
-            new Vector3(0.0, 0.0, 1.0), (pi / 2 - orientation.angle) % (2 * pi))
+            Vector3(0.0, 0.0, 1.0), (pi / 2 - orientation.angle) % (2 * pi))
         ..translate(-px, -py);
     }
 

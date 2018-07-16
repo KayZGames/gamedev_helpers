@@ -3,7 +3,7 @@
 part of gamedev_helpers;
 
 // **************************************************************************
-// Generator: SystemGenerator
+// SystemGenerator
 // **************************************************************************
 
 abstract class _$ParticleRenderingSystem extends WebGlRenderingSystem {
@@ -13,16 +13,16 @@ abstract class _$ParticleRenderingSystem extends WebGlRenderingSystem {
   WebGlViewProjectionMatrixManager webGlViewProjectionMatrixManager;
   TagManager tagManager;
   _$ParticleRenderingSystem(RenderingContext2 gl)
-      : super(gl, new Aspect.empty()..allOf([Position, Particle, Color]));
+      : super(gl, Aspect.empty()..allOf([Position, Particle, Color]));
   @override
   void initialize() {
     super.initialize();
-    positionMapper = new Mapper<Position>(Position, world);
-    particleMapper = new Mapper<Particle>(Particle, world);
-    colorMapper = new Mapper<Color>(Color, world);
+    positionMapper = Mapper<Position>(world);
+    particleMapper = Mapper<Particle>(world);
+    colorMapper = Mapper<Color>(world);
     webGlViewProjectionMatrixManager =
-        world.getManager(WebGlViewProjectionMatrixManager);
-    tagManager = world.getManager(TagManager);
+        world.getManager<WebGlViewProjectionMatrixManager>();
+    tagManager = world.getManager<TagManager>();
   }
 }
 
@@ -37,11 +37,11 @@ abstract class _$WebGlSpriteRenderingSystem extends WebGlRenderingSystem {
   @override
   void initialize() {
     super.initialize();
-    orientationMapper = new Mapper<Orientation>(Orientation, world);
-    renderableMapper = new Mapper<Renderable>(Renderable, world);
-    positionMapper = new Mapper<Position>(Position, world);
-    tagManager = world.getManager(TagManager);
+    orientationMapper = Mapper<Orientation>(world);
+    renderableMapper = Mapper<Renderable>(world);
+    positionMapper = Mapper<Position>(world);
+    tagManager = world.getManager<TagManager>();
     webGlViewProjectionMatrixManager =
-        world.getManager(WebGlViewProjectionMatrixManager);
+        world.getManager<WebGlViewProjectionMatrixManager>();
   }
 }

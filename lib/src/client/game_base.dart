@@ -5,7 +5,7 @@ abstract class GameBase {
   static const int physics = 1;
 
   final StreamController<bool> _pauseStreamController =
-      new StreamController<bool>();
+      StreamController<bool>();
   final CanvasElement canvas;
   final CanvasRenderingContext2D ctx;
   final RenderingContext2 gl;
@@ -29,15 +29,15 @@ abstract class GameBase {
   /// [appName] is used to refernce assets and has to be the name of the library
   /// which contains the assets. Usually the game itself.
   GameBase(String appName, String canvasSelector,
-      {this.spriteSheetName: 'assets',
-      this.bodyDefsName: 'assets',
+      {this.spriteSheetName = 'assets',
+      this.bodyDefsName = 'assets',
       this.musicName,
       this.audioContext,
-      this.webgl: false,
-      bool depthTest: true,
-      bool blending: true})
+      this.webgl = false,
+      bool depthTest = true,
+      bool blending = true})
       : canvas = querySelector(canvasSelector),
-        helper = new GameHelper(appName, audioContext),
+        helper = GameHelper(appName, audioContext),
         ctx = webgl
             ? null
             : (querySelector(canvasSelector) as CanvasElement).context2D,
@@ -65,7 +65,7 @@ abstract class GameBase {
       _errorInitializingWebGL = true;
     }
     canvas.onFullscreenChange.listen(_handleFullscreen);
-    world = createWorld()..addManager(new CameraManager());
+    world = createWorld()..addManager(CameraManager());
     final fullscreenButton = querySelector('button#fullscreen');
     if (null != fullscreenButton) {
       fullscreenButton.onClick
@@ -76,7 +76,7 @@ abstract class GameBase {
   /// [appName] is used to refernce assets and has to be the name of the library
   /// which contains the assets. Usually the game itself.
   GameBase.noAssets(String appName, String canvasSelector,
-      {bool webgl: false, bool depthTest: true, bool blending: true})
+      {bool webgl = false, bool depthTest = true, bool blending = true})
       : this(appName, canvasSelector,
             spriteSheetName: null,
             bodyDefsName: null,
@@ -89,7 +89,7 @@ abstract class GameBase {
       : canvas = null,
         ctx = null,
         gl = null,
-        helper = new GameHelper(appNahme, null),
+        helper = GameHelper(appNahme, null),
         bodyDefsName = null,
         spriteSheetName = null,
         musicName = null,
@@ -97,7 +97,7 @@ abstract class GameBase {
     world = createWorld();
   }
 
-  World createWorld() => new World();
+  World createWorld() => World();
 
   bool get webGlInitialized => webgl && !_errorInitializingWebGL;
 
@@ -198,7 +198,7 @@ abstract class GameBase {
     world.process(1);
 
     if (!_stop && !_pause) {
-      new Future.delayed(const Duration(milliseconds: 5), physicsLoop);
+      Future.delayed(const Duration(milliseconds: 5), physicsLoop);
     }
   }
 
@@ -236,7 +236,7 @@ abstract class GameBase {
 
   void handleResize(int width, int height) {
     resizeCanvas(canvas, width, height);
-    (world.getManager(CameraManager) as CameraManager)
+    (world.getManager<CameraManager>())
       ..width = width
       ..height = height;
     if (paused || isStopped) {

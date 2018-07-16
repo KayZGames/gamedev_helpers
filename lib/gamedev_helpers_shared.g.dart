@@ -3,17 +3,16 @@
 part of gamedev_helpers_shared;
 
 // **************************************************************************
-// Generator: SystemGenerator
+// SystemGenerator
 // **************************************************************************
 
 abstract class _$ResetAccelerationSystem extends EntityProcessingSystem {
   Mapper<Acceleration> accelerationMapper;
-  _$ResetAccelerationSystem()
-      : super(new Aspect.empty()..allOf([Acceleration]));
+  _$ResetAccelerationSystem() : super(Aspect.empty()..allOf([Acceleration]));
   @override
   void initialize() {
     super.initialize();
-    accelerationMapper = new Mapper<Acceleration>(Acceleration, world);
+    accelerationMapper = Mapper<Acceleration>(world);
   }
 }
 
@@ -21,48 +20,46 @@ abstract class _$SimpleAccelerationSystem extends EntityProcessingSystem {
   Mapper<Acceleration> accelerationMapper;
   Mapper<Velocity> velocityMapper;
   _$SimpleAccelerationSystem()
-      : super(new Aspect.empty()..allOf([Acceleration, Velocity]));
+      : super(Aspect.empty()..allOf([Acceleration, Velocity]));
   @override
   void initialize() {
     super.initialize();
-    accelerationMapper = new Mapper<Acceleration>(Acceleration, world);
-    velocityMapper = new Mapper<Velocity>(Velocity, world);
+    accelerationMapper = Mapper<Acceleration>(world);
+    velocityMapper = Mapper<Velocity>(world);
   }
 }
 
 abstract class _$SimpleGravitySystem extends EntityProcessingSystem {
   Mapper<Acceleration> accelerationMapper;
   Mapper<Mass> massMapper;
-  _$SimpleGravitySystem()
-      : super(new Aspect.empty()..allOf([Acceleration, Mass]));
+  _$SimpleGravitySystem() : super(Aspect.empty()..allOf([Acceleration, Mass]));
   @override
   void initialize() {
     super.initialize();
-    accelerationMapper = new Mapper<Acceleration>(Acceleration, world);
-    massMapper = new Mapper<Mass>(Mass, world);
+    accelerationMapper = Mapper<Acceleration>(world);
+    massMapper = Mapper<Mass>(world);
   }
 }
 
 abstract class _$SimpleMovementSystem extends EntityProcessingSystem {
   Mapper<Velocity> velocityMapper;
   Mapper<Position> positionMapper;
-  _$SimpleMovementSystem()
-      : super(new Aspect.empty()..allOf([Velocity, Position]));
+  _$SimpleMovementSystem() : super(Aspect.empty()..allOf([Velocity, Position]));
   @override
   void initialize() {
     super.initialize();
-    velocityMapper = new Mapper<Velocity>(Velocity, world);
-    positionMapper = new Mapper<Position>(Position, world);
+    velocityMapper = Mapper<Velocity>(world);
+    positionMapper = Mapper<Position>(world);
   }
 }
 
 abstract class _$AnimationSystem extends EntityProcessingSystem {
   Mapper<Renderable> renderableMapper;
-  _$AnimationSystem() : super(new Aspect.empty()..allOf([Renderable]));
+  _$AnimationSystem() : super(Aspect.empty()..allOf([Renderable]));
   @override
   void initialize() {
     super.initialize();
-    renderableMapper = new Mapper<Renderable>(Renderable, world);
+    renderableMapper = Mapper<Renderable>(world);
   }
 }
 
@@ -74,9 +71,9 @@ abstract class _$WebGlViewProjectionMatrixManager extends Manager {
   @override
   void initialize() {
     super.initialize();
-    positionMapper = new Mapper<Position>(Position, world);
-    orientationMapper = new Mapper<Orientation>(Orientation, world);
-    cameraManager = world.getManager(CameraManager);
-    tagManager = world.getManager(TagManager);
+    positionMapper = Mapper<Position>(world);
+    orientationMapper = Mapper<Orientation>(world);
+    cameraManager = world.getManager<CameraManager>();
+    tagManager = world.getManager<TagManager>();
   }
 }

@@ -1,27 +1,25 @@
 part of gamedev_helpers;
 
-Future<Map<String, String>> _loadAchievements(String libName) => HttpRequest
-    .getString('packages/$libName/assets/achievements.json')
-    .then(_processAchievementAssets);
+Future<Map<String, String>> _loadAchievements(String libName) =>
+    HttpRequest.getString('packages/$libName/assets/achievements.json')
+        .then(_processAchievementAssets);
 
 Future<Map<String, List<Polygon>>> _loadPolygons(String libName, String name) =>
-    HttpRequest
-        .getString('packages/$libName/assets/img/$name.polygons.json')
+    HttpRequest.getString('packages/$libName/assets/img/$name.polygons.json')
         .then(_processPolygonAssets)
         .then(_createPolygonMap);
 
 Future<SpriteSheet> _loadSpritesheet(String libName, String name) {
   final imgPath = 'packages/$libName/assets/img/$name.png';
-  return HttpRequest
-      .getString('packages/$libName/assets/img/$name.json')
+  return HttpRequest.getString('packages/$libName/assets/img/$name.json')
       .then(_processAssets)
       .then((assets) => _createSpriteSheet(imgPath, assets));
 }
 
 Future<AudioBuffer> _loadMusic(
     AudioContext audioContext, String libName, String name) {
-  const goodAnswer = const ['probably', 'maybe'];
-  final audio = new AudioElement();
+  const goodAnswer = ['probably', 'maybe'];
+  final audio = AudioElement();
   var fileExtension = 'ogg';
   if (goodAnswer.contains(audio.canPlayType('audio/ogg'))) {
     fileExtension = 'ogg';
@@ -32,8 +30,7 @@ Future<AudioBuffer> _loadMusic(
   }
   final String musicPath =
       'packages/$libName/assets/music/$name.$fileExtension';
-  return HttpRequest
-      .request(musicPath, responseType: 'arraybuffer')
+  return HttpRequest.request(musicPath, responseType: 'arraybuffer')
       .then((request) async => audioContext.decodeAudioData(request.response));
 }
 
@@ -43,22 +40,22 @@ Future<Map<String, List<Polygon>>> _createPolygonMap(
   polygons.forEach((bodyId, pointMaps) {
     final polygonList = <Polygon>[];
     pointMaps
-        .forEach((pointMap) => polygonList.add(new Polygon(pointMap['shape'])));
+        .forEach((pointMap) => polygonList.add(Polygon(pointMap['shape'])));
     result[bodyId] = polygonList;
   });
-  return new Future.value(result);
+  return Future.value(result);
 }
 
 Future<SpriteSheet> _createSpriteSheet(
     String imgPath, Map<String, Map<String, Map<String, dynamic>>> assets) {
-  final completer = new Completer<SpriteSheet>();
-  final img = new ImageElement();
+  final completer = Completer<SpriteSheet>();
+  final img = ImageElement();
   img.onLoad.listen((_) {
     final sprites = <String, Sprite>{};
     assets['frames'].forEach((assetName, assetData) {
-      sprites[assetName] = new Sprite(assetData);
+      sprites[assetName] = Sprite(assetData);
     });
-    final sheet = new SpriteSheet(img, sprites);
+    final sheet = SpriteSheet(img, sprites);
     completer.complete(sheet);
   });
   img.src = imgPath;
@@ -71,9 +68,8 @@ Future<ShaderSource> _loadShader(
     HttpRequest.getString('packages/$libName/assets/shader/$vShaderFile.vert'),
     HttpRequest.getString('packages/$libName/assets/shader/$fShaderFile.frag')
   ];
-  return Future
-      .wait(loaders)
-      .then((shaders) => new ShaderSource(shaders[0], shaders[1]));
+  return Future.wait(loaders)
+      .then((shaders) => ShaderSource(shaders[0], shaders[1]));
 }
 
 class ShaderSource {
@@ -105,7 +101,7 @@ class Sprite {
   Vector2 offset;
   Vector2 trimmed;
   Sprite(Map<String, dynamic> singleAsset) {
-    final _Asset asset = new _Asset(singleAsset);
+    final _Asset asset = _Asset(singleAsset);
     src = asset.frame;
     var cx, cy;
     if (asset.trimmed) {
@@ -116,9 +112,9 @@ class Sprite {
       cy = -asset.frame.height ~/ 2;
     }
 
-    dst = new Rectangle<int>(cx, cy, src.width, src.height);
-    offset = new Vector2(cx.toDouble(), cy.toDouble());
-    trimmed = new Vector2(asset.spriteSourceSize.left.toDouble(),
+    dst = Rectangle<int>(cx, cy, src.width, src.height);
+    offset = Vector2(cx.toDouble(), cy.toDouble());
+    trimmed = Vector2(asset.spriteSourceSize.left.toDouble(),
         asset.spriteSourceSize.top.toDouble());
   }
 }
@@ -126,10 +122,10 @@ class Sprite {
 class Polygon {
   List<Vector2> vertices;
   Polygon(List<double> points) {
-    vertices = new List(points.length ~/ 2);
+    vertices = List(points.length ~/ 2);
     for (int i = 0; i < points.length; i += 2) {
       vertices[i ~/ 2] =
-          new Vector2(points[i].toDouble(), points[i + 1].toDouble());
+          Vector2(points[i].toDouble(), points[i + 1].toDouble());
     }
   }
 }
@@ -147,17 +143,16 @@ class _Asset {
 }
 
 Rectangle<int> _createRectangle(Map<String, int> rect) =>
-    new Rectangle(rect['x'], rect['y'], rect['w'], rect['h']);
+    Rectangle(rect['x'], rect['y'], rect['w'], rect['h']);
 
-Point<int> _createPoint(Map<String, int> rect) =>
-    new Point(rect['w'], rect['h']);
+Point<int> _createPoint(Map<String, int> rect) => Point(rect['w'], rect['h']);
 
 Future<Map<String, String>> _processAchievementAssets(String assetJson) =>
-    new Future.value(json.decode(assetJson));
+    Future.value(json.decode(assetJson));
 
 Future<Map<String, List<Map<String, List<double>>>>> _processPolygonAssets(
         String assetJson) =>
-    new Future.value(json.decode(assetJson));
+    Future.value(json.decode(assetJson));
 
 Future<Map<String, dynamic>> _processAssets(String assetJson) =>
-    new Future.value(json.decode(assetJson));
+    Future.value(json.decode(assetJson));

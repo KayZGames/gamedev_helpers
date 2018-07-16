@@ -1,12 +1,12 @@
 part of gamedev_helpers;
 
 // originally part of CanvasQuery
-final Pattern _whitespacePattern = new RegExp((r'\s+'));
+final Pattern _whitespacePattern = RegExp((r'\s+'));
 
 /// Writes [text] at [x], [y] and wraps at [maxWidth].
 void wrappedText(
     CanvasRenderingContext2D ctx, String text, int x, int y, num maxWidth) {
-  final regexp = new RegExp(r"(\d+)");
+  final regexp = RegExp(r"(\d+)");
   final h = int.parse(regexp.firstMatch(ctx.font).group(0)) * 2;
   final lines = _getLines(ctx, text, maxWidth);
 
@@ -23,11 +23,11 @@ void wrappedText(
 /// is given, the [text] will be wrapped.
 Rectangle textBoundaries(CanvasRenderingContext2D ctx, String text,
     [num maxWidth]) {
-  final regexp = new RegExp(r"(\d+)");
+  final regexp = RegExp(r"(\d+)");
   final h = int.parse(regexp.firstMatch(ctx.font).group(0)) * 2;
   final List<String> lines = _getLines(ctx, text, maxWidth);
   maxWidth ??= ctx.measureText(text).width;
-  return new Rectangle(0, 0, maxWidth, (lines.length * h * 0.6).toInt());
+  return Rectangle(0, 0, maxWidth, (lines.length * h * 0.6).toInt());
 }
 
 /// Splits the [text] at [maxWidth] and returns a list of lines.
@@ -37,7 +37,7 @@ List<String> _getLines(CanvasRenderingContext2D ctx, String text,
 
   var ox = 0.0;
 
-  var lines = new List<String>.from([""]);
+  var lines = List<String>.from([""]);
   final spaceWidth = ctx.measureText(" ").width;
   if (null != maxWidth) {
     final totalMaxWidth = maxWidth + spaceWidth;

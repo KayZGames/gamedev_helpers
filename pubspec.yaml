@@ -17,6 +17,6 @@ executables:
   setup_game:
   publish_game:
 dev_dependencies:
-  build_runner: ^0.8.0
+  build_runner: ^0.9.1
   dartemis_builder:
     git: git://github.com/denniskaselow/dartemis_builder.git
