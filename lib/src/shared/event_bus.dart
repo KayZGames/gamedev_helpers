@@ -17,7 +17,7 @@ class EventBus {
     }
   }
 
-  Stream on([Type eventType]) {
+  Stream on<T>() {
     final sc = StreamController.broadcast(sync: true);
     var countDone = 0;
     void done() {
@@ -27,8 +27,8 @@ class EventBus {
       }
     }
 
-    eventBus.on(eventType).listen(sc.add, onDone: done);
-    eventBusSync.on(eventType).listen(sc.add, onDone: done);
+    eventBus.on<T>().listen(sc.add, onDone: done);
+    eventBusSync.on<T>().listen(sc.add, onDone: done);
     return sc.stream;
   }
 }

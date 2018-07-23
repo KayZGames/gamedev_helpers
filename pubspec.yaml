@@ -2,13 +2,16 @@ name: gamedev_helpers
 version: 0.0.1-dev
 description: Useful stuff for my gamedevelopment needs
 author: Dennis Kaselow <Dennis.Kaselow+gamedev_helpers@gmail.com>
+publish_to: none
+environment:
+  sdk: '>=2.0.0-dev.69 <3.0.0'
 dependencies:
   vector_math: ^2.0.6
   dartemis:
     git:
       url: git://github.com/denniskaselow/dartemis.git
       ref: feature/ddc
-  event_bus: 0.4.1
+  event_bus: ^1.0.1
   tweenengine:
     git: git://github.com/KayZGames/tween-engine-dart.git
   git: ^0.5.1

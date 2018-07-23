@@ -178,6 +178,8 @@ targets:
 name: $_name
 description: A $_name game
 publish_to: none
+environment:
+  sdk: '>=2.0.0-dev.69 <3.0.0'
 dependencies:
   dartemis:
     git:
