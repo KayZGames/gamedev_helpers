@@ -2,21 +2,23 @@ name: gamedev_helpers
 version: 0.0.1-dev
 description: Useful stuff for my gamedevelopment needs
 author: Dennis Kaselow <Dennis.Kaselow+gamedev_helpers@gmail.com>
+publish_to: none
+environment:
+  sdk: '>=2.0.0 <3.0.0'
 dependencies:
-  vector_math: any
+  vector_math: ^2.0.6
   dartemis:
     git:
       url: git://github.com/denniskaselow/dartemis.git
-      ref: develop
-  dartemis_transformer:
-    path: ../dartemis_transformer
-  event_bus: any
-  tweenengine: any
-  git: 0.4.4
-  path: any
-  which: any
-transformers:
-- dartemis_transformer
+  event_bus: ^1.0.1
+  tweenengine:
+    git: git://github.com/KayZGames/tween-engine-dart.git
+  git: ^0.5.1
+  path: ^1.5.1
 executables:
   setup_game:
   publish_game:
+dev_dependencies:
+  build_runner: ^0.9.1
+  dartemis_builder:
+    git: git://github.com/denniskaselow/dartemis_builder.git

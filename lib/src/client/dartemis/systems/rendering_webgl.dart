@@ -1,7 +1,7 @@
 part of gamedev_helpers;
 
 class WebGlCanvasCleaningSystem extends VoidEntitySystem {
-  RenderingContext gl;
+  RenderingContext2 gl;
 
   WebGlCanvasCleaningSystem(this.gl);
 
@@ -12,15 +12,14 @@ class WebGlCanvasCleaningSystem extends VoidEntitySystem {
 
   @override
   void processSystem() {
-    gl.clear(
-        RenderingContext.COLOR_BUFFER_BIT | RenderingContext.DEPTH_BUFFER_BIT);
+    gl.clear(WebGL.COLOR_BUFFER_BIT | WebGL.DEPTH_BUFFER_BIT);
   }
 }
 
 abstract class WebGlRenderingMixin {
-  static const int fsize = Float32List.BYTES_PER_ELEMENT;
+  static const int fsize = Float32List.bytesPerElement;
 
-  RenderingContext gl;
+  RenderingContext2 gl;
   Program program;
   ShaderSource shaderSource;
   Buffer elementBuffer;
@@ -29,10 +28,8 @@ abstract class WebGlRenderingMixin {
   bool success = true;
 
   void initProgram() {
-    final vShader =
-        _createShader(RenderingContext.VERTEX_SHADER, shaderSource.vShader);
-    final fShader =
-        _createShader(RenderingContext.FRAGMENT_SHADER, shaderSource.fShader);
+    final vShader = _createShader(WebGL.VERTEX_SHADER, shaderSource.vShader);
+    final fShader = _createShader(WebGL.FRAGMENT_SHADER, shaderSource.fShader);
 
     _createProgram(vShader, fShader);
   }
@@ -43,8 +40,7 @@ abstract class WebGlRenderingMixin {
       ..attachShader(program, vShader)
       ..attachShader(program, fShader)
       ..linkProgram(program);
-    final linkSuccess =
-        gl.getProgramParameter(program, RenderingContext.LINK_STATUS);
+    final linkSuccess = gl.getProgramParameter(program, WebGL.LINK_STATUS);
     if (!linkSuccess) {
       print(
           '$runtimeType - Error linking program: ${gl.getProgramInfoLog(program)}');
@@ -57,42 +53,43 @@ abstract class WebGlRenderingMixin {
     gl
       ..shaderSource(shader, source)
       ..compileShader(shader);
-    final compileSuccess =
-        gl.getShaderParameter(shader, RenderingContext.COMPILE_STATUS);
+    final compileSuccess = gl.getShaderParameter(shader, WebGL.COMPILE_STATUS);
     if (!compileSuccess) {
-      print(
-          '$runtimeType - Error compiling shader: ${gl.getShaderInfoLog(shader)}');
       success = false;
+      throw ArgumentError(
+          '$runtimeType - Error compiling shader $vShaderFile or $fShaderFile: ${gl.getShaderInfoLog(shader)}');
     }
     return shader;
   }
 
   void buffer(String attribute, Float32List items, int itemSize,
-      {int usage: DYNAMIC_DRAW}) {
+      {int usage = WebGL.DYNAMIC_DRAW}) {
     var buffer = buffers[attribute];
     if (null == buffer) {
       buffer = gl.createBuffer();
       buffers[attribute] = buffer;
     }
     final attribLocation = gl.getAttribLocation(program, attribute);
+    if (attribLocation == -1) {
+      throw ArgumentError(
+          'Attribute $attribute not found in shader $vShaderFile}');
+    }
     gl
-      ..bindBuffer(RenderingContext.ARRAY_BUFFER, buffer)
-      ..bufferData(RenderingContext.ARRAY_BUFFER, items, usage)
-      ..vertexAttribPointer(
-          attribLocation, itemSize, RenderingContext.FLOAT, false, 0, 0)
+      ..bindBuffer(WebGL.ARRAY_BUFFER, buffer)
+      ..bufferData(WebGL.ARRAY_BUFFER, items, usage)
+      ..vertexAttribPointer(attribLocation, itemSize, WebGL.FLOAT, false, 0, 0)
       ..enableVertexAttribArray(attribLocation);
   }
 
   void bufferElements(
-      List<Attrib> attributes, Float32List items, List<int> indices) {
+      List<Attrib> attributes, Float32List items, Uint16List indices) {
     if (null == elementBuffer) {
       elementBuffer = gl.createBuffer();
       indexBuffer = gl.createBuffer();
     }
     gl
-      ..bindBuffer(RenderingContext.ARRAY_BUFFER, elementBuffer)
-      ..bufferData(
-          RenderingContext.ARRAY_BUFFER, items, RenderingContext.DYNAMIC_DRAW);
+      ..bindBuffer(WebGL.ARRAY_BUFFER, elementBuffer)
+      ..bufferData(WebGL.ARRAY_BUFFER, items, WebGL.DYNAMIC_DRAW);
     int offset = 0;
     int elementsPerItem = 0;
     for (Attrib attribute in attributes) {
@@ -100,21 +97,31 @@ abstract class WebGlRenderingMixin {
     }
     for (Attrib attribute in attributes) {
       final attribLocation = gl.getAttribLocation(program, attribute.name);
+      if (attribLocation == -1) {
+        throw ArgumentError(
+            'Attribute ${attribute.name} not found in shader $vShaderFile}');
+      }
       gl
-        ..vertexAttribPointer(
-            attribLocation,
-            attribute.size,
-            RenderingContext.FLOAT,
-            false,
-            fsize * elementsPerItem,
-            fsize * offset)
+        ..vertexAttribPointer(attribLocation, attribute.size, WebGL.FLOAT,
+            false, fsize * elementsPerItem, fsize * offset)
         ..enableVertexAttribArray(attribLocation);
       offset += attribute.size;
     }
     gl
-      ..bindBuffer(RenderingContext.ELEMENT_ARRAY_BUFFER, indexBuffer)
-      ..bufferData(RenderingContext.ELEMENT_ARRAY_BUFFER, indices,
-          RenderingContext.DYNAMIC_DRAW);
+      ..bindBuffer(WebGL.ELEMENT_ARRAY_BUFFER, indexBuffer)
+      ..bufferData(WebGL.ELEMENT_ARRAY_BUFFER, indices, WebGL.DYNAMIC_DRAW);
+  }
+
+  void drawTriangles(
+      List<Attrib> attributes, Float32List items, Uint16List indices) {
+    bufferElements(attributes, items, indices);
+    gl.drawElements(WebGL.TRIANGLES, indices.length, WebGL.UNSIGNED_SHORT, 0);
+  }
+
+  void drawPoints(
+      List<Attrib> attributes, Float32List items, Uint16List indices) {
+    bufferElements(attributes, items, indices);
+    gl.drawElements(WebGL.POINTS, indices.length, WebGL.UNSIGNED_SHORT, 0);
   }
 
   String get vShaderFile;
@@ -132,7 +139,7 @@ abstract class WebGlRenderingSystem extends EntitySystem
     with WebGlRenderingMixin {
   int maxLength = 0;
 
-  WebGlRenderingSystem(RenderingContext gl, Aspect aspect) : super(aspect) {
+  WebGlRenderingSystem(RenderingContext2 gl, Aspect aspect) : super(aspect) {
     this.gl = gl;
   }
 
@@ -168,7 +175,7 @@ abstract class WebGlRenderingSystem extends EntitySystem
 
 abstract class VoidWebGlRenderingSystem extends VoidEntitySystem
     with WebGlRenderingMixin {
-  VoidWebGlRenderingSystem(RenderingContext gl) {
+  VoidWebGlRenderingSystem(RenderingContext2 gl) {
     this.gl = gl;
   }
 
@@ -186,22 +193,19 @@ abstract class VoidWebGlRenderingSystem extends VoidEntitySystem
   void render();
 }
 
-class ParticleRenderingSystem extends WebGlRenderingSystem {
-  Mapper<Position> pm;
-  Mapper<Color> cm;
-  WebGlViewProjectionMatrixManager vpmm;
-  TagManager tm;
-
+@Generate(WebGlRenderingSystem,
+    allOf: [Position, Particle, Color],
+    manager: [WebGlViewProjectionMatrixManager, TagManager])
+class ParticleRenderingSystem extends _$ParticleRenderingSystem {
   Float32List positions;
   Float32List colors;
 
-  ParticleRenderingSystem(RenderingContext gl)
-      : super(gl, new Aspect.forAllOf([Position, Particle, Color]));
+  ParticleRenderingSystem(RenderingContext2 gl) : super(gl);
 
   @override
   void processEntity(int index, Entity entity) {
-    final p = pm[entity];
-    final c = cm[entity];
+    final p = positionMapper[entity];
+    final c = colorMapper[entity];
 
     final pOffset = index * 2;
     final cOffset = index * 4;
@@ -217,19 +221,23 @@ class ParticleRenderingSystem extends WebGlRenderingSystem {
 
   @override
   void render(int length) {
-    gl.uniformMatrix4fv(gl.getUniformLocation(program, 'uViewProjection'),
-        false, vpmm.create2dViewProjectionMatrix().storage);
+    gl.uniformMatrix4fv(
+        gl.getUniformLocation(program, 'uViewProjection'),
+        false,
+        webGlViewProjectionMatrixManager
+            .create2dViewProjectionMatrix()
+            .storage);
 
     buffer('aPosition', positions, 2);
     buffer('aColor', colors, 4);
 
-    gl.drawArrays(POINTS, 0, length);
+    gl.drawArrays(WebGL.POINTS, 0, length);
   }
 
   @override
   void updateLength(int length) {
-    positions = new Float32List(length * 2);
-    colors = new Float32List(length * 4);
+    positions = Float32List(length * 2);
+    colors = Float32List(length * 4);
   }
 
   @override
@@ -242,13 +250,11 @@ class ParticleRenderingSystem extends WebGlRenderingSystem {
   String get libName => 'gamedev_helpers';
 }
 
-abstract class WebGlSpriteRenderingSystem extends WebGlRenderingSystem {
-  Mapper<Position> pm;
-  Mapper<Orientation> om;
-  Mapper<Renderable> rm;
-  TagManager tm;
-  WebGlViewProjectionMatrixManager vpmm;
-
+@Generate(WebGlRenderingSystem,
+    allOf: [Orientation, Renderable],
+    mapper: [Position],
+    manager: [TagManager, WebGlViewProjectionMatrixManager])
+abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
   SpriteSheet sheet;
 
   List<Attrib> attributes = [
@@ -258,8 +264,8 @@ abstract class WebGlSpriteRenderingSystem extends WebGlRenderingSystem {
   Float32List values;
   Uint16List indices;
 
-  WebGlSpriteRenderingSystem(RenderingContext gl, this.sheet, Aspect aspect)
-      : super(gl, aspect..allOf([Orientation, Renderable]));
+  WebGlSpriteRenderingSystem(RenderingContext2 gl, this.sheet, Aspect aspect)
+      : super(gl, aspect);
 
   @override
   void initialize() {
@@ -270,12 +276,14 @@ abstract class WebGlSpriteRenderingSystem extends WebGlRenderingSystem {
 
     gl
       ..useProgram(program)
-      ..pixelStorei(UNPACK_FLIP_Y_WEBGL, 0)
-      ..activeTexture(TEXTURE0)
-      ..bindTexture(TEXTURE_2D, texture)
-      ..texParameteri(TEXTURE_2D, TEXTURE_MIN_FILTER, LINEAR)
-      ..texParameteri(TEXTURE_2D, TEXTURE_WRAP_S, CLAMP_TO_EDGE)
-      ..texImage2D(TEXTURE_2D, 0, RGBA, RGBA, UNSIGNED_BYTE, sheet.image)
+      ..pixelStorei(WebGL.UNPACK_FLIP_Y_WEBGL, 0)
+      ..activeTexture(WebGL.TEXTURE0)
+      ..bindTexture(WebGL.TEXTURE_2D, texture)
+      ..texParameteri(WebGL.TEXTURE_2D, WebGL.TEXTURE_MIN_FILTER, WebGL.LINEAR)
+      ..texParameteri(
+          WebGL.TEXTURE_2D, WebGL.TEXTURE_WRAP_S, WebGL.CLAMP_TO_EDGE)
+      ..texImage2D(WebGL.TEXTURE_2D, 0, WebGL.RGBA, WebGL.RGBA,
+          WebGL.UNSIGNED_BYTE, sheet.image)
       ..uniform1i(uTexture, 0)
       ..uniform2f(gl.getUniformLocation(program, 'uSize'), sheet.image.width,
           sheet.image.height);
@@ -284,9 +292,9 @@ abstract class WebGlSpriteRenderingSystem extends WebGlRenderingSystem {
   @override
   void processEntity(int index, Entity entity) {
     final p = getPosition(entity);
-    final o = om[entity];
-    final r = rm[entity];
-    final sprite = sheet.sprites[r.name];
+    final o = orientationMapper[entity];
+    final r = renderableMapper[entity];
+    final sprite = sheet.sprites[r.spriteName];
     final dst = sprite.dst;
     final src = sprite.src;
     double right;
@@ -310,27 +318,35 @@ abstract class WebGlSpriteRenderingSystem extends WebGlRenderingSystem {
     final bottom = src.bottom.toDouble();
     final top = src.top.toDouble();
 
-    var bottomLeftAngle = atan2(dstBottom, dstLeft);
-    values[index * 16] = p.x + dstLeft * cos(o.angle + bottomLeftAngle)/cos(bottomLeftAngle);
-    values[index * 16 + 1] = p.y + dstBottom * sin(o.angle + bottomLeftAngle)/sin(bottomLeftAngle);
+    final bottomLeftAngle = atan2(dstBottom, dstLeft);
+    values[index * 16] =
+        p.x + dstLeft * cos(o.angle + bottomLeftAngle) / cos(bottomLeftAngle);
+    values[index * 16 + 1] =
+        p.y + dstBottom * sin(o.angle + bottomLeftAngle) / sin(bottomLeftAngle);
     values[index * 16 + 2] = left;
     values[index * 16 + 3] = bottom;
 
-    var bottomRightAngle = atan2(dstBottom, dstRight);
-    values[index * 16 + 4] = p.x + dstRight * cos(o.angle + bottomRightAngle)/cos(bottomRightAngle);
-    values[index * 16 + 5] = p.y + dstBottom * sin(o.angle + bottomRightAngle)/sin(bottomRightAngle);
+    final bottomRightAngle = atan2(dstBottom, dstRight);
+    values[index * 16 + 4] = p.x +
+        dstRight * cos(o.angle + bottomRightAngle) / cos(bottomRightAngle);
+    values[index * 16 + 5] = p.y +
+        dstBottom * sin(o.angle + bottomRightAngle) / sin(bottomRightAngle);
     values[index * 16 + 6] = right;
     values[index * 16 + 7] = bottom;
 
-    var topLeftAngle = atan2(dstTop, dstLeft);
-    values[index * 16 + 8] = p.x + dstLeft * cos(o.angle + topLeftAngle)/cos(topLeftAngle);
-    values[index * 16 + 9] = p.y + dstTop * sin(o.angle + topLeftAngle)/sin(topLeftAngle);
+    final topLeftAngle = atan2(dstTop, dstLeft);
+    values[index * 16 + 8] =
+        p.x + dstLeft * cos(o.angle + topLeftAngle) / cos(topLeftAngle);
+    values[index * 16 + 9] =
+        p.y + dstTop * sin(o.angle + topLeftAngle) / sin(topLeftAngle);
     values[index * 16 + 10] = left;
     values[index * 16 + 11] = top;
 
-    var topRightAngle = atan2(dstTop, dstRight);
-    values[index * 16 + 12] = p.x + dstRight * cos(o.angle + topRightAngle)/cos(topRightAngle);
-    values[index * 16 + 13] = p.y + dstTop * sin(o.angle + topRightAngle)/sin(topRightAngle);
+    final topRightAngle = atan2(dstTop, dstRight);
+    values[index * 16 + 12] =
+        p.x + dstRight * cos(o.angle + topRightAngle) / cos(topRightAngle);
+    values[index * 16 + 13] =
+        p.y + dstTop * sin(o.angle + topRightAngle) / sin(topRightAngle);
     values[index * 16 + 14] = right;
     values[index * 16 + 15] = top;
 
@@ -342,7 +358,7 @@ abstract class WebGlSpriteRenderingSystem extends WebGlRenderingSystem {
     indices[index * 6 + 5] = index * 4 + 1;
   }
 
-  Position getPosition(Entity entity) => pm[entity];
+  Position getPosition(Entity entity) => positionMapper[entity];
 
   @override
   void render(int length) {
@@ -351,15 +367,16 @@ abstract class WebGlSpriteRenderingSystem extends WebGlRenderingSystem {
     gl
       ..uniformMatrix4fv(gl.getUniformLocation(program, 'uViewProjection'),
           false, create2dViewProjectionMatrix().storage)
-      ..drawElements(TRIANGLES, length * 6, UNSIGNED_SHORT, 0);
+      ..drawElements(WebGL.TRIANGLES, length * 6, WebGL.UNSIGNED_SHORT, 0);
   }
 
-  Matrix4 create2dViewProjectionMatrix() => vpmm.create2dViewProjectionMatrix();
+  Matrix4 create2dViewProjectionMatrix() =>
+      webGlViewProjectionMatrixManager.create2dViewProjectionMatrix();
 
   @override
   void updateLength(int length) {
-    values = new Float32List(length * 4 * 2 * 2);
-    indices = new Uint16List(length * 6);
+    values = Float32List(length * 4 * 2 * 2);
+    indices = Uint16List(length * 6);
   }
 
   @override

@@ -1,15 +1,15 @@
 part of gamedev_helpers_shared;
 
 class EventBus {
-  final event_bus.EventBus eventBus = new event_bus.EventBus();
-  final event_bus.EventBus eventBusSync = new event_bus.EventBus(sync: true);
+  final event_bus.EventBus eventBus = event_bus.EventBus();
+  final event_bus.EventBus eventBusSync = event_bus.EventBus(sync: true);
 
   void destroy() {
     eventBus.destroy();
     eventBusSync.destroy();
   }
 
-  void fire(Object event, {bool sync: false}) {
+  void fire(Object event, {bool sync = false}) {
     if (sync) {
       eventBusSync.fire(event);
     } else {
@@ -17,8 +17,8 @@ class EventBus {
     }
   }
 
-  Stream on([Type eventType]) {
-    final sc = new StreamController.broadcast(sync: true);
+  Stream on<T>() {
+    final sc = StreamController.broadcast(sync: true);
     var countDone = 0;
     void done() {
       countDone++;
@@ -27,8 +27,8 @@ class EventBus {
       }
     }
 
-    eventBus.on(eventType).listen(sc.add, onDone: done);
-    eventBusSync.on(eventType).listen(sc.add, onDone: done);
+    eventBus.on<T>().listen(sc.add, onDone: done);
+    eventBusSync.on<T>().listen(sc.add, onDone: done);
     return sc.stream;
   }
 }

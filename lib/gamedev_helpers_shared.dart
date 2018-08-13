@@ -15,17 +15,22 @@ export 'package:tweenengine/tweenengine.dart';
 export 'package:vector_math/vector_math.dart' hide Quad;
 
 part 'src/shared/dartemis/systems/tweening.dart';
+part 'src/shared/dartemis/systems/simple_acceleration_system.dart';
+part 'src/shared/dartemis/systems/simple_gravity_system.dart';
+part 'src/shared/dartemis/systems/simple_movement_system.dart';
 part 'src/shared/dartemis/systems/animation_system.dart';
 part 'src/shared/dartemis/managers/web_gl_view_projection_matrix_manager.dart';
 part 'src/shared/dartemis/managers/camera_manager.dart';
 part 'src/shared/dartemis/components.dart';
 part 'src/shared/event_bus.dart';
 
-final EventBus eventBus = new EventBus();
+part 'gamedev_helpers_shared.g.dart';
 
-final Random random = new Random();
+final EventBus eventBus = EventBus();
 
-final TweenManager tweenManager = new TweenManager();
+final Random random = Random();
+
+final TweenManager tweenManager = TweenManager();
 const String playerTag = 'player';
 
 class AnalyticsTrackEvent {

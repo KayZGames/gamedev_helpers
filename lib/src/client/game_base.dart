@@ -5,15 +5,14 @@ abstract class GameBase {
   static const int physics = 1;
 
   final StreamController<bool> _pauseStreamController =
-      new StreamController<bool>();
+      StreamController<bool>();
   final CanvasElement canvas;
-  final CanvasRenderingContext ctx;
+  final CanvasRenderingContext2D ctx;
+  final RenderingContext2 gl;
   final GameHelper helper;
   final String spriteSheetName;
   final String bodyDefsName;
   final String musicName;
-  final int _width;
-  final int _height;
   final bool webgl;
   World world;
   Map<String, List<Polygon>> bodyDefs;
@@ -29,46 +28,44 @@ abstract class GameBase {
 
   /// [appName] is used to refernce assets and has to be the name of the library
   /// which contains the assets. Usually the game itself.
-  GameBase(String appName, String canvasSelector, int width, int height,
-      {this.spriteSheetName: 'assets',
-      this.bodyDefsName: 'assets',
-      this.musicName: null,
-      this.audioContext: null,
-      this.webgl: false,
-      bool depthTest: true,
-      bool blending: true})
+  GameBase(String appName, String canvasSelector,
+      {this.spriteSheetName = 'assets',
+      this.bodyDefsName = 'assets',
+      this.musicName,
+      this.audioContext,
+      this.webgl = false,
+      bool depthTest = true,
+      bool blending = true})
       : canvas = querySelector(canvasSelector),
-        helper = new GameHelper(appName, audioContext),
+        helper = GameHelper(appName, audioContext),
         ctx = webgl
-            ? (querySelector(canvasSelector) as CanvasElement).getContext3d()
-            : (querySelector(canvasSelector) as CanvasElement).context2D
-                as CanvasRenderingContext,
-        _width = width,
-        _height = height {
-    canvas
-      ..width = width
-      ..height = height;
-    if (!webgl) {
-      (ctx as CanvasRenderingContext2D)
-        ..textBaseline = "top"
+            ? null
+            : (querySelector(canvasSelector) as CanvasElement).context2D,
+        gl = webgl
+            ? (querySelector(canvasSelector) as CanvasElement)
+                .getContext('webgl2')
+            : null {
+    if (ctx != null) {
+      ctx
+        ..textBaseline = 'top'
         ..font = '12px Verdana';
-    } else if (ctx is RenderingContext) {
+    } else if (gl != null) {
       if (depthTest) {
-        (ctx as RenderingContext).enable(RenderingContext.DEPTH_TEST);
+        gl.enable(WebGL.DEPTH_TEST);
       }
       if (blending) {
-        (ctx as RenderingContext)
-          ..enable(BLEND)
-          ..blendFunc(SRC_ALPHA, ONE_MINUS_SRC_ALPHA);
+        gl
+          ..enable(WebGL.BLEND)
+          ..blendFunc(WebGL.SRC_ALPHA, WebGL.ONE_MINUS_SRC_ALPHA);
       }
-//      (ctx as RenderingContext)
-//                               ..enable(RenderingContext.POLYGON_OFFSET_FILL);
+//      (ctx as RenderingContext2)
+//                               ..enable(WebGL.POLYGON_OFFSET_FILL);
 //                               ..polygonOffset(1.0, 1.0);
     } else {
       _errorInitializingWebGL = true;
     }
     canvas.onFullscreenChange.listen(_handleFullscreen);
-    world = createWorld();
+    world = createWorld()..addManager(CameraManager());
     final fullscreenButton = querySelector('button#fullscreen');
     if (null != fullscreenButton) {
       fullscreenButton.onClick
@@ -78,10 +75,9 @@ abstract class GameBase {
 
   /// [appName] is used to refernce assets and has to be the name of the library
   /// which contains the assets. Usually the game itself.
-  GameBase.noAssets(
-      String appName, String canvasSelector, int width, int height,
-      {bool webgl: false, bool depthTest: true, bool blending: true})
-      : this(appName, canvasSelector, width, height,
+  GameBase.noAssets(String appName, String canvasSelector,
+      {bool webgl = false, bool depthTest = true, bool blending = true})
+      : this(appName, canvasSelector,
             spriteSheetName: null,
             bodyDefsName: null,
             musicName: null,
@@ -92,17 +88,16 @@ abstract class GameBase {
   GameBase.noCanvas(String appNahme)
       : canvas = null,
         ctx = null,
-        helper = new GameHelper(appNahme, null),
+        gl = null,
+        helper = GameHelper(appNahme, null),
         bodyDefsName = null,
         spriteSheetName = null,
         musicName = null,
-        _width = null,
-        _height = null,
         webgl = false {
     world = createWorld();
   }
 
-  World createWorld() => new World();
+  World createWorld() => World();
 
   bool get webGlInitialized => webgl && !_errorInitializingWebGL;
 
@@ -203,11 +198,12 @@ abstract class GameBase {
     world.process(1);
 
     if (!_stop && !_pause) {
-      new Future.delayed(const Duration(milliseconds: 5), physicsLoop);
+      Future.delayed(const Duration(milliseconds: 5), physicsLoop);
     }
   }
 
-  void _firstUpdate(double time) {
+  void _firstUpdate(num time) {
+    _resize();
     _lastTime = time / 1000.0;
     world
       ..delta = 1 / 60
@@ -215,7 +211,8 @@ abstract class GameBase {
     window.animationFrame.then((time) => update(time: time / 1000.0));
   }
 
-  void update({double time}) {
+  void update({num time}) {
+    _resize();
     var delta = time - _lastTime;
     delta = min(0.05, delta);
     world.delta = delta;
@@ -228,24 +225,33 @@ abstract class GameBase {
 
   void _handleFullscreen(Event e) {
     fullscreen = !fullscreen;
-    if (fullscreen) {
-      canvas
-        ..width = window.screen.width
-        ..height = window.screen.height;
-    } else {
-      canvas
-        ..width = _width
-        ..height = _height;
+    _resize();
+  }
+
+  void _resize() {
+    if (null != canvas) {
+      handleResize(document.body.clientWidth, document.body.clientHeight);
+    }
+  }
+
+  void handleResize(int width, int height) {
+    resizeCanvas(canvas, width, height);
+    (world.getManager<CameraManager>())
+      ..width = width
+      ..height = height;
+    if (paused || isStopped) {
+      world
+        ..delta = 0.0
+        ..process(GameBase.rendering);
     }
     if (!webgl) {
       canvas.context2D
         ..textBaseline = "top"
         ..font = '12px Verdana';
+    } else {
+      gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
     }
-    handleResize(canvas.width, canvas.height);
   }
-
-  void handleResize(int width, int height) {}
 
   /// Create your entities
   void createEntities();
@@ -274,4 +280,13 @@ abstract class GameBase {
 
   Entity addEntity(List<Component> components) =>
       world.createAndAddEntity(components);
+
+  void resizeCanvas(CanvasElement canvas, int width, int height) {
+    canvas
+      ..width = width
+      ..height = height;
+    canvas.style
+      ..width = '${width}px'
+      ..height = '${height}px';
+  }
 }

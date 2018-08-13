@@ -3,11 +3,11 @@ part of gamedev_helpers;
 class FpsRenderingSystem extends VoidEntitySystem {
   static const _deltaCount = 20;
   final List<double> deltas =
-      new List.generate(_deltaCount, (_) => 0.0, growable: false);
+      List.generate(_deltaCount, (_) => 0.0, growable: false);
   final String fillStyle;
 
   CanvasRenderingContext2D ctx;
-  FpsRenderingSystem(this.ctx, {this.fillStyle: 'black'});
+  FpsRenderingSystem(this.ctx, {this.fillStyle = 'black'});
 
   @override
   void processSystem() {
@@ -17,16 +17,20 @@ class FpsRenderingSystem extends VoidEntitySystem {
         _deltaCount / deltas.reduce((combined, current) => combined + current);
 
     ctx
+      ..save()
+      ..font = '20px Verdana'
+      ..textBaseline = 'top'
       ..fillStyle = fillStyle
       ..fillText('FPS: ${fps.toStringAsFixed(2)}', 5, 5)
-      ..fillText('Entities: ${world.entityManager.activeEntityCount}', 5, 25);
+      ..fillText('Entities: ${world.entityManager.activeEntityCount}', 5, 25)
+      ..restore();
   }
 }
 
 class FpsPrintingSystem extends VoidEntitySystem {
   static const _deltaCount = 20;
   final List<double> deltas =
-      new List.generate(_deltaCount, (_) => 0.0, growable: false);
+      List.generate(_deltaCount, (_) => 0.0, growable: false);
 
   FpsPrintingSystem();
 

@@ -5,11 +5,25 @@ class Sound extends Component {
   Sound(this.clipName);
 }
 
+class Acceleration extends Component {
+  double x, y;
+
+  Acceleration(this.x, this.y);
+}
+
+class Velocity extends Component {
+  double x, y;
+
+  Velocity(this.x, this.y);
+}
+
 class Position extends Component {
   double x, y;
 
   Position(this.x, this.y);
 }
+
+class Mass extends Component {}
 
 class Orientation extends Component {
   double angle;
@@ -51,13 +65,13 @@ class Color extends Component {
 }
 
 class Renderable extends Component {
-  String _name;
+  String name;
   int maxFrames;
   double timePerFrame;
   double time;
   double scale;
   bool facesRight;
-  Renderable(this._name,
+  Renderable(this.name,
       {this.maxFrames = 1,
       this.timePerFrame = 0.2,
       this.facesRight = true,
@@ -65,11 +79,11 @@ class Renderable extends Component {
       this.scale = 1.0});
 
   Renderable.fromRenderable(Renderable other, this.time, this.scale)
-      : _name = other._name,
+      : name = other.name,
         maxFrames = other.maxFrames,
         timePerFrame = other.timePerFrame,
         facesRight = other.facesRight;
 
-  String get name =>
-      '${_name}_${maxFrames - (time / timePerFrame % maxFrames).toInt() - 1}';
+  String get spriteName =>
+      '${name}_${maxFrames - (time / timePerFrame % maxFrames).toInt() - 1}';
 }
