@@ -184,11 +184,9 @@ dependencies:
   dartemis:
     git:
       url: git://github.com/denniskaselow/dartemis.git
-      ref: feature/ddc
   gamedev_helpers:
     git:
       url: git://github.com/kayzgames/gamedev_helpers.git
-      ref: feature/ddc
 dev_dependencies:
   build_runner: ^0.9.0
   build_web_compilers: any  
