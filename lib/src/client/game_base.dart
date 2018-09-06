@@ -14,6 +14,7 @@ abstract class GameBase {
   final String bodyDefsName;
   final String musicName;
   final bool webgl;
+  final bool useMaxDelta;
   World world;
   Map<String, List<Polygon>> bodyDefs;
   SpriteSheet spriteSheet;
@@ -35,7 +36,8 @@ abstract class GameBase {
       this.audioContext,
       this.webgl = false,
       bool depthTest = true,
-      bool blending = true})
+      bool blending = true,
+      this.useMaxDelta = true})
       : canvas = querySelector(canvasSelector),
         helper = GameHelper(appName, audioContext),
         ctx = webgl
@@ -76,12 +78,16 @@ abstract class GameBase {
   /// [appName] is used to refernce assets and has to be the name of the library
   /// which contains the assets. Usually the game itself.
   GameBase.noAssets(String appName, String canvasSelector,
-      {bool webgl = false, bool depthTest = true, bool blending = true})
+      {bool webgl = false,
+      bool depthTest = true,
+      bool blending = true,
+      bool useMaxDelta = true})
       : this(appName, canvasSelector,
             spriteSheetName: null,
             bodyDefsName: null,
             musicName: null,
             webgl: webgl,
+            useMaxDelta: useMaxDelta,
             depthTest: depthTest,
             blending: blending);
 
@@ -89,6 +95,7 @@ abstract class GameBase {
       : canvas = null,
         ctx = null,
         gl = null,
+        useMaxDelta = true,
         helper = GameHelper(appNahme, null),
         bodyDefsName = null,
         spriteSheetName = null,
@@ -214,7 +221,9 @@ abstract class GameBase {
   void update({num time}) {
     _resize();
     var delta = time - _lastTime;
-    delta = min(0.05, delta);
+    if (useMaxDelta) {
+      delta = min(0.05, delta);
+    }
     world.delta = delta;
     _lastTime = time;
     world.process();
