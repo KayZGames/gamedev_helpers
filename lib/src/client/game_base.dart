@@ -45,7 +45,7 @@ abstract class GameBase {
             : (querySelector(canvasSelector) as CanvasElement).context2D,
         gl = webgl
             ? (querySelector(canvasSelector) as CanvasElement)
-                .getContext('webgl2')
+                .getContext3d()
             : null {
     if (ctx != null) {
       ctx
