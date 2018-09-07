@@ -4,7 +4,7 @@ precision mediump float;
 
 uniform sampler2D uSheet;
 uniform vec2 uSize;
-attribute vec2 vTexCoord;
+varying vec2 vTexCoord;
 
 void main() {
 	vec4 color = texture(uSheet, vTexCoord / uSize);;
