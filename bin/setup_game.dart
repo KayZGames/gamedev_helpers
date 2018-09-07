@@ -537,7 +537,7 @@ class PositionRenderingSystem extends _\$PositionRenderingSystem {
   Float32List items;
   Uint16List indices;
 
-  PositionRenderingSystem(RenderingContext2 gl) : super(gl) {
+  PositionRenderingSystem(RenderingContext gl) : super(gl) {
     attributes = [Attrib('pos', 2)];
   }
 

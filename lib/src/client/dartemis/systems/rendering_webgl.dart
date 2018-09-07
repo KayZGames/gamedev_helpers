@@ -1,7 +1,7 @@
 part of gamedev_helpers;
 
 class WebGlCanvasCleaningSystem extends VoidEntitySystem {
-  RenderingContext2 gl;
+  RenderingContext gl;
 
   WebGlCanvasCleaningSystem(this.gl);
 
@@ -19,7 +19,7 @@ class WebGlCanvasCleaningSystem extends VoidEntitySystem {
 abstract class WebGlRenderingMixin {
   static const int fsize = Float32List.bytesPerElement;
 
-  RenderingContext2 gl;
+  RenderingContext gl;
   Program program;
   ShaderSource shaderSource;
   Buffer elementBuffer;
@@ -139,7 +139,7 @@ abstract class WebGlRenderingSystem extends EntitySystem
     with WebGlRenderingMixin {
   int maxLength = 0;
 
-  WebGlRenderingSystem(RenderingContext2 gl, Aspect aspect) : super(aspect) {
+  WebGlRenderingSystem(RenderingContext gl, Aspect aspect) : super(aspect) {
     this.gl = gl;
   }
 
@@ -175,7 +175,7 @@ abstract class WebGlRenderingSystem extends EntitySystem
 
 abstract class VoidWebGlRenderingSystem extends VoidEntitySystem
     with WebGlRenderingMixin {
-  VoidWebGlRenderingSystem(RenderingContext2 gl) {
+  VoidWebGlRenderingSystem(RenderingContext gl) {
     this.gl = gl;
   }
 
@@ -200,7 +200,7 @@ class ParticleRenderingSystem extends _$ParticleRenderingSystem {
   Float32List positions;
   Float32List colors;
 
-  ParticleRenderingSystem(RenderingContext2 gl) : super(gl);
+  ParticleRenderingSystem(RenderingContext gl) : super(gl);
 
   @override
   void processEntity(int index, Entity entity) {
@@ -264,7 +264,7 @@ abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
   Float32List values;
   Uint16List indices;
 
-  WebGlSpriteRenderingSystem(RenderingContext2 gl, this.sheet, Aspect aspect)
+  WebGlSpriteRenderingSystem(RenderingContext gl, this.sheet, Aspect aspect)
       : super(gl, aspect);
 
   @override

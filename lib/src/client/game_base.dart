@@ -8,7 +8,7 @@ abstract class GameBase {
       StreamController<bool>();
   final CanvasElement canvas;
   final CanvasRenderingContext2D ctx;
-  final RenderingContext2 gl;
+  final RenderingContext gl;
   final GameHelper helper;
   final String spriteSheetName;
   final String bodyDefsName;
@@ -60,7 +60,7 @@ abstract class GameBase {
           ..enable(WebGL.BLEND)
           ..blendFunc(WebGL.SRC_ALPHA, WebGL.ONE_MINUS_SRC_ALPHA);
       }
-//      (ctx as RenderingContext2)
+//      (ctx as RenderingContext)
 //                               ..enable(WebGL.POLYGON_OFFSET_FILL);
 //                               ..polygonOffset(1.0, 1.0);
     } else {

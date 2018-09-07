@@ -12,7 +12,7 @@ abstract class _$ParticleRenderingSystem extends WebGlRenderingSystem {
   Mapper<Color> colorMapper;
   WebGlViewProjectionMatrixManager webGlViewProjectionMatrixManager;
   TagManager tagManager;
-  _$ParticleRenderingSystem(RenderingContext2 gl)
+  _$ParticleRenderingSystem(RenderingContext gl)
       : super(gl, Aspect.empty()..allOf([Position, Particle, Color]));
   @override
   void initialize() {
@@ -32,7 +32,7 @@ abstract class _$WebGlSpriteRenderingSystem extends WebGlRenderingSystem {
   Mapper<Position> positionMapper;
   TagManager tagManager;
   WebGlViewProjectionMatrixManager webGlViewProjectionMatrixManager;
-  _$WebGlSpriteRenderingSystem(RenderingContext2 gl, Aspect aspect)
+  _$WebGlSpriteRenderingSystem(RenderingContext gl, Aspect aspect)
       : super(gl, aspect..allOf([Orientation, Renderable]));
   @override
   void initialize() {
