@@ -238,8 +238,8 @@ void main() {
   </head>
   <body>
     <div id="gamecontainer">
-      <canvas id="game" width="800px" height="600px"></canvas>
-      <canvas id="hud" width="800px" height="600px"></canvas>
+      <canvas id="game"></canvas>
+      <canvas id="hud"></canvas>
     </div>
   </body>
 </html>
@@ -251,8 +251,6 @@ body {
   padding: 0;
   width: 100vw;
   height: 100vh;
-  min-width: 800px;
-  min-height: 450px;
   background-color: black;
   display: flex;
   justify-content: center;
@@ -272,8 +270,6 @@ body {
   padding: 0;
   width: 100vw;
   height: 100vh;
-  min-width: 800px;
-  min-height: 450px;
   background-color: black;
   display: flex;
   justify-content: center;
@@ -348,18 +344,6 @@ class Game extends GameBase {
       ]
     };
   }
-
-  @override
-  void handleResize(int width, int height) {
-    width = max(800, width);
-    height = max(450, height);
-    if (width / height > 16 / 9) {
-      width = (16 * height) ~/ 9;
-    } else if (width / height < 16 / 9) {
-      height = (9 * width) ~/ 16;
-    }
-    super.handleResize(width, height);
-  }
 }
 """;
 
@@ -425,13 +409,6 @@ class Game extends GameBase {
 
   @override
   void handleResize(int width, int height) {
-    width = max(800, width);
-    height = max(450, height);
-    if (width / height > 16 / 9) {
-      width = (16 * height) ~/ 9;
-    } else if (width / height < 16 / 9) {
-      height = (9 * width) ~/ 16;
-    }
     container.style
       ..width = '\${width}px'
       ..height = '\${height}px';
