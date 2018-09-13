@@ -18,11 +18,10 @@ class FpsRenderingSystem extends VoidEntitySystem {
 
     ctx
       ..save()
-      ..font = '20px Verdana'
+      ..font = '10px Verdana'
       ..textBaseline = 'top'
       ..fillStyle = fillStyle
       ..fillText('FPS: ${fps.toStringAsFixed(2)}', 5, 5)
-      ..fillText('Entities: ${world.entityManager.activeEntityCount}', 5, 25)
       ..restore();
   }
 }
