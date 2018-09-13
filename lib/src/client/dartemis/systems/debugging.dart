@@ -7,7 +7,7 @@ class FpsRenderingSystem extends VoidEntitySystem {
   final String fillStyle;
 
   CanvasRenderingContext2D ctx;
-  FpsRenderingSystem(this.ctx, {this.fillStyle = 'black'});
+  FpsRenderingSystem(this.ctx, this.fillStyle);
 
   @override
   void processSystem() {
