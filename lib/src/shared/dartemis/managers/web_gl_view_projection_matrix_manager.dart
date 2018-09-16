@@ -4,6 +4,8 @@ part of gamedev_helpers_shared;
     mapper: [Position, Orientation], manager: [CameraManager, TagManager])
 class WebGlViewProjectionMatrixManager
     extends _$WebGlViewProjectionMatrixManager {
+  final int maxBaseViewRange;
+  WebGlViewProjectionMatrixManager(this.maxBaseViewRange);
   Matrix4 create2dViewProjectionMatrix() {
     final playerEntity = tagManager.getEntity(playerTag);
     final p = positionMapper[playerEntity];
@@ -16,8 +18,14 @@ class WebGlViewProjectionMatrixManager
     final twodOrthographicMatrix = Matrix4.identity();
     final width = cameraManager.width;
     final height = cameraManager.height;
-    setOrthographicMatrix(twodOrthographicMatrix, px - width / 2,
-        px + width / 2, py - height / 2, py + height / 2, 250.0, -250.0);
+    setOrthographicMatrix(
+        twodOrthographicMatrix,
+        px - width / 2,
+        px + width / 2,
+        py - height / 2,
+        py + height / 2,
+        1.0,
+        -1.0);
     if (cameraManager.lockCamera) {
       twodOrthographicMatrix
         ..translate(px, py)

@@ -44,8 +44,7 @@ abstract class GameBase {
             ? null
             : (querySelector(canvasSelector) as CanvasElement).context2D,
         gl = webgl
-            ? (querySelector(canvasSelector) as CanvasElement)
-                .getContext3d()
+            ? (querySelector(canvasSelector) as CanvasElement).getContext3d()
             : null {
     if (ctx != null) {
       ctx
@@ -67,7 +66,8 @@ abstract class GameBase {
       _errorInitializingWebGL = true;
     }
     canvas.onFullscreenChange.listen(_handleFullscreen);
-    world = createWorld()..addManager(CameraManager());
+    world = createWorld()
+      ..addManager(CameraManager(canvas.width, canvas.height));
     final fullscreenButton = querySelector('button#fullscreen');
     if (null != fullscreenButton) {
       fullscreenButton.onClick
@@ -239,15 +239,20 @@ abstract class GameBase {
 
   void _resize() {
     if (null != canvas) {
-      handleResize(document.body.clientWidth, document.body.clientHeight);
+      _updateCameraManager(
+          document.body.clientWidth, document.body.clientHeight);
+      handleResize();
     }
   }
 
-  void handleResize(int width, int height) {
-    resizeCanvas(canvas, width, height);
+  void _updateCameraManager(int width, int height) {
     (world.getManager<CameraManager>())
-      ..width = width
-      ..height = height;
+      ..clientWidth = width
+      ..clientHeight = height;
+  }
+
+  void handleResize() {
+    resizeCanvas(canvas);
     if (paused || isStopped) {
       world
         ..delta = 0.0
@@ -290,12 +295,13 @@ abstract class GameBase {
   Entity addEntity(List<Component> components) =>
       world.createAndAddEntity(components);
 
-  void resizeCanvas(CanvasElement canvas, int width, int height) {
+  void resizeCanvas(CanvasElement canvas, {bool useClientSize = false}) {
+    final camera = world.getManager<CameraManager>();
     canvas
-      ..width = width
-      ..height = height;
+      ..width = useClientSize ? camera.clientWidth : camera.width
+      ..height = useClientSize ? camera.clientHeight : camera.height;
     canvas.style
-      ..width = '${width}px'
-      ..height = '${height}px';
+      ..width = '${camera.clientWidth}px'
+      ..height = '${camera.clientHeight}px';
   }
 }
