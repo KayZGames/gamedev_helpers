@@ -5,8 +5,9 @@ class CameraManager extends Manager {
   double _scalingFactor;
   bool lockCamera = false;
   final int maxViewportSize;
+  double gameZoom;
   CameraManager(this._viewportWidth, this._viewportHeight,
-      [this.maxViewportSize = 1000]) {
+      {this.maxViewportSize = 1000, this.gameZoom = 1.0}) {
     _calculateScalingFactor();
   }
 
@@ -32,5 +33,6 @@ class CameraManager extends Manager {
     } else if (_viewportHeight >= _viewportWidth) {
       _scalingFactor = maxViewportSize / _viewportHeight;
     }
+    _scalingFactor = min(16 / 9, max(9 / 16, _scalingFactor));
   }
 }

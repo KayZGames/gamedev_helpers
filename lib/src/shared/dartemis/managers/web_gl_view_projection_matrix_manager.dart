@@ -16,8 +16,8 @@ class WebGlViewProjectionMatrixManager
     final playerEntity = tagManager.getEntity(playerTag);
     final orientation = orientationMapper[playerEntity];
     final twodOrthographicMatrix = Matrix4.identity();
-    final width = cameraManager.width;
-    final height = cameraManager.height;
+    final width = cameraManager.width * cameraManager.gameZoom;
+    final height = cameraManager.height * cameraManager.gameZoom;
     setOrthographicMatrix(
         twodOrthographicMatrix,
         px - width / 2,
