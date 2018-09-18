@@ -33,6 +33,5 @@ class CameraManager extends Manager {
     } else if (_viewportHeight >= _viewportWidth) {
       _scalingFactor = maxViewportSize / _viewportHeight;
     }
-    _scalingFactor = min(16 / 9, max(9 / 16, _scalingFactor));
   }
 }
