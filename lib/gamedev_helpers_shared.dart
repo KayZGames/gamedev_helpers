@@ -32,6 +32,7 @@ final Random random = Random();
 
 final TweenManager tweenManager = TweenManager();
 const String playerTag = 'player';
+const String cameraTag = 'camera';
 
 class AnalyticsTrackEvent {
   String action;

@@ -7,14 +7,14 @@ class WebGlViewProjectionMatrixManager
   final int maxBaseViewRange;
   WebGlViewProjectionMatrixManager(this.maxBaseViewRange);
   Matrix4 create2dViewProjectionMatrix() {
-    final playerEntity = tagManager.getEntity(playerTag);
-    final p = positionMapper[playerEntity];
+    final cameraEntity = tagManager.getEntity(cameraTag);
+    final p = positionMapper[cameraEntity];
     return create2dViewProjectionMatrixForPosition(p.x, p.y);
   }
 
   Matrix4 create2dViewProjectionMatrixForPosition(double px, double py) {
-    final playerEntity = tagManager.getEntity(playerTag);
-    final orientation = orientationMapper[playerEntity];
+    final cameraEntity = tagManager.getEntity(cameraTag);
+    final orientation = orientationMapper[cameraEntity];
     final twodOrthographicMatrix = Matrix4.identity();
     final width = cameraManager.width * cameraManager.gameZoom;
     final height = cameraManager.height * cameraManager.gameZoom;
