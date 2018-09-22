@@ -28,10 +28,15 @@ abstract class WebGlRenderingMixin {
   bool success = true;
 
   void initProgram() {
-    final vShader = _createShader(WebGL.VERTEX_SHADER, shaderSource.vShader);
-    final fShader = _createShader(WebGL.FRAGMENT_SHADER, shaderSource.fShader);
-
-    _createProgram(vShader, fShader);
+    final vShader = _createShader(
+        WebGL.VERTEX_SHADER, shaderSource.vShader, '$vShaderFile.vert');
+    if (success) {
+      final fShader = _createShader(
+          WebGL.FRAGMENT_SHADER, shaderSource.fShader, '$fShaderFile.frag');
+      if (success) {
+        _createProgram(vShader, fShader);
+      }
+    }
   }
 
   void _createProgram(Shader vShader, Shader fShader) {
@@ -48,16 +53,16 @@ abstract class WebGlRenderingMixin {
     }
   }
 
-  Shader _createShader(int type, String source) {
+  Shader _createShader(int type, String source, String filename) {
     final shader = gl.createShader(type);
     gl
       ..shaderSource(shader, source)
       ..compileShader(shader);
     final compileSuccess = gl.getShaderParameter(shader, WebGL.COMPILE_STATUS);
     if (!compileSuccess) {
+      print(
+          '$runtimeType - Error compiling shader $filename: ${gl.getShaderInfoLog(shader)}');
       success = false;
-      throw ArgumentError(
-          '$runtimeType - Error compiling shader $vShaderFile or $fShaderFile: ${gl.getShaderInfoLog(shader)}');
     }
     return shader;
   }
