@@ -18,9 +18,30 @@ class Velocity extends Component {
 }
 
 class Position extends Component {
-  double x, y;
+  double _x, _y;
+  double _oldX, _oldY;
 
-  Position(this.x, this.y);
+  Position(this._x, this._y)
+      : _oldX = _x,
+        _oldY = _y;
+
+  double get y => _y;
+
+  set y(double value) {
+    _oldY = _y;
+    _y = value;
+  }
+
+  double get x => _x;
+
+  set x(double value) {
+    _oldX = _x;
+    _x = value;
+  }
+
+  double get oldY => _oldY;
+
+  double get oldX => _oldX;
 }
 
 class Mass extends Component {}
