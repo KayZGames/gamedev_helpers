@@ -198,12 +198,23 @@ abstract class VoidWebGlRenderingSystem extends VoidEntitySystem
   void render();
 }
 
-@Generate(WebGlRenderingSystem,
-    allOf: [Position, Particle, Color],
-    manager: [WebGlViewProjectionMatrixManager, TagManager])
+@Generate(
+  WebGlRenderingSystem,
+  allOf: [
+    Position,
+    Particle,
+    Color,
+  ],
+  manager: [
+    WebGlViewProjectionMatrixManager,
+    TagManager,
+    CameraManager,
+  ],
+)
 class ParticleRenderingSystem extends _$ParticleRenderingSystem {
   Float32List positions;
   Float32List colors;
+  Float32List radius;
 
   ParticleRenderingSystem(RenderingContext gl) : super(gl);
 
@@ -217,6 +228,7 @@ class ParticleRenderingSystem extends _$ParticleRenderingSystem {
 
     positions[pOffset] = p.x;
     positions[pOffset + 1] = p.y;
+    radius[index] = 1.0 / cameraManager.scalingFactor;
 
     colors[cOffset] = c.r;
     colors[cOffset + 1] = c.g;
@@ -234,6 +246,7 @@ class ParticleRenderingSystem extends _$ParticleRenderingSystem {
             .storage);
 
     buffer('aPosition', positions, 2);
+    buffer('aRadius', radius, 1);
     buffer('aColor', colors, 4);
 
     gl.drawArrays(WebGL.POINTS, 0, length);
@@ -241,7 +254,8 @@ class ParticleRenderingSystem extends _$ParticleRenderingSystem {
 
   @override
   void updateLength(int length) {
-    positions = Float32List(length * 2);
+    positions = Float32List(length * 3);
+    radius = Float32List(length);
     colors = Float32List(length * 4);
   }
 

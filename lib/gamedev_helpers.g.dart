@@ -12,6 +12,7 @@ abstract class _$ParticleRenderingSystem extends WebGlRenderingSystem {
   Mapper<Color> colorMapper;
   WebGlViewProjectionMatrixManager webGlViewProjectionMatrixManager;
   TagManager tagManager;
+  CameraManager cameraManager;
   _$ParticleRenderingSystem(RenderingContext gl)
       : super(gl, Aspect.empty()..allOf([Position, Particle, Color]));
   @override
@@ -23,6 +24,7 @@ abstract class _$ParticleRenderingSystem extends WebGlRenderingSystem {
     webGlViewProjectionMatrixManager =
         world.getManager<WebGlViewProjectionMatrixManager>();
     tagManager = world.getManager<TagManager>();
+    cameraManager = world.getManager<CameraManager>();
   }
 }
 

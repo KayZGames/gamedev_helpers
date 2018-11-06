@@ -295,11 +295,11 @@ abstract class GameBase {
   Entity addEntity(List<Component> components) =>
       world.createAndAddEntity(components);
 
-  void resizeCanvas(CanvasElement canvas, {bool useClientSize = false}) {
+  void resizeCanvas(CanvasElement canvas) {
     final camera = world.getManager<CameraManager>();
     canvas
-      ..width = useClientSize ? camera.clientWidth : camera.width
-      ..height = useClientSize ? camera.clientHeight : camera.height;
+      ..width = camera.clientWidth
+      ..height = camera.clientHeight;
     canvas.style
       ..width = '${camera.clientWidth}px'
       ..height = '${camera.clientHeight}px';
