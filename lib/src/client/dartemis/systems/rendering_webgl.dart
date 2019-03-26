@@ -16,7 +16,7 @@ class WebGlCanvasCleaningSystem extends VoidEntitySystem {
   }
 }
 
-abstract class WebGlRenderingMixin {
+mixin WebGlRenderingMixin {
   static const int fsize = Float32List.bytesPerElement;
 
   RenderingContext gl;
@@ -45,10 +45,11 @@ abstract class WebGlRenderingMixin {
       ..attachShader(program, vShader)
       ..attachShader(program, fShader)
       ..linkProgram(program);
-    final linkSuccess = gl.getProgramParameter(program, WebGL.LINK_STATUS);
+    final linkSuccess =
+        gl.getProgramParameter(program, WebGL.LINK_STATUS) as bool;
     if (!linkSuccess) {
       print(
-          '$runtimeType - Error linking program: ${gl.getProgramInfoLog(program)}');
+          '''$runtimeType - Error linking program: ${gl.getProgramInfoLog(program)}''');
       success = false;
     }
   }
@@ -58,10 +59,11 @@ abstract class WebGlRenderingMixin {
     gl
       ..shaderSource(shader, source)
       ..compileShader(shader);
-    final compileSuccess = gl.getShaderParameter(shader, WebGL.COMPILE_STATUS);
+    final compileSuccess =
+        gl.getShaderParameter(shader, WebGL.COMPILE_STATUS) as bool;
     if (!compileSuccess) {
       print(
-          '$runtimeType - Error compiling shader $filename: ${gl.getShaderInfoLog(shader)}');
+          '''$runtimeType - Error compiling shader $filename: ${gl.getShaderInfoLog(shader)}''');
       success = false;
     }
     return shader;
@@ -95,12 +97,12 @@ abstract class WebGlRenderingMixin {
     gl
       ..bindBuffer(WebGL.ARRAY_BUFFER, elementBuffer)
       ..bufferData(WebGL.ARRAY_BUFFER, items, WebGL.DYNAMIC_DRAW);
-    int offset = 0;
-    int elementsPerItem = 0;
-    for (Attrib attribute in attributes) {
+    var offset = 0;
+    var elementsPerItem = 0;
+    for (final attribute in attributes) {
       elementsPerItem += attribute.size;
     }
-    for (Attrib attribute in attributes) {
+    for (final attribute in attributes) {
       final attribLocation = gl.getAttribLocation(program, attribute.name);
       if (attribLocation == -1) {
         throw ArgumentError(
@@ -163,9 +165,9 @@ abstract class WebGlRenderingSystem extends EntitySystem
         maxLength = length;
       }
       var index = 0;
-      entities.forEach((entity) {
+      for (final entity in entities) {
         processEntity(index++, entity);
-      });
+      }
       render(length);
     }
   }

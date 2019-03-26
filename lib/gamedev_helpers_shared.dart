@@ -46,8 +46,8 @@ List<double> hslToRgb(double h, double s, double l) {
   if (s == 0.0) {
     r = g = b = l;
   } else {
-    final num q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-    final num p = 2 * l - q;
+    final q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    final p = 2 * l - q;
     r = _hue2rgb(p, q, h + 1 / 3);
     g = _hue2rgb(p, q, h);
     b = _hue2rgb(p, q, h - 1 / 3);
@@ -55,7 +55,7 @@ List<double> hslToRgb(double h, double s, double l) {
   return [r, g, b];
 }
 
-num _hue2rgb(num p, num q, num t) {
+double _hue2rgb(double p, double q, double t) {
   var tNorm = t;
   if (tNorm < 0) {
     tNorm += 1;
@@ -76,7 +76,7 @@ num _hue2rgb(num p, num q, num t) {
 
 /// Converts rgb to hsl. All values between 0.0 and 1.0.
 List<double> rgbToHsl(double red, double green, double blue) {
-  final double maxv = max(max(red, green), blue),
+  final maxv = max(max(red, green), blue),
       minv = min(min(red, green), blue);
   final l = (maxv + minv) / 2.0;
   double h, s;

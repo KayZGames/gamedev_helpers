@@ -2,8 +2,13 @@ part of gamedev_helpers;
 
 abstract class GenericInputHandlingSystem extends EntityProcessingSystem {
   /// to prevent scrolling
-  final Set<int> preventDefaultKeys = Set<int>.from(
-      [KeyCode.UP, KeyCode.DOWN, KeyCode.LEFT, KeyCode.RIGHT, KeyCode.SPACE]);
+  final Set<int> preventDefaultKeys = <int>{
+    KeyCode.UP,
+    KeyCode.DOWN,
+    KeyCode.LEFT,
+    KeyCode.RIGHT,
+    KeyCode.SPACE
+  };
   final Map<int, bool> keyState = <int, bool>{};
   final Map<int, bool> unpress = <int, bool>{};
   StreamSubscription _onKeyUpSubscription;

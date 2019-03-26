@@ -38,7 +38,7 @@ abstract class GameBase {
       bool depthTest = true,
       bool blending = true,
       this.useMaxDelta = true})
-      : canvas = querySelector(canvasSelector),
+      : canvas = querySelector(canvasSelector) as CanvasElement,
         helper = GameHelper(appName, audioContext),
         ctx = webgl
             ? null
@@ -115,10 +115,10 @@ abstract class GameBase {
 
   /// Do whatever you have to do before starting to create [Entity]s and
   /// [EntitySystem]s.
-  Future onInit() => null;
+  Future onInit() async => null;
 
   /// Do whatever you have to do after world.initialize() was called.
-  Future onInitDone() => null;
+  Future onInitDone() async => null;
 
   Future _assetsLoaded() {
     final loader = <Future>[];
@@ -136,16 +136,14 @@ abstract class GameBase {
       loader.add(helper.loadMusic(musicName).then((result) => music = result));
     }
     return Future.wait(loader).then((_) {
-      if (null != bodyDefs) {
-        bodyDefs.forEach((bodyId, shapes) {
-          final offset = spriteSheet.sprites['$bodyId.png'].offset -
-              spriteSheet.sprites['$bodyId.png'].trimmed;
-          shapes.forEach((shape) {
-            shape.vertices =
-                shape.vertices.map((vertex) => vertex + offset).toList();
-          });
-        });
-      }
+      bodyDefs?.forEach((bodyId, shapes) {
+        final offset = spriteSheet.sprites['$bodyId.png'].offset -
+            spriteSheet.sprites['$bodyId.png'].trimmed;
+        for (final shape in shapes) {
+          shape.vertices =
+              shape.vertices.map((vertex) => vertex + offset).toList();
+        }
+      });
     });
   }
 
@@ -218,7 +216,7 @@ abstract class GameBase {
     window.animationFrame.then((time) => update(time: time / 1000.0));
   }
 
-  void update({num time}) {
+  void update({double time}) {
     _resize();
     var delta = time - _lastTime;
     if (useMaxDelta) {
@@ -260,7 +258,7 @@ abstract class GameBase {
     }
     if (!webgl) {
       canvas.context2D
-        ..textBaseline = "top"
+        ..textBaseline = 'top'
         ..font = '12px Verdana';
     } else {
       gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
@@ -274,9 +272,9 @@ abstract class GameBase {
   Map<int, List<EntitySystem>> getSystems();
 
   Future initSystems() {
-    final List<Future> shaderSourceFutures = [];
+    final shaderSourceFutures = <Future>[];
     getSystems().forEach((group, systems) {
-      for (EntitySystem system in systems) {
+      for (final system in systems) {
         world.addSystem(system, group: group);
         if (system is WebGlRenderingMixin) {
           final webglMixin = system as WebGlRenderingMixin;
@@ -292,7 +290,7 @@ abstract class GameBase {
     return Future.wait(shaderSourceFutures);
   }
 
-  Entity addEntity(List<Component> components) =>
+  Entity addEntity<T extends Component>(List<T> components) =>
       world.createAndAddEntity(components);
 
   void resizeCanvas(CanvasElement canvas) {

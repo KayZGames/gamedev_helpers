@@ -18,19 +18,12 @@ class WebGlViewProjectionMatrixManager
     final twodOrthographicMatrix = Matrix4.identity();
     final width = cameraManager.width * cameraManager.gameZoom;
     final height = cameraManager.height * cameraManager.gameZoom;
-    setOrthographicMatrix(
-        twodOrthographicMatrix,
-        px - width / 2,
-        px + width / 2,
-        py - height / 2,
-        py + height / 2,
-        1.0,
-        -1.0);
+    setOrthographicMatrix(twodOrthographicMatrix, px - width / 2,
+        px + width / 2, py - height / 2, py + height / 2, 1, -1);
     if (cameraManager.lockCamera) {
       twodOrthographicMatrix
         ..translate(px, py)
-        ..rotate(
-            Vector3(0.0, 0.0, 1.0), (pi / 2 - orientation.angle) % (2 * pi))
+        ..rotate(Vector3(0, 0, 1), (pi / 2 - orientation.angle) % (2 * pi))
         ..translate(-px, -py);
     }
     return twodOrthographicMatrix; // * rotationMatrix;
