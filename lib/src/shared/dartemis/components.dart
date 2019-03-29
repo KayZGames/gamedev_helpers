@@ -87,3 +87,8 @@ class Renderable extends Component {
   String get spriteName =>
       '${name}_${maxFrames - (time / timePerFrame % maxFrames).toInt() - 1}';
 }
+
+class Camera extends Component {
+  double zoom;
+  Camera({this.zoom = 1.0});
+}

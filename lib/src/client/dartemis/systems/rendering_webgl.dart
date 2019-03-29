@@ -240,11 +240,12 @@ class ParticleRenderingSystem extends _$ParticleRenderingSystem {
 
   @override
   void render(int length) {
+    final cameraEntity = tagManager.getEntity(cameraTag);
     gl.uniformMatrix4fv(
         gl.getUniformLocation(program, 'uViewProjection'),
         false,
         webGlViewProjectionMatrixManager
-            .create2dViewProjectionMatrix()
+            .create2dViewProjectionMatrix(cameraEntity)
             .storage);
 
     buffer('aPosition', positions, 2);
@@ -271,10 +272,18 @@ class ParticleRenderingSystem extends _$ParticleRenderingSystem {
   String get libName => 'gamedev_helpers';
 }
 
-@Generate(WebGlRenderingSystem,
-    allOf: [Orientation, Renderable],
-    mapper: [Position],
-    manager: [TagManager, WebGlViewProjectionMatrixManager])
+@Generate(
+  WebGlRenderingSystem,
+  allOf: [Orientation, Renderable],
+  mapper: [
+    Position,
+    Camera,
+  ],
+  manager: [
+    TagManager,
+    WebGlViewProjectionMatrixManager,
+  ],
+)
 abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
   SpriteSheet sheet;
 
@@ -383,16 +392,18 @@ abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
 
   @override
   void render(int length) {
+    final cameraEntity = tagManager.getEntity(cameraTag);
     bufferElements(attributes, values, indices);
 
     gl
-      ..uniformMatrix4fv(gl.getUniformLocation(program, 'uViewProjection'),
-          false, create2dViewProjectionMatrix().storage)
+      ..uniformMatrix4fv(
+          gl.getUniformLocation(program, 'uViewProjection'),
+          false,
+          webGlViewProjectionMatrixManager
+              .create2dViewProjectionMatrix(cameraEntity)
+              .storage)
       ..drawElements(WebGL.TRIANGLES, length * 6, WebGL.UNSIGNED_SHORT, 0);
   }
-
-  Matrix4 create2dViewProjectionMatrix() =>
-      webGlViewProjectionMatrixManager.create2dViewProjectionMatrix();
 
   @override
   void updateLength(int length) {

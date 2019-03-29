@@ -32,6 +32,7 @@ abstract class _$WebGlSpriteRenderingSystem extends WebGlRenderingSystem {
   Mapper<Orientation> orientationMapper;
   Mapper<Renderable> renderableMapper;
   Mapper<Position> positionMapper;
+  Mapper<Camera> cameraMapper;
   TagManager tagManager;
   WebGlViewProjectionMatrixManager webGlViewProjectionMatrixManager;
   _$WebGlSpriteRenderingSystem(RenderingContext gl, Aspect aspect)
@@ -42,6 +43,7 @@ abstract class _$WebGlSpriteRenderingSystem extends WebGlRenderingSystem {
     orientationMapper = Mapper<Orientation>(world);
     renderableMapper = Mapper<Renderable>(world);
     positionMapper = Mapper<Position>(world);
+    cameraMapper = Mapper<Camera>(world);
     tagManager = world.getManager<TagManager>();
     webGlViewProjectionMatrixManager =
         world.getManager<WebGlViewProjectionMatrixManager>();
