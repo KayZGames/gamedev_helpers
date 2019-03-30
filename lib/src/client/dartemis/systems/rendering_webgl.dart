@@ -208,7 +208,7 @@ abstract class VoidWebGlRenderingSystem extends VoidEntitySystem
     Color,
   ],
   manager: [
-    WebGlViewProjectionMatrixManager,
+    ViewProjectionMatrixManager,
     TagManager,
     CameraManager,
   ],
@@ -244,7 +244,7 @@ class ParticleRenderingSystem extends _$ParticleRenderingSystem {
     gl.uniformMatrix4fv(
         gl.getUniformLocation(program, 'uViewProjection'),
         false,
-        webGlViewProjectionMatrixManager
+        viewProjectionMatrixManager
             .create2dViewProjectionMatrix(cameraEntity)
             .storage);
 
@@ -281,7 +281,7 @@ class ParticleRenderingSystem extends _$ParticleRenderingSystem {
   ],
   manager: [
     TagManager,
-    WebGlViewProjectionMatrixManager,
+    ViewProjectionMatrixManager,
   ],
 )
 abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
@@ -399,7 +399,7 @@ abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
       ..uniformMatrix4fv(
           gl.getUniformLocation(program, 'uViewProjection'),
           false,
-          webGlViewProjectionMatrixManager
+          viewProjectionMatrixManager
               .create2dViewProjectionMatrix(cameraEntity)
               .storage)
       ..drawElements(WebGL.TRIANGLES, length * 6, WebGL.UNSIGNED_SHORT, 0);

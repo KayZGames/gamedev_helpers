@@ -10,10 +10,8 @@ part of gamedev_helpers_shared;
     CameraManager,
   ],
 )
-class WebGlViewProjectionMatrixManager
-    extends _$WebGlViewProjectionMatrixManager {
-  final int maxBaseViewRange;
-  WebGlViewProjectionMatrixManager(this.maxBaseViewRange);
+class ViewProjectionMatrixManager
+    extends _$ViewProjectionMatrixManager {
   Matrix4 create2dViewProjectionMatrix(Entity cameraEntity) {
     final position = positionMapper[cameraEntity];
     final camera = cameraMapper[cameraEntity];

@@ -63,7 +63,7 @@ abstract class _$AnimationSystem extends EntityProcessingSystem {
   }
 }
 
-abstract class _$WebGlViewProjectionMatrixManager extends Manager {
+abstract class _$ViewProjectionMatrixManager extends Manager {
   Mapper<Position> positionMapper;
   Mapper<Camera> cameraMapper;
   CameraManager cameraManager;

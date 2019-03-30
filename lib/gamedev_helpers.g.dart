@@ -10,7 +10,7 @@ abstract class _$ParticleRenderingSystem extends WebGlRenderingSystem {
   Mapper<Position> positionMapper;
   Mapper<Particle> particleMapper;
   Mapper<Color> colorMapper;
-  WebGlViewProjectionMatrixManager webGlViewProjectionMatrixManager;
+  ViewProjectionMatrixManager viewProjectionMatrixManager;
   TagManager tagManager;
   CameraManager cameraManager;
   _$ParticleRenderingSystem(RenderingContext gl)
@@ -21,8 +21,8 @@ abstract class _$ParticleRenderingSystem extends WebGlRenderingSystem {
     positionMapper = Mapper<Position>(world);
     particleMapper = Mapper<Particle>(world);
     colorMapper = Mapper<Color>(world);
-    webGlViewProjectionMatrixManager =
-        world.getManager<WebGlViewProjectionMatrixManager>();
+    viewProjectionMatrixManager =
+        world.getManager<ViewProjectionMatrixManager>();
     tagManager = world.getManager<TagManager>();
     cameraManager = world.getManager<CameraManager>();
   }
@@ -34,7 +34,7 @@ abstract class _$WebGlSpriteRenderingSystem extends WebGlRenderingSystem {
   Mapper<Position> positionMapper;
   Mapper<Camera> cameraMapper;
   TagManager tagManager;
-  WebGlViewProjectionMatrixManager webGlViewProjectionMatrixManager;
+  ViewProjectionMatrixManager viewProjectionMatrixManager;
   _$WebGlSpriteRenderingSystem(RenderingContext gl, Aspect aspect)
       : super(gl, aspect..allOf([Orientation, Renderable]));
   @override
@@ -45,7 +45,7 @@ abstract class _$WebGlSpriteRenderingSystem extends WebGlRenderingSystem {
     positionMapper = Mapper<Position>(world);
     cameraMapper = Mapper<Camera>(world);
     tagManager = world.getManager<TagManager>();
-    webGlViewProjectionMatrixManager =
-        world.getManager<WebGlViewProjectionMatrixManager>();
+    viewProjectionMatrixManager =
+        world.getManager<ViewProjectionMatrixManager>();
   }
 }
