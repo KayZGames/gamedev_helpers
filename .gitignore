@@ -6,3 +6,4 @@ pubspec.lock
 .settings/
 .idea/
 .packages
+.dart_tool
