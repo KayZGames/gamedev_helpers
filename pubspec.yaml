@@ -4,7 +4,7 @@ description: Useful stuff for my gamedevelopment needs
 author: Dennis Kaselow <Dennis.Kaselow+gamedev_helpers@gmail.com>
 publish_to: none
 environment:
-  sdk: '>=2.1.0 <3.0.0'
+  sdk: '>=2.2.0 <3.0.0'
 dependencies:
   vector_math: ^2.0.6
   dartemis:

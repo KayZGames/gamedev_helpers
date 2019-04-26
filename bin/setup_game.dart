@@ -267,11 +267,8 @@ targets:
         options:
           compiler: dart2js
           dart2js_args:
-            - --fast-startup
-            - --omit-implicit-checks
-            - --trust-primitives
-            - --minify
-            - --no-source-maps
+            - -O4
+            - -Ddebug=false
 ''';
 
   String _buildDevYaml() => r'''
@@ -290,19 +287,21 @@ name: $_name
 description: A $_name game
 publish_to: none
 environment:
-  sdk: '>=2.0.0-dev.69 <3.0.0'
+  sdk: '>=2.2.0 <3.0.0'
 dependencies:
   dartemis:
     git:
       url: git://github.com/denniskaselow/dartemis.git
   gamedev_helpers:
     git:
-      url: git://github.com/kayzgames/gamedev_helpers.git
+      url: git://github.com/kayzgames/gamedev_helpers
+      ref: games/ludumdare44
 dev_dependencies:
-  build_runner: ^0.9.0
+  build_runner: ^1.0.0
   build_web_compilers: any  
   dartemis_builder:
-    git: git://github.com/denniskaselow/dartemis_builder.git
+    git: 
+      url: git://github.com/denniskaselow/dartemis_builder.git
 ''';
 
   String _readme() => '''
@@ -473,9 +472,11 @@ class Game extends GameBase {
   CanvasRenderingContext2D hudCtx;
   DivElement container;
 
-  Game() : super.noAssets('$_name', '#game', webgl: true) {
-    container = querySelector('#gamecontainer');
-    hudCanvas = querySelector('#hud');
+  Game() : super.noAssets('$_name', '#game', webgl: true) {    
+    // ignore: avoid_as
+    container = querySelector('#gamecontainer') as DivElement;
+    // ignore: avoid_as
+    hudCanvas = querySelector('#hud') as CanvasElement;
     hudCtx = hudCanvas.context2D;
     _configureHud();
   }
@@ -483,49 +484,50 @@ class Game extends GameBase {
   @override
   void createEntities() {
     final tagManager = TagManager();
-    world.addManager(tagManager);
-    world.addManager(WebGlViewProjectionMatrixManager());
+    world..addManager(tagManager)..addManager(ViewProjectionMatrixManager());
     addEntity([
       Controller(),
-      Position(0.0, 0.0),
-      Acceleration(0.0, 0.0),
-      Velocity(0.0, 0.0),
+      Position(0, 0),
+      Acceleration(0, 0),
+      Velocity(0, 0),
       Mass(),
     ]);
 
-    final player = addEntity([Position(0.0, 0.0)]);
-    tagManager.register(player, playerTag);
+    final camera = world.createAndAddEntity([
+      Position(0, 0),
+      Camera(zoom: 1),
+    ]);
+    tagManager.register(camera, cameraTag);
   }
 
   @override
-  Map<int, List<EntitySystem>> getSystems() {
-    return {
-      GameBase.rendering: [
-        ControllerSystem(),
-        ResetAccelerationSystem(),
-        ControllerToActionSystem(),
-        SimpleGravitySystem(),
-        SimpleAccelerationSystem(),
-        SimpleMovementSystem(),
-        WebGlCanvasCleaningSystem(gl),
-        PositionRenderingSystem(gl),
-        CanvasCleaningSystem(hudCanvas),
-        FpsRenderingSystem(hudCtx, fillStyle: 'white'),
-      ],
-      GameBase.physics: [
-        // add at least one
-      ]
-    };
-  }
+  Map<int, List<EntitySystem>> getSystems() => {
+        GameBase.rendering: [
+          ControllerSystem(),
+          ResetAccelerationSystem(),
+          ControllerToActionSystem(),
+          SimpleGravitySystem(),
+          SimpleAccelerationSystem(),
+          SimpleMovementSystem(),
+          WebGlCanvasCleaningSystem(gl),
+          PositionRenderingSystem(gl),
+          CanvasCleaningSystem(hudCanvas),
+          FpsRenderingSystem(hudCtx, 'white'),
+        ],
+        GameBase.physics: [
+          // add at least one
+        ]
+      };
 
   @override
-  void handleResize(int width, int height) {
+  void handleResize() {
+    final camera = world.getManager<CameraManager>();
     container.style
-      ..width = '\${width}px'
-      ..height = '\${height}px';
-    resizeCanvas(hudCanvas, width, height);
+      ..width = '\${camera.clientWidth}px'
+      ..height = '\${camera.clientHeight}px';
+    resizeCanvas(hudCanvas);
     _configureHud();
-    super.handleResize(width, height);
+    super.handleResize();
   }
 
   void _configureHud() {
@@ -615,19 +617,18 @@ part 'rendering.g.dart';
     Position,
   ],
   manager: [
+    TagManager,
     CameraManager,
-    WebGlViewProjectionMatrixManager,
+    ViewProjectionMatrixManager,
   ],
 )
 class PositionRenderingSystem extends _\$PositionRenderingSystem {
-  List<Attrib> attributes;
+  List<Attrib> attributes = const [Attrib('pos', 2)];
 
   Float32List items;
   Uint16List indices;
 
-  PositionRenderingSystem(RenderingContext gl) : super(gl) {
-    attributes = [Attrib('pos', 2)];
-  }
+  PositionRenderingSystem(RenderingContext gl) : super(gl);
 
   @override
   void processEntity(int index, Entity entity) {
@@ -658,8 +659,8 @@ class PositionRenderingSystem extends _\$PositionRenderingSystem {
     gl.uniformMatrix4fv(
         gl.getUniformLocation(program, 'viewProjectionMatrix'),
         false,
-        webGlViewProjectionMatrixManager
-            .create2dViewProjectionMatrix()
+        viewProjectionMatrixManager
+            .create2dViewProjectionMatrix(tagManager.getEntity(cameraTag))
             .storage);
 
     drawTriangles(attributes, items, indices);
@@ -685,7 +686,13 @@ import 'package:$_name/src/shared/components.dart';
 
 part 'logic.g.dart';
 
-@Generate(EntityProcessingSystem, allOf: const [Controller, Acceleration])
+@Generate(
+  EntityProcessingSystem,
+  allOf: [
+    Controller,
+    Acceleration,
+  ],
+)
 class ControllerToActionSystem extends _\$ControllerToActionSystem {
   final _acc = 50.0;
   final _sqrttwo = 1.4142;
@@ -703,17 +710,21 @@ class ControllerToActionSystem extends _\$ControllerToActionSystem {
     } else if (controller.right) {
       acceleration.x += _acc * world.delta;
     } else if (controller.upleft) {
-      acceleration.y += _acc * world.delta / _sqrttwo;
-      acceleration.x -= _acc * world.delta / _sqrttwo;
+      acceleration
+        ..y += _acc * world.delta / _sqrttwo
+        ..x -= _acc * world.delta / _sqrttwo;
     } else if (controller.upright) {
-      acceleration.y += _acc * world.delta / _sqrttwo;
-      acceleration.x += _acc * world.delta / _sqrttwo;
+      acceleration
+        ..y += _acc * world.delta / _sqrttwo
+        ..x += _acc * world.delta / _sqrttwo;
     } else if (controller.downleft) {
-      acceleration.y -= _acc * world.delta / _sqrttwo;
-      acceleration.x -= _acc * world.delta / _sqrttwo;
+      acceleration
+        ..y -= _acc * world.delta / _sqrttwo
+        ..x -= _acc * world.delta / _sqrttwo;
     } else if (controller.downright) {
-      acceleration.y -= _acc * world.delta / _sqrttwo;
-      acceleration.x += _acc * world.delta / _sqrttwo;
+      acceleration
+        ..y -= _acc * world.delta / _sqrttwo
+        ..x += _acc * world.delta / _sqrttwo;
     }
   }
 }
@@ -778,24 +789,22 @@ class Controller extends Component {
 ''';
 
   String _positionRenderingSystemVert() => '''
-#version 300 es
+#version 100
 
 uniform mat4 viewProjectionMatrix;
-in vec2 pos;
+attribute vec2 pos;
 
 void main() {
-	gl_Position = viewProjectionMatrix * vec4(pos, 0.0, 1.0);
+    gl_Position = viewProjectionMatrix * vec4(pos, 0.0, 1.0);
 }''';
 
   String _positionRenderingSystemFrag() => '''
-#version 300 es
+#version 100
 
 precision mediump float;
 
-out vec4 color;
-
 void main() {
-	color = vec4(1.0, 1.0, 1.0, 1.0);
+    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
 }''';
 }
 
