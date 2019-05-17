@@ -13,7 +13,9 @@ abstract class GenericInputHandlingSystem extends EntityProcessingSystem {
   final Map<int, bool> unpress = <int, bool>{};
   StreamSubscription _onKeyUpSubscription;
   StreamSubscription _onKeyDownSubscription;
-  GenericInputHandlingSystem(Aspect aspect) : super(aspect);
+  List<Element> ignoreInputFromElements;
+  GenericInputHandlingSystem(Aspect aspect, this.ignoreInputFromElements)
+      : super(aspect);
 
   @override
   void initialize() {
@@ -29,12 +31,14 @@ abstract class GenericInputHandlingSystem extends EntityProcessingSystem {
   }
 
   void handleInput(KeyboardEvent event, {bool keyDown = true}) {
-    keyState[event.keyCode] = keyDown;
-    if (!keyDown && unpress[event.keyCode] == true) {
-      unpress[event.keyCode] = false;
-    }
-    if (preventDefaultKeys.contains(event.keyCode)) {
-      event.preventDefault();
+    if (!ignoreInputFromElements.contains(event.target)) {
+      keyState[event.keyCode] = keyDown;
+      if (!keyDown && unpress[event.keyCode] == true) {
+        unpress[event.keyCode] = false;
+      }
+      if (preventDefaultKeys.contains(event.keyCode)) {
+        event.preventDefault();
+      }
     }
   }
 
