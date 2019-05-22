@@ -237,8 +237,7 @@ abstract class GameBase {
 
   void _resize() {
     if (null != canvas) {
-      _updateCameraManager(
-          document.body.clientWidth, document.body.clientHeight);
+      _updateCameraManager(window.innerWidth, window.innerHeight);
       handleResize();
     }
   }
