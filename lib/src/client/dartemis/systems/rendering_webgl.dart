@@ -16,7 +16,7 @@ class WebGlCanvasCleaningSystem extends VoidEntitySystem {
   }
 }
 
-mixin WebGlRenderingMixin {
+mixin _WebGlRenderingMixin {
   static const int fsize = Float32List.bytesPerElement;
 
   RenderingContext gl;
@@ -26,6 +26,8 @@ mixin WebGlRenderingMixin {
   Buffer indexBuffer;
   Map<String, Buffer> buffers = <String, Buffer>{};
   bool success = true;
+  final Map<String, UniformLocation> _uniforms = {};
+  final Set<String> _usedUniforms = {};
 
   void initProgram() {
     final vShader = _createShader(
@@ -37,6 +39,31 @@ mixin WebGlRenderingMixin {
         _createProgram(vShader, fShader);
       }
     }
+    _initUniformLocations();
+  }
+
+  void _initUniformLocations() {
+    initUniformLocations();
+    if (_uniforms.isNotEmpty) {
+      throw Exception('''
+unused uniforms: ${_uniforms.keys} in $runtimeType
+use this:
+${_uniforms.keys.map((key) => '${key}Location = getUniformLocation(\'$key\');').join('\n')}
+''');
+    }
+  }
+
+  UniformLocation getUniformLocation(String name) {
+    if (_usedUniforms.contains(name)) {
+      throw Exception('uniform $name already initialized in $runtimeType');
+    }
+    final result = _uniforms.remove(name);
+    if (result == null) {
+      throw Exception(
+          '''tried to get uniform location of unknown name $name from ${_uniforms.keys} in $runtimeType''');
+    }
+    _usedUniforms.add(name);
+    return result;
   }
 
   void _createProgram(Shader vShader, Shader fShader) {
@@ -47,7 +74,14 @@ mixin WebGlRenderingMixin {
       ..linkProgram(program);
     final linkSuccess =
         gl.getProgramParameter(program, WebGL.LINK_STATUS) as bool;
-    if (!linkSuccess) {
+    if (linkSuccess) {
+      final uniformCount =
+          gl.getProgramParameter(program, WebGL.ACTIVE_UNIFORMS) as int;
+      for (var i = 0; i < uniformCount; i++) {
+        final uniformName = gl.getActiveUniform(program, i).name;
+        _uniforms[uniformName] = gl.getUniformLocation(program, uniformName);
+      }
+    } else {
       print(
           '''$runtimeType - Error linking program: ${gl.getProgramInfoLog(program)}''');
       success = false;
@@ -134,6 +168,7 @@ mixin WebGlRenderingMixin {
   String get vShaderFile;
   String get fShaderFile;
   String get libName => null;
+  void initUniformLocations();
 }
 
 class Attrib {
@@ -143,7 +178,7 @@ class Attrib {
 }
 
 abstract class WebGlRenderingSystem extends EntitySystem
-    with WebGlRenderingMixin {
+    with _WebGlRenderingMixin {
   int maxLength = 0;
 
   WebGlRenderingSystem(RenderingContext gl, Aspect aspect) : super(aspect) {
@@ -181,7 +216,7 @@ abstract class WebGlRenderingSystem extends EntitySystem
 }
 
 abstract class VoidWebGlRenderingSystem extends VoidEntitySystem
-    with WebGlRenderingMixin {
+    with _WebGlRenderingMixin {
   VoidWebGlRenderingSystem(RenderingContext gl) {
     this.gl = gl;
   }
@@ -218,6 +253,8 @@ class ParticleRenderingSystem extends _$ParticleRenderingSystem {
   Float32List colors;
   Float32List radius;
 
+  UniformLocation uViewProjectionLocation;
+
   ParticleRenderingSystem(RenderingContext gl) : super(gl);
 
   @override
@@ -242,7 +279,7 @@ class ParticleRenderingSystem extends _$ParticleRenderingSystem {
   void render(int length) {
     final cameraEntity = tagManager.getEntity(cameraTag);
     gl.uniformMatrix4fv(
-        gl.getUniformLocation(program, 'uViewProjection'),
+        uViewProjectionLocation,
         false,
         viewProjectionMatrixManager
             .create2dViewProjectionMatrix(cameraEntity)
@@ -270,6 +307,11 @@ class ParticleRenderingSystem extends _$ParticleRenderingSystem {
 
   @override
   String get libName => 'gamedev_helpers';
+
+  @override
+  void initUniformLocations() {
+    uViewProjectionLocation = getUniformLocation('uViewProjection');
+  }
 }
 
 @Generate(

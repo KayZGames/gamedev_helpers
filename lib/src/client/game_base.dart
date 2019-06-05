@@ -276,8 +276,8 @@ abstract class GameBase {
     getSystems().forEach((group, systems) {
       for (final system in systems) {
         world.addSystem(system, group: group);
-        if (system is WebGlRenderingMixin) {
-          final webglMixin = system as WebGlRenderingMixin;
+        if (system is _WebGlRenderingMixin) {
+          final webglMixin = system as _WebGlRenderingMixin;
           shaderSourceFutures.add(helper
               .loadShader(webglMixin.libName, webglMixin.vShaderFile,
                   webglMixin.fShaderFile)
