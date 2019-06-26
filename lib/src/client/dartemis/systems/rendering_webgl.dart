@@ -153,16 +153,16 @@ ${_uniforms.keys.map((key) => '${key}Location = getUniformLocation(\'$key\');').
       ..bufferData(WebGL.ELEMENT_ARRAY_BUFFER, indices, WebGL.DYNAMIC_DRAW);
   }
 
-  void drawTriangles(
-      List<Attrib> attributes, Float32List items, Uint16List indices) {
+  void drawTriangles(List<Attrib> attributes, Float32List items,
+      Uint16List indices, int length) {
     bufferElements(attributes, items, indices);
-    gl.drawElements(WebGL.TRIANGLES, indices.length, WebGL.UNSIGNED_SHORT, 0);
+    gl.drawElements(WebGL.TRIANGLES, length, WebGL.UNSIGNED_SHORT, 0);
   }
 
-  void drawPoints(
-      List<Attrib> attributes, Float32List items, Uint16List indices) {
+  void drawPoints(List<Attrib> attributes, Float32List items,
+      Uint16List indices, int length) {
     bufferElements(attributes, items, indices);
-    gl.drawElements(WebGL.POINTS, indices.length, WebGL.UNSIGNED_SHORT, 0);
+    gl.drawElements(WebGL.POINTS, length, WebGL.UNSIGNED_SHORT, 0);
   }
 
   String get vShaderFile;
@@ -201,9 +201,11 @@ abstract class WebGlRenderingSystem extends EntitySystem
       }
       var index = 0;
       for (final entity in entities) {
-        processEntity(index++, entity);
+        if (processEntity(index, entity)) {
+          index++;
+        }
       }
-      render(length);
+      render(index);
     }
   }
 
@@ -211,7 +213,7 @@ abstract class WebGlRenderingSystem extends EntitySystem
   bool checkProcessing() => success;
 
   void updateLength(int length);
-  void processEntity(int index, Entity entity);
+  bool processEntity(int index, Entity entity);
   void render(int length);
 }
 
@@ -258,7 +260,7 @@ class ParticleRenderingSystem extends _$ParticleRenderingSystem {
   ParticleRenderingSystem(RenderingContext gl) : super(gl);
 
   @override
-  void processEntity(int index, Entity entity) {
+  bool processEntity(int index, Entity entity) {
     final p = positionMapper[entity];
     final c = colorMapper[entity];
 
@@ -273,6 +275,8 @@ class ParticleRenderingSystem extends _$ParticleRenderingSystem {
     colors[cOffset + 1] = c.g;
     colors[cOffset + 2] = c.b;
     colors[cOffset + 3] = c.a;
+
+    return true;
   }
 
   @override
@@ -362,11 +366,11 @@ abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
   }
 
   @override
-  void processEntity(int index, Entity entity) {
+  bool processEntity(int index, Entity entity) {
     final p = getPosition(entity);
     final o = orientationMapper[entity];
     final r = renderableMapper[entity];
-    final sprite = sheet.sprites[r.spriteName];
+    final sprite = sheet.sprites[r._spriteName];
     final dst = sprite.dst;
     final src = sprite.src;
     double right;
@@ -428,6 +432,8 @@ abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
     indices[index * 6 + 3] = index * 4;
     indices[index * 6 + 4] = index * 4 + 3;
     indices[index * 6 + 5] = index * 4 + 1;
+
+    return true;
   }
 
   Position getPosition(Entity entity) => positionMapper[entity];

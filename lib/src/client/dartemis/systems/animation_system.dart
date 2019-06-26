@@ -1,4 +1,4 @@
-part of gamedev_helpers_shared;
+part of gamedev_helpers;
 
 @Generate(EntityProcessingSystem, allOf: [Renderable])
 class AnimationSystem extends _$AnimationSystem {

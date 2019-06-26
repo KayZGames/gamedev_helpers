@@ -64,30 +64,6 @@ class Color extends Component {
   }
 }
 
-class Renderable extends Component {
-  String name;
-  int maxFrames;
-  double timePerFrame;
-  double time;
-  double scale;
-  bool facesRight;
-  Renderable(this.name,
-      {this.maxFrames = 1,
-      this.timePerFrame = 0.2,
-      this.facesRight = true,
-      this.time = 0.0,
-      this.scale = 1.0});
-
-  Renderable.fromRenderable(Renderable other, this.time, this.scale)
-      : name = other.name,
-        maxFrames = other.maxFrames,
-        timePerFrame = other.timePerFrame,
-        facesRight = other.facesRight;
-
-  String get spriteName =>
-      '${name}_${maxFrames - (time / timePerFrame % maxFrames).toInt() - 1}';
-}
-
 class Camera extends Component {
   double zoom;
   Camera({this.zoom = 1.0});
