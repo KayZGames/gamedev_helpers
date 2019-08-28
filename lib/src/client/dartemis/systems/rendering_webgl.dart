@@ -191,7 +191,7 @@ abstract class WebGlRenderingSystem extends EntitySystem
   }
 
   @override
-  void processEntities(Iterable<Entity> entities) {
+  void processEntities(Iterable<int> entities) {
     final length = entities.length;
     if (length > 0) {
       gl.useProgram(program);
@@ -213,7 +213,7 @@ abstract class WebGlRenderingSystem extends EntitySystem
   bool checkProcessing() => success;
 
   void updateLength(int length);
-  bool processEntity(int index, Entity entity);
+  bool processEntity(int index, int entity);
   void render(int length);
 }
 
@@ -260,7 +260,7 @@ class ParticleRenderingSystem extends _$ParticleRenderingSystem {
   ParticleRenderingSystem(RenderingContext gl) : super(gl);
 
   @override
-  bool processEntity(int index, Entity entity) {
+  bool processEntity(int index, int entity) {
     final p = positionMapper[entity];
     final c = colorMapper[entity];
 
@@ -366,7 +366,7 @@ abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
   }
 
   @override
-  bool processEntity(int index, Entity entity) {
+  bool processEntity(int index, int entity) {
     final p = getPosition(entity);
     final o = orientationMapper[entity];
     final r = renderableMapper[entity];
@@ -436,7 +436,7 @@ abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
     return true;
   }
 
-  Position getPosition(Entity entity) => positionMapper[entity];
+  Position getPosition(int entity) => positionMapper[entity];
 
   @override
   void render(int length) {

@@ -28,7 +28,7 @@ part 'gamedev_helpers.g.dart';
 
 class GameHelper {
   final String _libName;
-  AudioContext _audioContext;
+  final AudioContext _audioContext;
   GameHelper(this._libName, this._audioContext);
 
   /// Loads achievements.json.

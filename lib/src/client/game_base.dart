@@ -113,7 +113,7 @@ abstract class GameBase {
       .then((_) => _initGame())
       .then((_) => onInitDone());
 
-  /// Do whatever you have to do before starting to create [Entity]s and
+  /// Do whatever you have to do before starting to create [int]s and
   /// [EntitySystem]s.
   Future onInit() async => null;
 
@@ -290,8 +290,8 @@ abstract class GameBase {
     return Future.wait(shaderSourceFutures);
   }
 
-  Entity addEntity<T extends Component>(List<T> components) =>
-      world.createAndAddEntity(components);
+  int addEntity<T extends Component>(List<T> components) =>
+      world.createEntity(components);
 
   void resizeCanvas(CanvasElement canvas) {
     final camera = world.getManager<CameraManager>();

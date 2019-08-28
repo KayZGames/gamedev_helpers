@@ -12,7 +12,7 @@ part of gamedev_helpers_shared;
 )
 class ViewProjectionMatrixManager
     extends _$ViewProjectionMatrixManager {
-  Matrix4 create2dViewProjectionMatrix(Entity cameraEntity) {
+  Matrix4 create2dViewProjectionMatrix(int cameraEntity) {
     final position = positionMapper[cameraEntity];
     final camera = cameraMapper[cameraEntity];
     return create2dViewProjectionMatrixForPosition(

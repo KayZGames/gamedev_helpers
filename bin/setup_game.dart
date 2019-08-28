@@ -545,7 +545,7 @@ part 'events.g.dart';
 @Generate(GenericInputHandlingSystem, allOf: [Controller])
 class ControllerSystem extends _\$ControllerSystem {
   @override
-  void processEntity(Entity entity) {
+  void processEntity(int entity) {
     final c = controllerMapper[entity]..reset();
     if (up) {
       if (left) {
@@ -587,7 +587,7 @@ class PositionRenderingSystem extends _\$PositionRenderingSystem {
   PositionRenderingSystem(this.ctx);
 
   @override
-  void processEntity(Entity entity) {
+  void processEntity(int entity) {
     final position = positionMapper[entity];
 
     ctx
@@ -630,7 +630,7 @@ class PositionRenderingSystem extends _\$PositionRenderingSystem {
   }
 
   @override
-  void processEntity(int index, Entity entity) {
+  void processEntity(int index, int entity) {
     final position = positionMapper[entity];
     final itemOffset = index * 2 * 4;
     final indexOffset = index * 3 * 2;
@@ -691,7 +691,7 @@ class ControllerToActionSystem extends _\$ControllerToActionSystem {
   final _sqrttwo = 1.4142;
 
   @override
-  void processEntity(Entity entity) {
+  void processEntity(int entity) {
     final controller = controllerMapper[entity];
     final acceleration = accelerationMapper[entity];
     if (controller.up) {
