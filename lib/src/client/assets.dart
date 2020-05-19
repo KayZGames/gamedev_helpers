@@ -28,10 +28,11 @@ Future<AudioBuffer> _loadMusic(
       goodAnswer.contains(audio.canPlayType('audio/mp3'))) {
     fileExtension = 'mp3';
   }
-  final String musicPath =
-      'packages/$libName/assets/music/$name.$fileExtension';
+  final musicPath = 'packages/$libName/assets/music/$name.$fileExtension';
   return HttpRequest.request(musicPath, responseType: 'arraybuffer')
-      .then((request) async => audioContext.decodeAudioData(request.response));
+      .then((request) async =>
+          // ignore: avoid_as
+          audioContext.decodeAudioData(request.response as ByteBuffer));
 }
 
 Future<Map<String, List<Polygon>>> _createPolygonMap(
@@ -39,8 +40,9 @@ Future<Map<String, List<Polygon>>> _createPolygonMap(
   final result = <String, List<Polygon>>{};
   polygons.forEach((bodyId, pointMaps) {
     final polygonList = <Polygon>[];
-    pointMaps
-        .forEach((pointMap) => polygonList.add(Polygon(pointMap['shape'])));
+    for (final pointMap in pointMaps) {
+      polygonList.add(Polygon(pointMap['shape']));
+    }
     result[bodyId] = polygonList;
   });
   return Future.value(result);
@@ -63,7 +65,7 @@ Future<SpriteSheet> _createSpriteSheet(String imgPath, _AssetJson assets) {
 
 Future<ShaderSource> _loadShader(
     String libName, String vShaderFile, String fShaderFile) {
-  final List<Future> loaders = [
+  final loaders = [
     HttpRequest.getString('packages/$libName/assets/shader/$vShaderFile.vert'),
     HttpRequest.getString('packages/$libName/assets/shader/$fShaderFile.frag')
   ];
@@ -74,15 +76,18 @@ Future<ShaderSource> _loadShader(
 class ShaderSource {
   String vShader;
   String fShader;
+
   ShaderSource(this.vShader, this.fShader);
 }
 
 class LayeredSpriteSheet {
   List<SpriteSheet> sheets;
+
   LayeredSpriteSheet(SpriteSheet initialSpriteSheet)
       : sheets = [initialSpriteSheet];
 
   void add(SpriteSheet sheet) => sheets.insert(0, sheet);
+
   SpriteSheet getLayerFor(String spriteId) =>
       sheets.where((sheet) => sheet.sprites.containsKey(spriteId)).first;
 }
@@ -90,7 +95,9 @@ class LayeredSpriteSheet {
 class SpriteSheet {
   final ImageElement image;
   final Map<String, Sprite> sprites;
+
   SpriteSheet(this.image, this.sprites);
+
   Sprite operator [](String name) => sprites[name];
 }
 
@@ -99,10 +106,11 @@ class Sprite {
   Rectangle<int> dst;
   Vector2 offset;
   Vector2 trimmed;
+
   Sprite(_FrameValue singleAsset) {
-    final _Asset asset = _Asset(singleAsset);
+    final asset = _Asset(singleAsset);
     src = asset.frame;
-    var cx, cy;
+    int cx, cy;
     if (asset.trimmed) {
       cx = -(asset.sourceSize.x ~/ 2 - asset.spriteSourceSize.left);
       cy = -(asset.sourceSize.y ~/ 2 - asset.spriteSourceSize.top);
@@ -120,9 +128,10 @@ class Sprite {
 
 class Polygon {
   List<Vector2> vertices;
+
   Polygon(List<double> points) {
     vertices = List(points.length ~/ 2);
-    for (int i = 0; i < points.length; i += 2) {
+    for (var i = 0; i < points.length; i += 2) {
       vertices[i ~/ 2] =
           Vector2(points[i].toDouble(), points[i + 1].toDouble());
     }
@@ -130,10 +139,11 @@ class Polygon {
 }
 
 class _Asset {
-  Rectangle frame;
+  Rectangle<int> frame;
   bool trimmed;
-  Rectangle spriteSourceSize;
-  Point sourceSize;
+  Rectangle<int> spriteSourceSize;
+  Point<int> sourceSize;
+
   _Asset(_FrameValue asset)
       : frame = _createRectangle(asset.frame),
         trimmed = asset.trimmed,
@@ -147,14 +157,15 @@ Rectangle<int> _createRectangle(_SpriteSourceSizeClass rect) =>
 Point<int> _createPoint(_Size size) => Point(size.w, size.h);
 
 Future<Map<String, String>> _processAchievementAssets(String assetJson) =>
-    Future.value(json.decode(assetJson));
+    Future.value(json.decode(assetJson) as Map<String, String>);
 
 Future<Map<String, List<Map<String, List<double>>>>> _processPolygonAssets(
         String assetJson) =>
-    Future.value(json.decode(assetJson));
+    Future.value(
+        json.decode(assetJson) as Map<String, List<Map<String, List<double>>>>);
 
-Future<_AssetJson> _processAssets(String assetJson) =>
-    Future.value(_AssetJson.fromJson(json.decode(assetJson)));
+Future<_AssetJson> _processAssets(String assetJson) => Future.value(
+    _AssetJson.fromJson(json.decode(assetJson) as Map<String, dynamic>));
 
 class _AssetJson {
   Map<String, _FrameValue> frames;
@@ -165,16 +176,17 @@ class _AssetJson {
     this.meta,
   });
 
-  factory _AssetJson.fromJson(Map<String, dynamic> json) => new _AssetJson(
-        frames: new Map.from(json["frames"]).map((k, v) =>
-            new MapEntry<String, _FrameValue>(k, _FrameValue.fromJson(v))),
-        meta: _Meta.fromJson(json["meta"]),
+  factory _AssetJson.fromJson(Map<String, dynamic> json) => _AssetJson(
+        frames: Map<String, Map<String, dynamic>>.from(json['frames'] as Map)
+            .map((k, v) =>
+                MapEntry<String, _FrameValue>(k, _FrameValue.fromJson(v))),
+        meta: _Meta.fromJson(json['meta'] as Map<String, dynamic>),
       );
 
   Map<String, dynamic> toJson() => {
-        "frames": new Map.from(frames)
-            .map((k, v) => new MapEntry<String, dynamic>(k, v.toJson())),
-        "meta": meta.toJson(),
+        'frames': Map<String, _FrameValue>.from(frames)
+            .map((k, v) => MapEntry<String, dynamic>(k, v.toJson())),
+        'meta': meta.toJson(),
       };
 }
 
@@ -193,21 +205,23 @@ class _FrameValue {
     this.sourceSize,
   });
 
-  factory _FrameValue.fromJson(Map<String, dynamic> json) => new _FrameValue(
-        frame: _SpriteSourceSizeClass.fromJson(json["frame"]),
-        rotated: json["rotated"],
-        trimmed: json["trimmed"],
-        spriteSourceSize:
-            _SpriteSourceSizeClass.fromJson(json["spriteSourceSize"]),
-        sourceSize: _Size.fromJson(json["sourceSize"]),
+  factory _FrameValue.fromJson(Map<String, dynamic> json) => _FrameValue(
+        frame: _SpriteSourceSizeClass.fromJson(
+            Map<String, int>.from(json['frame'] as Map)),
+        rotated: json['rotated'] as bool,
+        trimmed: json['trimmed'] as bool,
+        spriteSourceSize: _SpriteSourceSizeClass.fromJson(
+            Map<String, int>.from(json['spriteSourceSize'] as Map)),
+        sourceSize:
+            _Size.fromJson(Map<String, int>.from(json['sourceSize'] as Map)),
       );
 
   Map<String, dynamic> toJson() => {
-        "frame": frame.toJson(),
-        "rotated": rotated,
-        "trimmed": trimmed,
-        "spriteSourceSize": spriteSourceSize.toJson(),
-        "sourceSize": sourceSize.toJson(),
+        'frame': frame.toJson(),
+        'rotated': rotated,
+        'trimmed': trimmed,
+        'spriteSourceSize': spriteSourceSize.toJson(),
+        'sourceSize': sourceSize.toJson(),
       };
 }
 
@@ -224,19 +238,19 @@ class _SpriteSourceSizeClass {
     this.h,
   });
 
-  factory _SpriteSourceSizeClass.fromJson(Map<String, dynamic> json) =>
-      new _SpriteSourceSizeClass(
-        x: json["x"] ?? 0,
-        y: json["y"] ?? 0,
-        w: json["w"],
-        h: json["h"],
+  factory _SpriteSourceSizeClass.fromJson(Map<String, int> json) =>
+      _SpriteSourceSizeClass(
+        x: json['x'] ?? 0,
+        y: json['y'] ?? 0,
+        w: json['w'],
+        h: json['h'],
       );
 
   Map<String, dynamic> toJson() => {
-        "x": x,
-        "y": y,
-        "w": w,
-        "h": h,
+        'x': x,
+        'y': y,
+        'w': w,
+        'h': h,
       };
 }
 
@@ -249,14 +263,14 @@ class _Size {
     this.h,
   });
 
-  factory _Size.fromJson(Map<String, dynamic> json) => new _Size(
-        w: json["w"],
-        h: json["h"],
+  factory _Size.fromJson(Map<String, int> json) => _Size(
+        w: json['w'],
+        h: json['h'],
       );
 
   Map<String, dynamic> toJson() => {
-        "w": w,
-        "h": h,
+        'w': w,
+        'h': h,
       };
 }
 
@@ -279,23 +293,23 @@ class _Meta {
     this.smartupdate,
   });
 
-  factory _Meta.fromJson(Map<String, dynamic> json) => new _Meta(
-        app: json["app"],
-        version: json["version"],
-        image: json["image"],
-        format: json["format"],
-        size: _Size.fromJson(json["size"]),
-        scale: json["scale"],
-        smartupdate: json["smartupdate"],
+  factory _Meta.fromJson(Map<String, dynamic> json) => _Meta(
+        app: json['app'] as String,
+        version: json['version'] as String,
+        image: json['image'] as String,
+        format: json['format'] as String,
+        size: _Size.fromJson(Map<String, int>.from(json['size'] as Map)),
+        scale: json['scale'] as String,
+        smartupdate: json['smartupdate'] as String,
       );
 
   Map<String, dynamic> toJson() => {
-        "app": app,
-        "version": version,
-        "image": image,
-        "format": format,
-        "size": size.toJson(),
-        "scale": scale,
-        "smartupdate": smartupdate,
+        'app': app,
+        'version': version,
+        'image': image,
+        'format': format,
+        'size': size.toJson(),
+        'scale': scale,
+        'smartupdate': smartupdate,
       };
 }

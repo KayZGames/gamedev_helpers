@@ -1,7 +1,7 @@
 part of gamedev_helpers;
 
 class WebGlCanvasCleaningSystem extends VoidEntitySystem {
-  RenderingContext2 gl;
+  RenderingContext gl;
 
   WebGlCanvasCleaningSystem(this.gl);
 
@@ -16,22 +16,54 @@ class WebGlCanvasCleaningSystem extends VoidEntitySystem {
   }
 }
 
-abstract class WebGlRenderingMixin {
+mixin _WebGlRenderingMixin {
   static const int fsize = Float32List.bytesPerElement;
 
-  RenderingContext2 gl;
+  RenderingContext gl;
   Program program;
   ShaderSource shaderSource;
   Buffer elementBuffer;
   Buffer indexBuffer;
   Map<String, Buffer> buffers = <String, Buffer>{};
   bool success = true;
+  final Map<String, UniformLocation> _uniforms = {};
+  final Set<String> _usedUniforms = {};
 
   void initProgram() {
-    final vShader = _createShader(WebGL.VERTEX_SHADER, shaderSource.vShader);
-    final fShader = _createShader(WebGL.FRAGMENT_SHADER, shaderSource.fShader);
+    final vShader = _createShader(
+        WebGL.VERTEX_SHADER, shaderSource.vShader, '$vShaderFile.vert');
+    if (success) {
+      final fShader = _createShader(
+          WebGL.FRAGMENT_SHADER, shaderSource.fShader, '$fShaderFile.frag');
+      if (success) {
+        _createProgram(vShader, fShader);
+      }
+    }
+    _initUniformLocations();
+  }
 
-    _createProgram(vShader, fShader);
+  void _initUniformLocations() {
+    initUniformLocations();
+    if (_uniforms.isNotEmpty) {
+      throw Exception('''
+unused uniforms: ${_uniforms.keys} in $runtimeType
+use this:
+${_uniforms.keys.map((key) => '${key}Location = getUniformLocation(\'$key\');').join('\n')}
+''');
+    }
+  }
+
+  UniformLocation getUniformLocation(String name) {
+    if (_usedUniforms.contains(name)) {
+      throw Exception('uniform $name already initialized in $runtimeType');
+    }
+    final result = _uniforms.remove(name);
+    if (result == null) {
+      throw Exception(
+          '''tried to get uniform location of unknown name $name from ${_uniforms.keys} in $runtimeType''');
+    }
+    _usedUniforms.add(name);
+    return result;
   }
 
   void _createProgram(Shader vShader, Shader fShader) {
@@ -40,24 +72,33 @@ abstract class WebGlRenderingMixin {
       ..attachShader(program, vShader)
       ..attachShader(program, fShader)
       ..linkProgram(program);
-    final linkSuccess = gl.getProgramParameter(program, WebGL.LINK_STATUS);
-    if (!linkSuccess) {
+    final linkSuccess =
+        gl.getProgramParameter(program, WebGL.LINK_STATUS) as bool;
+    if (linkSuccess) {
+      final uniformCount =
+          gl.getProgramParameter(program, WebGL.ACTIVE_UNIFORMS) as int;
+      for (var i = 0; i < uniformCount; i++) {
+        final uniformName = gl.getActiveUniform(program, i).name;
+        _uniforms[uniformName] = gl.getUniformLocation(program, uniformName);
+      }
+    } else {
       print(
-          '$runtimeType - Error linking program: ${gl.getProgramInfoLog(program)}');
+          '''$runtimeType - Error linking program: ${gl.getProgramInfoLog(program)}''');
       success = false;
     }
   }
 
-  Shader _createShader(int type, String source) {
+  Shader _createShader(int type, String source, String filename) {
     final shader = gl.createShader(type);
     gl
       ..shaderSource(shader, source)
       ..compileShader(shader);
-    final compileSuccess = gl.getShaderParameter(shader, WebGL.COMPILE_STATUS);
+    final compileSuccess =
+        gl.getShaderParameter(shader, WebGL.COMPILE_STATUS) as bool;
     if (!compileSuccess) {
+      print(
+          '''$runtimeType - Error compiling shader $filename: ${gl.getShaderInfoLog(shader)}''');
       success = false;
-      throw ArgumentError(
-          '$runtimeType - Error compiling shader $vShaderFile or $fShaderFile: ${gl.getShaderInfoLog(shader)}');
     }
     return shader;
   }
@@ -90,12 +131,12 @@ abstract class WebGlRenderingMixin {
     gl
       ..bindBuffer(WebGL.ARRAY_BUFFER, elementBuffer)
       ..bufferData(WebGL.ARRAY_BUFFER, items, WebGL.DYNAMIC_DRAW);
-    int offset = 0;
-    int elementsPerItem = 0;
-    for (Attrib attribute in attributes) {
+    var offset = 0;
+    var elementsPerItem = 0;
+    for (final attribute in attributes) {
       elementsPerItem += attribute.size;
     }
-    for (Attrib attribute in attributes) {
+    for (final attribute in attributes) {
       final attribLocation = gl.getAttribLocation(program, attribute.name);
       if (attribLocation == -1) {
         throw ArgumentError(
@@ -112,21 +153,22 @@ abstract class WebGlRenderingMixin {
       ..bufferData(WebGL.ELEMENT_ARRAY_BUFFER, indices, WebGL.DYNAMIC_DRAW);
   }
 
-  void drawTriangles(
-      List<Attrib> attributes, Float32List items, Uint16List indices) {
+  void drawTriangles(List<Attrib> attributes, Float32List items,
+      Uint16List indices, int length) {
     bufferElements(attributes, items, indices);
-    gl.drawElements(WebGL.TRIANGLES, indices.length, WebGL.UNSIGNED_SHORT, 0);
+    gl.drawElements(WebGL.TRIANGLES, length, WebGL.UNSIGNED_SHORT, 0);
   }
 
-  void drawPoints(
-      List<Attrib> attributes, Float32List items, Uint16List indices) {
+  void drawPoints(List<Attrib> attributes, Float32List items,
+      Uint16List indices, int length) {
     bufferElements(attributes, items, indices);
-    gl.drawElements(WebGL.POINTS, indices.length, WebGL.UNSIGNED_SHORT, 0);
+    gl.drawElements(WebGL.POINTS, length, WebGL.UNSIGNED_SHORT, 0);
   }
 
   String get vShaderFile;
   String get fShaderFile;
   String get libName => null;
+  void initUniformLocations();
 }
 
 class Attrib {
@@ -136,10 +178,10 @@ class Attrib {
 }
 
 abstract class WebGlRenderingSystem extends EntitySystem
-    with WebGlRenderingMixin {
+    with _WebGlRenderingMixin {
   int maxLength = 0;
 
-  WebGlRenderingSystem(RenderingContext2 gl, Aspect aspect) : super(aspect) {
+  WebGlRenderingSystem(RenderingContext gl, Aspect aspect) : super(aspect) {
     this.gl = gl;
   }
 
@@ -149,7 +191,7 @@ abstract class WebGlRenderingSystem extends EntitySystem
   }
 
   @override
-  void processEntities(Iterable<Entity> entities) {
+  void processEntities(Iterable<int> entities) {
     final length = entities.length;
     if (length > 0) {
       gl.useProgram(program);
@@ -158,10 +200,12 @@ abstract class WebGlRenderingSystem extends EntitySystem
         maxLength = length;
       }
       var index = 0;
-      entities.forEach((entity) {
-        processEntity(index++, entity);
-      });
-      render(length);
+      for (final entity in entities) {
+        if (processEntity(index, entity)) {
+          index++;
+        }
+      }
+      render(index);
     }
   }
 
@@ -169,13 +213,13 @@ abstract class WebGlRenderingSystem extends EntitySystem
   bool checkProcessing() => success;
 
   void updateLength(int length);
-  void processEntity(int index, Entity entity);
+  bool processEntity(int index, int entity);
   void render(int length);
 }
 
 abstract class VoidWebGlRenderingSystem extends VoidEntitySystem
-    with WebGlRenderingMixin {
-  VoidWebGlRenderingSystem(RenderingContext2 gl) {
+    with _WebGlRenderingMixin {
+  VoidWebGlRenderingSystem(RenderingContext gl) {
     this.gl = gl;
   }
 
@@ -193,17 +237,30 @@ abstract class VoidWebGlRenderingSystem extends VoidEntitySystem
   void render();
 }
 
-@Generate(WebGlRenderingSystem,
-    allOf: [Position, Particle, Color],
-    manager: [WebGlViewProjectionMatrixManager, TagManager])
+@Generate(
+  WebGlRenderingSystem,
+  allOf: [
+    Position,
+    Particle,
+    Color,
+  ],
+  manager: [
+    ViewProjectionMatrixManager,
+    TagManager,
+    CameraManager,
+  ],
+)
 class ParticleRenderingSystem extends _$ParticleRenderingSystem {
   Float32List positions;
   Float32List colors;
+  Float32List radius;
 
-  ParticleRenderingSystem(RenderingContext2 gl) : super(gl);
+  UniformLocation uViewProjectionLocation;
+
+  ParticleRenderingSystem(RenderingContext gl) : super(gl);
 
   @override
-  void processEntity(int index, Entity entity) {
+  bool processEntity(int index, int entity) {
     final p = positionMapper[entity];
     final c = colorMapper[entity];
 
@@ -212,23 +269,28 @@ class ParticleRenderingSystem extends _$ParticleRenderingSystem {
 
     positions[pOffset] = p.x;
     positions[pOffset + 1] = p.y;
+    radius[index] = 1.0 / cameraManager.scalingFactor;
 
     colors[cOffset] = c.r;
     colors[cOffset + 1] = c.g;
     colors[cOffset + 2] = c.b;
     colors[cOffset + 3] = c.a;
+
+    return true;
   }
 
   @override
   void render(int length) {
+    final cameraEntity = tagManager.getEntity(cameraTag);
     gl.uniformMatrix4fv(
-        gl.getUniformLocation(program, 'uViewProjection'),
+        uViewProjectionLocation,
         false,
-        webGlViewProjectionMatrixManager
-            .create2dViewProjectionMatrix()
+        viewProjectionMatrixManager
+            .create2dViewProjectionMatrix(cameraEntity)
             .storage);
 
     buffer('aPosition', positions, 2);
+    buffer('aRadius', radius, 1);
     buffer('aColor', colors, 4);
 
     gl.drawArrays(WebGL.POINTS, 0, length);
@@ -236,7 +298,8 @@ class ParticleRenderingSystem extends _$ParticleRenderingSystem {
 
   @override
   void updateLength(int length) {
-    positions = Float32List(length * 2);
+    positions = Float32List(length * 3);
+    radius = Float32List(length);
     colors = Float32List(length * 4);
   }
 
@@ -248,12 +311,25 @@ class ParticleRenderingSystem extends _$ParticleRenderingSystem {
 
   @override
   String get libName => 'gamedev_helpers';
+
+  @override
+  void initUniformLocations() {
+    uViewProjectionLocation = getUniformLocation('uViewProjection');
+  }
 }
 
-@Generate(WebGlRenderingSystem,
-    allOf: [Orientation, Renderable],
-    mapper: [Position],
-    manager: [TagManager, WebGlViewProjectionMatrixManager])
+@Generate(
+  WebGlRenderingSystem,
+  allOf: [Orientation, Renderable],
+  mapper: [
+    Position,
+    Camera,
+  ],
+  manager: [
+    TagManager,
+    ViewProjectionMatrixManager,
+  ],
+)
 abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
   SpriteSheet sheet;
 
@@ -264,7 +340,7 @@ abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
   Float32List values;
   Uint16List indices;
 
-  WebGlSpriteRenderingSystem(RenderingContext2 gl, this.sheet, Aspect aspect)
+  WebGlSpriteRenderingSystem(RenderingContext gl, this.sheet, Aspect aspect)
       : super(gl, aspect);
 
   @override
@@ -290,11 +366,11 @@ abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
   }
 
   @override
-  void processEntity(int index, Entity entity) {
+  bool processEntity(int index, int entity) {
     final p = getPosition(entity);
     final o = orientationMapper[entity];
     final r = renderableMapper[entity];
-    final sprite = sheet.sprites[r.spriteName];
+    final sprite = sheet.sprites[r._spriteName];
     final dst = sprite.dst;
     final src = sprite.src;
     double right;
@@ -356,22 +432,26 @@ abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
     indices[index * 6 + 3] = index * 4;
     indices[index * 6 + 4] = index * 4 + 3;
     indices[index * 6 + 5] = index * 4 + 1;
+
+    return true;
   }
 
-  Position getPosition(Entity entity) => positionMapper[entity];
+  Position getPosition(int entity) => positionMapper[entity];
 
   @override
   void render(int length) {
+    final cameraEntity = tagManager.getEntity(cameraTag);
     bufferElements(attributes, values, indices);
 
     gl
-      ..uniformMatrix4fv(gl.getUniformLocation(program, 'uViewProjection'),
-          false, create2dViewProjectionMatrix().storage)
+      ..uniformMatrix4fv(
+          gl.getUniformLocation(program, 'uViewProjection'),
+          false,
+          viewProjectionMatrixManager
+              .create2dViewProjectionMatrix(cameraEntity)
+              .storage)
       ..drawElements(WebGL.TRIANGLES, length * 6, WebGL.UNSIGNED_SHORT, 0);
   }
-
-  Matrix4 create2dViewProjectionMatrix() =>
-      webGlViewProjectionMatrixManager.create2dViewProjectionMatrix();
 
   @override
   void updateLength(int length) {

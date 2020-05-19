@@ -36,22 +36,22 @@ class Particle extends Component {}
 class Color extends Component {
   double r, g, b, a, l, realAlpha, realR, realG, realB;
 
-  Color(this.r, this.g, this.b, this.a) : realAlpha = a {
-    this.l = rgbToHsl(r, g, b)[2];
-    this.realR = this.r;
-    this.realG = this.g;
-    this.realB = this.b;
-  }
+  Color(this.r, this.g, this.b, this.a)
+      : realAlpha = a,
+        realR = r,
+        realG = g,
+        realB = b,
+        l = rgbToHsl(r, g, b)[2];
 
   Color.fromHsl(double h, double s, this.l, this.a) {
     final rgb = hslToRgb(h, s, l);
-    this.r = rgb[0];
-    this.g = rgb[1];
-    this.b = rgb[2];
-    this.realR = this.r;
-    this.realG = this.g;
-    this.realB = this.b;
-    this.realAlpha = a;
+    r = rgb[0];
+    g = rgb[1];
+    b = rgb[2];
+    realR = r;
+    realG = g;
+    realB = b;
+    realAlpha = a;
   }
 
   void setLightness(double lightness) {
@@ -64,26 +64,7 @@ class Color extends Component {
   }
 }
 
-class Renderable extends Component {
-  String name;
-  int maxFrames;
-  double timePerFrame;
-  double time;
-  double scale;
-  bool facesRight;
-  Renderable(this.name,
-      {this.maxFrames = 1,
-      this.timePerFrame = 0.2,
-      this.facesRight = true,
-      this.time = 0.0,
-      this.scale = 1.0});
-
-  Renderable.fromRenderable(Renderable other, this.time, this.scale)
-      : name = other.name,
-        maxFrames = other.maxFrames,
-        timePerFrame = other.timePerFrame,
-        facesRight = other.facesRight;
-
-  String get spriteName =>
-      '${name}_${maxFrames - (time / timePerFrame % maxFrames).toInt() - 1}';
+class Camera extends Component {
+  double zoom;
+  Camera({this.zoom = 1.0});
 }

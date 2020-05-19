@@ -17,16 +17,18 @@ part 'src/client/assets.dart';
 part 'src/client/game_base.dart';
 part 'src/client/rendering.dart';
 
+part 'src/client/dartemis/systems/animation_system.dart';
 part 'src/client/dartemis/systems/debugging.dart';
 part 'src/client/dartemis/systems/input.dart';
 part 'src/client/dartemis/systems/rendering_context2d.dart';
 part 'src/client/dartemis/systems/rendering_webgl.dart';
+part 'src/client/dartemis/components.dart';
 
 part 'gamedev_helpers.g.dart';
 
 class GameHelper {
   final String _libName;
-  AudioContext _audioContext;
+  final AudioContext _audioContext;
   GameHelper(this._libName, this._audioContext);
 
   /// Loads achievements.json.

@@ -1,9 +1,8 @@
-#version 300 es
+#version 100
 
 precision mediump float;
-in vec4 vColor;
-out vec4 fragColor;
+varying vec4 vColor;
 
 void main() {
-  fragColor = vColor;
+  gl_FragColor = vColor;
 }

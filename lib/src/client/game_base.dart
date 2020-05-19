@@ -8,7 +8,7 @@ abstract class GameBase {
       StreamController<bool>();
   final CanvasElement canvas;
   final CanvasRenderingContext2D ctx;
-  final RenderingContext2 gl;
+  final RenderingContext gl;
   final GameHelper helper;
   final String spriteSheetName;
   final String bodyDefsName;
@@ -38,14 +38,13 @@ abstract class GameBase {
       bool depthTest = true,
       bool blending = true,
       this.useMaxDelta = true})
-      : canvas = querySelector(canvasSelector),
+      : canvas = querySelector(canvasSelector) as CanvasElement,
         helper = GameHelper(appName, audioContext),
         ctx = webgl
             ? null
             : (querySelector(canvasSelector) as CanvasElement).context2D,
         gl = webgl
-            ? (querySelector(canvasSelector) as CanvasElement)
-                .getContext('webgl2')
+            ? (querySelector(canvasSelector) as CanvasElement).getContext3d()
             : null {
     if (ctx != null) {
       ctx
@@ -60,14 +59,15 @@ abstract class GameBase {
           ..enable(WebGL.BLEND)
           ..blendFunc(WebGL.SRC_ALPHA, WebGL.ONE_MINUS_SRC_ALPHA);
       }
-//      (ctx as RenderingContext2)
+//      (ctx as RenderingContext)
 //                               ..enable(WebGL.POLYGON_OFFSET_FILL);
 //                               ..polygonOffset(1.0, 1.0);
     } else {
       _errorInitializingWebGL = true;
     }
     canvas.onFullscreenChange.listen(_handleFullscreen);
-    world = createWorld()..addManager(CameraManager());
+    world = createWorld()
+      ..addManager(CameraManager(canvas.width, canvas.height));
     final fullscreenButton = querySelector('button#fullscreen');
     if (null != fullscreenButton) {
       fullscreenButton.onClick
@@ -113,12 +113,12 @@ abstract class GameBase {
       .then((_) => _initGame())
       .then((_) => onInitDone());
 
-  /// Do whatever you have to do before starting to create [Entity]s and
+  /// Do whatever you have to do before starting to create [int]s and
   /// [EntitySystem]s.
-  Future onInit() => null;
+  Future onInit() async => null;
 
   /// Do whatever you have to do after world.initialize() was called.
-  Future onInitDone() => null;
+  Future onInitDone() async => null;
 
   Future _assetsLoaded() {
     final loader = <Future>[];
@@ -136,16 +136,14 @@ abstract class GameBase {
       loader.add(helper.loadMusic(musicName).then((result) => music = result));
     }
     return Future.wait(loader).then((_) {
-      if (null != bodyDefs) {
-        bodyDefs.forEach((bodyId, shapes) {
-          final offset = spriteSheet.sprites['$bodyId.png'].offset -
-              spriteSheet.sprites['$bodyId.png'].trimmed;
-          shapes.forEach((shape) {
-            shape.vertices =
-                shape.vertices.map((vertex) => vertex + offset).toList();
-          });
-        });
-      }
+      bodyDefs?.forEach((bodyId, shapes) {
+        final offset = spriteSheet.sprites['$bodyId.png'].offset -
+            spriteSheet.sprites['$bodyId.png'].trimmed;
+        for (final shape in shapes) {
+          shape.vertices =
+              shape.vertices.map((vertex) => vertex + offset).toList();
+        }
+      });
     });
   }
 
@@ -218,7 +216,7 @@ abstract class GameBase {
     window.animationFrame.then((time) => update(time: time / 1000.0));
   }
 
-  void update({num time}) {
+  void update({double time}) {
     _resize();
     var delta = time - _lastTime;
     if (useMaxDelta) {
@@ -239,15 +237,20 @@ abstract class GameBase {
 
   void _resize() {
     if (null != canvas) {
-      handleResize(document.body.clientWidth, document.body.clientHeight);
+      _updateCameraManager(
+          document.body.clientWidth, document.body.clientHeight);
+      handleResize();
     }
   }
 
-  void handleResize(int width, int height) {
-    resizeCanvas(canvas, width, height);
+  void _updateCameraManager(int width, int height) {
     (world.getManager<CameraManager>())
-      ..width = width
-      ..height = height;
+      ..clientWidth = width
+      ..clientHeight = height;
+  }
+
+  void handleResize() {
+    resizeCanvas(canvas);
     if (paused || isStopped) {
       world
         ..delta = 0.0
@@ -255,7 +258,7 @@ abstract class GameBase {
     }
     if (!webgl) {
       canvas.context2D
-        ..textBaseline = "top"
+        ..textBaseline = 'top'
         ..font = '12px Verdana';
     } else {
       gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
@@ -269,12 +272,12 @@ abstract class GameBase {
   Map<int, List<EntitySystem>> getSystems();
 
   Future initSystems() {
-    final List<Future> shaderSourceFutures = [];
+    final shaderSourceFutures = <Future>[];
     getSystems().forEach((group, systems) {
-      for (EntitySystem system in systems) {
+      for (final system in systems) {
         world.addSystem(system, group: group);
-        if (system is WebGlRenderingMixin) {
-          final webglMixin = system as WebGlRenderingMixin;
+        if (system is _WebGlRenderingMixin) {
+          final webglMixin = system as _WebGlRenderingMixin;
           shaderSourceFutures.add(helper
               .loadShader(webglMixin.libName, webglMixin.vShaderFile,
                   webglMixin.fShaderFile)
@@ -287,15 +290,16 @@ abstract class GameBase {
     return Future.wait(shaderSourceFutures);
   }
 
-  Entity addEntity(List<Component> components) =>
-      world.createAndAddEntity(components);
+  int addEntity<T extends Component>(List<T> components) =>
+      world.createEntity(components);
 
-  void resizeCanvas(CanvasElement canvas, int width, int height) {
+  void resizeCanvas(CanvasElement canvas) {
+    final camera = world.getManager<CameraManager>();
     canvas
-      ..width = width
-      ..height = height;
+      ..width = camera.clientWidth
+      ..height = camera.clientHeight;
     canvas.style
-      ..width = '${width}px'
-      ..height = '${height}px';
+      ..width = '${camera.clientWidth}px'
+      ..height = '${camera.clientHeight}px';
   }
 }

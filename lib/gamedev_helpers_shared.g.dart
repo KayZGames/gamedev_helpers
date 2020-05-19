@@ -53,27 +53,15 @@ abstract class _$SimpleMovementSystem extends EntityProcessingSystem {
   }
 }
 
-abstract class _$AnimationSystem extends EntityProcessingSystem {
-  Mapper<Renderable> renderableMapper;
-  _$AnimationSystem() : super(Aspect.empty()..allOf([Renderable]));
-  @override
-  void initialize() {
-    super.initialize();
-    renderableMapper = Mapper<Renderable>(world);
-  }
-}
-
-abstract class _$WebGlViewProjectionMatrixManager extends Manager {
+abstract class _$ViewProjectionMatrixManager extends Manager {
   Mapper<Position> positionMapper;
-  Mapper<Orientation> orientationMapper;
+  Mapper<Camera> cameraMapper;
   CameraManager cameraManager;
-  TagManager tagManager;
   @override
   void initialize() {
     super.initialize();
     positionMapper = Mapper<Position>(world);
-    orientationMapper = Mapper<Orientation>(world);
+    cameraMapper = Mapper<Camera>(world);
     cameraManager = world.getManager<CameraManager>();
-    tagManager = world.getManager<TagManager>();
   }
 }

@@ -2,13 +2,20 @@ part of gamedev_helpers;
 
 abstract class GenericInputHandlingSystem extends EntityProcessingSystem {
   /// to prevent scrolling
-  final Set<int> preventDefaultKeys = Set<int>.from(
-      [KeyCode.UP, KeyCode.DOWN, KeyCode.LEFT, KeyCode.RIGHT, KeyCode.SPACE]);
+  final Set<int> preventDefaultKeys = <int>{
+    KeyCode.UP,
+    KeyCode.DOWN,
+    KeyCode.LEFT,
+    KeyCode.RIGHT,
+    KeyCode.SPACE
+  };
   final Map<int, bool> keyState = <int, bool>{};
   final Map<int, bool> unpress = <int, bool>{};
   StreamSubscription _onKeyUpSubscription;
   StreamSubscription _onKeyDownSubscription;
-  GenericInputHandlingSystem(Aspect aspect) : super(aspect);
+  List<Element> ignoreInputFromElements;
+  GenericInputHandlingSystem(Aspect aspect, this.ignoreInputFromElements)
+      : super(aspect);
 
   @override
   void initialize() {
@@ -24,12 +31,14 @@ abstract class GenericInputHandlingSystem extends EntityProcessingSystem {
   }
 
   void handleInput(KeyboardEvent event, {bool keyDown = true}) {
-    keyState[event.keyCode] = keyDown;
-    if (!keyDown && unpress[event.keyCode] == true) {
-      unpress[event.keyCode] = false;
-    }
-    if (preventDefaultKeys.contains(event.keyCode)) {
-      event.preventDefault();
+    if (!ignoreInputFromElements.contains(event.target)) {
+      keyState[event.keyCode] = keyDown;
+      if (!keyDown && unpress[event.keyCode] == true) {
+        unpress[event.keyCode] = false;
+      }
+      if (preventDefaultKeys.contains(event.keyCode)) {
+        event.preventDefault();
+      }
     }
   }
 

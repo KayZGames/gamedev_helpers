@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:git/git.dart';
 
-Future<Null> main(List<String> args) async {
+Future<void> main(List<String> args) async {
   if (args.isEmpty) {
     print('use webgl to create a project supporting WebGL');
   }
@@ -20,30 +20,30 @@ class DartemisApp {
 
   DartemisApp({bool useWebGl = false}) {
     _name = path.basename(_dir);
-    print(
-        'Project $_name ${useWebGl ? 'with' : 'without'} WebGL support is being created...');
+    print('''
+Project $_name ${useWebGl ? 'with' : 'without'} WebGL support is being created...''');
     _project = {
-      "pubspec.yaml": _pubspec(),
-      "build.yaml": _buildYaml(),
-      "build.dev.yaml": _buildDevYaml(),
-      "analysis_options.yaml": _analysisOptions(),
-      ".gitignore": _gitignore(),
-      "README.md": _readme(),
-      "web/index.html": useWebGl ? _htmlWebGl() : _html(),
-      "web/main.dart": _main(),
-      "web/styles.css": useWebGl ? _cssWebGl() : _css(),
-      "lib/shared.dart": _shared(),
-      "lib/src/shared/components.dart": _components(),
-      "lib/src/shared/systems/logic.dart": _logic(),
-      "lib/client.dart": useWebGl ? _clientWebGl() : _client(),
-      "lib/src/client/systems/events.dart": _events(),
-      "lib/src/client/systems/rendering.dart":
+      'pubspec.yaml': _pubspec(),
+      'build.yaml': _buildYaml(),
+      'build.dev.yaml': _buildDevYaml(),
+      'analysis_options.yaml': _analysisOptions(),
+      '.gitignore': _gitignore(),
+      'README.md': _readme(),
+      'web/index.html': useWebGl ? _htmlWebGl() : _html(),
+      'web/main.dart': _main(),
+      'web/styles.css': useWebGl ? _cssWebGl() : _css(),
+      'lib/shared.dart': _shared(),
+      'lib/src/shared/components.dart': _components(),
+      'lib/src/shared/systems/logic.dart': _logic(),
+      'lib/client.dart': useWebGl ? _clientWebGl() : _client(),
+      'lib/src/client/systems/events.dart': _events(),
+      'lib/src/client/systems/rendering.dart':
           useWebGl ? _renderingWebGl() : _rendering(),
-      "lib/assets/img": null,
-      "lib/assets/sfx": null,
-      "lib/assets/shader": null,
-      "assetOrigs/img/assets.tps": _texturePacker(),
-      "assetOrigs/sfx": null
+      'lib/assets/img': null,
+      'lib/assets/sfx': null,
+      'lib/assets/shader': null,
+      'assetOrigs/img/assets.tps': _texturePacker(),
+      'assetOrigs/sfx': null
     };
     if (useWebGl) {
       _project['lib/assets/shader/PositionRenderingSystem.vert'] =
@@ -53,12 +53,12 @@ class DartemisApp {
     }
   }
 
-  Future<Null> create() async {
+  Future<void> create() async {
     _project.forEach((file, content) {
       if (content == null) {
-        Directory("$_dir/$file").createSync(recursive: true);
+        Directory('$_dir/$file').createSync(recursive: true);
       } else {
-        final f = File("$_dir/$file");
+        final f = File('$_dir/$file');
         final dir = f.parent;
         if (!dir.existsSync()) {
           dir.createSync(recursive: true);
@@ -80,45 +80,156 @@ class DartemisApp {
     }
   }
 
-  String _analysisOptions() => """
+  String _analysisOptions() => '''
 analyzer:
   errors:
     unused_element: error
     unused_import: error
     unused_local_variable: error
     dead_code: error
+  strong-mode:
+    implicit-casts: false
+language:
+  strict-inference: true
+  strict-raw-types: true
 linter:
   rules:
     # http://dart-lang.github.io/linter/lints/options/options.html
     - always_declare_return_types
+    - always_put_control_body_on_new_line
+    - always_put_required_named_parameters_first
+    - always_require_non_null_named_parameters
     - annotate_overrides
+    - avoid_annotating_with_dynamic
+    - avoid_as
+    - avoid_bool_literals_in_conditional_expressions
+    - avoid_catches_without_on_clauses
+    - avoid_catching_errors
+    - avoid_classes_with_only_static_members
+    - avoid_double_and_int_checks
     - avoid_empty_else
+    - avoid_field_initializers_in_const_classes
+    - avoid_function_literals_in_foreach_calls
+    - avoid_implementing_value_types
     - avoid_init_to_null
+    - avoid_js_rounded_ints
+    - avoid_null_checks_in_equality_operators
+    - avoid_positional_boolean_parameters
+    - avoid_private_typedef_functions
+    - avoid_relative_lib_imports
+    - avoid_renaming_method_parameters
     - avoid_return_types_on_setters
+    - avoid_returning_null
+    - avoid_returning_null_for_future
+    - avoid_returning_null_for_void
+    - avoid_returning_this
+    - avoid_setters_without_getters
+    - avoid_shadowing_type_parameters
+    - avoid_single_cascade_in_expression_statements
+    - avoid_slow_async_io
+    - avoid_types_as_parameter_names
+    - avoid_types_on_closure_parameters
+    - avoid_unused_constructor_parameters
+    - avoid_void_async
+    - await_only_futures
     - camel_case_types
+    - cancel_subscriptions
+    - cascade_invocations
+    - close_sinks
+    - comment_references
     - constant_identifier_names
+    - control_flow_in_finally
+    - curly_braces_in_flow_control_structures
+    - directives_ordering
+    - empty_catches
     - empty_constructor_bodies
+    - empty_statements
+    - file_names
     - hash_and_equals
     - implementation_imports
+    - invariant_booleans
+    - iterable_contains_unrelated_type
+    - join_return_with_assignment
     - library_names
     - library_prefixes
+    - lines_longer_than_80_chars
+    - list_remove_unrelated_type
+    - literal_only_boolean_expressions
+    - no_adjacent_strings_in_list
+    - no_duplicate_case_values
     - non_constant_identifier_names
+    - null_closures
+    - omit_local_variable_types
     - one_member_abstracts
+    - only_throw_errors
+    - overridden_fields
     - package_api_docs
     - package_names
     - package_prefixed_library_names
+    - parameter_assignments
+    - prefer_adjacent_string_concatenation
+    - prefer_asserts_in_initializer_lists
+    - prefer_collection_literals
+    - prefer_conditional_assignment
+    - prefer_const_constructors
+    - prefer_const_constructors_in_immutables
+    - prefer_const_declarations
+    - prefer_const_literals_to_create_immutables
+    - prefer_constructors_over_static_methods
+    - prefer_contains
+    - prefer_equal_for_default_values
+    - prefer_expression_function_bodies
+    - prefer_final_fields
+    - prefer_final_in_for_each
+    - prefer_final_locals
+    - prefer_foreach
+    - prefer_function_declarations_over_variables
+    - prefer_generic_function_type_aliases
+    - prefer_initializing_formals
+    - prefer_int_literals
+    - prefer_interpolation_to_compose_strings
+    - prefer_is_empty
     - prefer_is_not_empty
+    - prefer_iterable_whereType
+    - prefer_mixin
+    - prefer_null_aware_operators
+    - prefer_single_quotes
+    - prefer_typing_uninitialized_variables
+    - prefer_void_to_null
+    - provide_deprecation_message
+    - recursive_getters
     - slash_for_doc_comments
-    - sort_constructors_first
+    - sort_pub_dependencies
     - sort_unnamed_constructors_first
-    - super_goes_last
+    - test_types_in_equals
+    - throw_in_finally
     - type_annotate_public_apis
     - type_init_formals
+    - unawaited_futures
+    - unnecessary_await_in_return
     - unnecessary_brace_in_string_interps
+    - unnecessary_const
     - unnecessary_getters_setters
-""";
+    - unnecessary_lambdas
+    - unnecessary_new
+    - unnecessary_null_aware_assignments
+    - unnecessary_null_in_if_null_operators
+    - unnecessary_overrides
+    - unnecessary_parenthesis
+    - unnecessary_statements
+    - unnecessary_this
+    - unrelated_type_equality_checks
+    - use_full_hex_values_for_flutter_colors
+    - use_function_type_syntax_for_parameters
+    - use_rethrow_when_possible
+    - use_setters_to_change_properties
+    - use_string_buffers
+    - use_to_and_as_if_applicable
+    - valid_regexps
+    - void_checks
+''';
 
-  String _gitignore() => """
+  String _gitignore() => '''
 # See https://www.dartlang.org/tools/private-files.html
 
 # Files and directories created by pub
@@ -144,9 +255,9 @@ build/
 doc/api/
 
 .idea/
-""";
+''';
 
-  String _buildYaml() => r"""
+  String _buildYaml() => r'''
 targets:
   $default:
     builders:
@@ -161,9 +272,9 @@ targets:
             - --trust-primitives
             - --minify
             - --no-source-maps
-""";
+''';
 
-  String _buildDevYaml() => r"""
+  String _buildDevYaml() => r'''
 targets:
   $default:
     builders:
@@ -172,9 +283,9 @@ targets:
           - web/main.dart
         options:
           compiler: dartdevc
-""";
+''';
 
-  String _pubspec() => """
+  String _pubspec() => '''
 name: $_name
 description: A $_name game
 publish_to: none
@@ -192,67 +303,65 @@ dev_dependencies:
   build_web_compilers: any  
   dartemis_builder:
     git: git://github.com/denniskaselow/dartemis_builder.git
-""";
+''';
 
-  String _readme() => """
+  String _readme() => '''
 $_name
 ===========
 [Play on kayzgames.github.io](http://kayzgames.github.io/$_name/)
-""";
+''';
 
-  String _main() => """
+  String _main() => '''
 import 'package:$_name/client.dart';
 
 void main() {
-  new Game().start();
+  Game().start();
 }
-""";
+''';
 
-  String _html() => """
+  String _html() => '''
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>$_name</title>
-    <link rel="stylesheet" href="styles.css">
-    <script defer src="main.dart.js" type="application/javascript"></script>
+    <link rel='stylesheet' href='styles.css'>
+    <script defer src='main.dart.js' type='application/javascript'></script>
   </head>
   <body>
-    <canvas id="game"></canvas>
+    <canvas id='game'></canvas>
   </body>
 </html>
-""";
+''';
 
-  String _htmlWebGl() => """
+  String _htmlWebGl() => '''
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>$_name</title>
-    <link rel="stylesheet" href="styles.css">
-    <script defer src="main.dart.js" type="application/javascript"></script>
+    <link rel='stylesheet' href='styles.css'>
+    <script defer src='main.dart.js' type='application/javascript'></script>
   </head>
   <body>
-    <div id="gamecontainer">
-      <canvas id="game" width="800px" height="600px"></canvas>
-      <canvas id="hud" width="800px" height="600px"></canvas>
+    <div id='gamecontainer'>
+      <canvas id='game'></canvas>
+      <canvas id='hud'></canvas>
     </div>
   </body>
 </html>
-""";
+''';
 
-  String _css() => """
+  String _css() => '''
 body {
   margin: 0;
   padding: 0;
   width: 100vw;
   height: 100vh;
-  min-width: 800px;
-  min-height: 450px;
   background-color: black;
   display: flex;
   justify-content: center;
@@ -264,16 +373,14 @@ canvas {
   width: 100vw;
   height: 100vh;
 }
-""";
+''';
 
-  String _cssWebGl() => """
+  String _cssWebGl() => '''
 body {
   margin: 0;
   padding: 0;
   width: 100vw;
   height: 100vh;
-  min-width: 800px;
-  min-height: 450px;
   background-color: black;
   display: flex;
   justify-content: center;
@@ -294,18 +401,18 @@ canvas {
   width: 100vw;
   height: 100vh;
 }
-""";
+''';
 
-  String _shared() => """
+  String _shared() => '''
 library shared;
 
 export 'package:gamedev_helpers/gamedev_helpers_shared.dart';
 
 export 'src/shared/components.dart';
 export 'src/shared/systems/logic.dart';
-""";
+''';
 
-  String _client() => """
+  String _client() => '''
 library client;
 
 import 'package:$_name/shared.dart';
@@ -348,22 +455,10 @@ class Game extends GameBase {
       ]
     };
   }
-
-  @override
-  void handleResize(int width, int height) {
-    width = max(800, width);
-    height = max(450, height);
-    if (width / height > 16 / 9) {
-      width = (16 * height) ~/ 9;
-    } else if (width / height < 16 / 9) {
-      height = (9 * width) ~/ 16;
-    }
-    super.handleResize(width, height);
-  }
 }
-""";
+''';
 
-  String _clientWebGl() => """
+  String _clientWebGl() => '''
 library client;
 
 import 'dart:html';
@@ -425,13 +520,6 @@ class Game extends GameBase {
 
   @override
   void handleResize(int width, int height) {
-    width = max(800, width);
-    height = max(450, height);
-    if (width / height > 16 / 9) {
-      width = (16 * height) ~/ 9;
-    } else if (width / height < 16 / 9) {
-      height = (9 * width) ~/ 16;
-    }
     container.style
       ..width = '\${width}px'
       ..height = '\${height}px';
@@ -446,9 +534,9 @@ class Game extends GameBase {
       ..font = '16px Verdana';
   }
 }
-""";
+''';
 
-  String _events() => """
+  String _events() => '''
 import 'package:gamedev_helpers/gamedev_helpers.dart';
 import 'package:$_name/src/shared/components.dart';
 
@@ -457,7 +545,7 @@ part 'events.g.dart';
 @Generate(GenericInputHandlingSystem, allOf: [Controller])
 class ControllerSystem extends _\$ControllerSystem {
   @override
-  void processEntity(Entity entity) {
+  void processEntity(int entity) {
     final c = controllerMapper[entity]..reset();
     if (up) {
       if (left) {
@@ -482,9 +570,9 @@ class ControllerSystem extends _\$ControllerSystem {
     }
   }
 }
-""";
+''';
 
-  String _rendering() => """
+  String _rendering() => '''
 import 'dart:html';
 
 import 'package:gamedev_helpers/gamedev_helpers.dart';
@@ -499,7 +587,7 @@ class PositionRenderingSystem extends _\$PositionRenderingSystem {
   PositionRenderingSystem(this.ctx);
 
   @override
-  void processEntity(Entity entity) {
+  void processEntity(int entity) {
     final position = positionMapper[entity];
 
     ctx
@@ -512,8 +600,8 @@ class PositionRenderingSystem extends _\$PositionRenderingSystem {
   }
 }
 
-""";
-  String _renderingWebGl() => """
+''';
+  String _renderingWebGl() => '''
 import 'dart:typed_data';
 import 'dart:web_gl';
 
@@ -537,12 +625,12 @@ class PositionRenderingSystem extends _\$PositionRenderingSystem {
   Float32List items;
   Uint16List indices;
 
-  PositionRenderingSystem(RenderingContext2 gl) : super(gl) {
+  PositionRenderingSystem(RenderingContext gl) : super(gl) {
     attributes = [Attrib('pos', 2)];
   }
 
   @override
-  void processEntity(int index, Entity entity) {
+  void processEntity(int index, int entity) {
     final position = positionMapper[entity];
     final itemOffset = index * 2 * 4;
     final indexOffset = index * 3 * 2;
@@ -588,9 +676,9 @@ class PositionRenderingSystem extends _\$PositionRenderingSystem {
   @override
   String get fShaderFile => 'PositionRenderingSystem';
 }
-""";
+''';
 
-  String _logic() => """
+  String _logic() => '''
 import 'package:dartemis/dartemis.dart';
 import 'package:gamedev_helpers/gamedev_helpers_shared.dart';
 import 'package:$_name/src/shared/components.dart';
@@ -603,7 +691,7 @@ class ControllerToActionSystem extends _\$ControllerToActionSystem {
   final _sqrttwo = 1.4142;
 
   @override
-  void processEntity(Entity entity) {
+  void processEntity(int entity) {
     final controller = controllerMapper[entity];
     final acceleration = accelerationMapper[entity];
     if (controller.up) {
@@ -629,9 +717,9 @@ class ControllerToActionSystem extends _\$ControllerToActionSystem {
     }
   }
 }
-""";
+''';
 
-  String _components() => """
+  String _components() => '''
 import 'package:dartemis/dartemis.dart';
 
 class Controller extends Component {
@@ -659,12 +747,12 @@ class Controller extends Component {
     downright = false;
   }
 }
-""";
+''';
 
-  String _texturePacker() => """
-<?xml version="1.0" encoding="UTF-8"?>
-<data version="1.0">
-    <struct type="Settings">
+  String _texturePacker() => '''
+<?xml version='1.0' encoding='UTF-8'?>
+<data version='1.0'>
+    <struct type='Settings'>
         <key>fileFormatVersion</key>
         <int>3</int>
         <key>texturePackerVersion</key>
@@ -676,9 +764,9 @@ class Controller extends Component {
         <key>textureFileName</key>
         <filename>../../lib/assets/img/assets.png</filename>
         <key>dataFileNames</key>
-        <map type="GFileNameMap">
+        <map type='GFileNameMap'>
             <key>data</key>
-            <struct type="DataFile">
+            <struct type='DataFile'>
                 <key>name</key>
                 <filename>../../lib/assets/img/assets.json</filename>
             </struct>
@@ -687,7 +775,7 @@ class Controller extends Component {
         <true/>
     </struct>
 </data>
-""";
+''';
 
   String _positionRenderingSystemVert() => '''
 #version 300 es
@@ -711,8 +799,8 @@ void main() {
 }''';
 }
 
-Future<Null> execute(String exec, List<String> args) async {
-  final Process process = await Process.start(exec, args);
+Future<void> execute(String exec, List<String> args) async {
+  final process = await Process.start(exec, args);
 
   process.stdout
       .transform(systemEncoding.decoder)
@@ -731,6 +819,6 @@ Future<Null> execute(String exec, List<String> args) async {
   final exitCode = await process.exitCode;
 
   if (exitCode != 0) {
-    throw 'Error running $exec ${args.join(' ')}';
+    throw Exception('Error running $exec ${args.join(' ')}');
   }
 }

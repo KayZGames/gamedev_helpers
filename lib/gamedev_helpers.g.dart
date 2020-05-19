@@ -6,13 +6,24 @@ part of gamedev_helpers;
 // SystemGenerator
 // **************************************************************************
 
+abstract class _$AnimationSystem extends EntityProcessingSystem {
+  Mapper<Renderable> renderableMapper;
+  _$AnimationSystem() : super(Aspect.empty()..allOf([Renderable]));
+  @override
+  void initialize() {
+    super.initialize();
+    renderableMapper = Mapper<Renderable>(world);
+  }
+}
+
 abstract class _$ParticleRenderingSystem extends WebGlRenderingSystem {
   Mapper<Position> positionMapper;
   Mapper<Particle> particleMapper;
   Mapper<Color> colorMapper;
-  WebGlViewProjectionMatrixManager webGlViewProjectionMatrixManager;
+  ViewProjectionMatrixManager viewProjectionMatrixManager;
   TagManager tagManager;
-  _$ParticleRenderingSystem(RenderingContext2 gl)
+  CameraManager cameraManager;
+  _$ParticleRenderingSystem(RenderingContext gl)
       : super(gl, Aspect.empty()..allOf([Position, Particle, Color]));
   @override
   void initialize() {
@@ -20,9 +31,10 @@ abstract class _$ParticleRenderingSystem extends WebGlRenderingSystem {
     positionMapper = Mapper<Position>(world);
     particleMapper = Mapper<Particle>(world);
     colorMapper = Mapper<Color>(world);
-    webGlViewProjectionMatrixManager =
-        world.getManager<WebGlViewProjectionMatrixManager>();
+    viewProjectionMatrixManager =
+        world.getManager<ViewProjectionMatrixManager>();
     tagManager = world.getManager<TagManager>();
+    cameraManager = world.getManager<CameraManager>();
   }
 }
 
@@ -30,9 +42,10 @@ abstract class _$WebGlSpriteRenderingSystem extends WebGlRenderingSystem {
   Mapper<Orientation> orientationMapper;
   Mapper<Renderable> renderableMapper;
   Mapper<Position> positionMapper;
+  Mapper<Camera> cameraMapper;
   TagManager tagManager;
-  WebGlViewProjectionMatrixManager webGlViewProjectionMatrixManager;
-  _$WebGlSpriteRenderingSystem(RenderingContext2 gl, Aspect aspect)
+  ViewProjectionMatrixManager viewProjectionMatrixManager;
+  _$WebGlSpriteRenderingSystem(RenderingContext gl, Aspect aspect)
       : super(gl, aspect..allOf([Orientation, Renderable]));
   @override
   void initialize() {
@@ -40,8 +53,9 @@ abstract class _$WebGlSpriteRenderingSystem extends WebGlRenderingSystem {
     orientationMapper = Mapper<Orientation>(world);
     renderableMapper = Mapper<Renderable>(world);
     positionMapper = Mapper<Position>(world);
+    cameraMapper = Mapper<Camera>(world);
     tagManager = world.getManager<TagManager>();
-    webGlViewProjectionMatrixManager =
-        world.getManager<WebGlViewProjectionMatrixManager>();
+    viewProjectionMatrixManager =
+        world.getManager<ViewProjectionMatrixManager>();
   }
 }
