@@ -1,30 +1,30 @@
 library gamedev_helpers;
 
 import 'dart:async';
-
 import 'dart:convert';
 import 'dart:html';
 import 'dart:typed_data';
 import 'dart:web_audio';
 import 'dart:web_gl';
 
+import 'package:aspen_assets/aspen_assets.dart';
 import 'package:gamedev_helpers/gamedev_helpers_shared.dart';
+import 'src/assets.dart';
 
 export 'dart:async';
+
 export 'package:gamedev_helpers/gamedev_helpers_shared.dart';
 
+part 'gamedev_helpers.g.dart';
 part 'src/client/assets.dart';
-part 'src/client/game_base.dart';
-part 'src/client/rendering.dart';
-
+part 'src/client/dartemis/components.dart';
 part 'src/client/dartemis/systems/animation_system.dart';
 part 'src/client/dartemis/systems/debugging.dart';
 part 'src/client/dartemis/systems/input.dart';
 part 'src/client/dartemis/systems/rendering_context2d.dart';
 part 'src/client/dartemis/systems/rendering_webgl.dart';
-part 'src/client/dartemis/components.dart';
-
-part 'gamedev_helpers.g.dart';
+part 'src/client/game_base.dart';
+part 'src/client/rendering.dart';
 
 class GameHelper {
   final String _libName;
@@ -47,8 +47,7 @@ class GameHelper {
   Future<AudioBuffer> loadMusic(String name) =>
       _loadMusic(_audioContext, _libName, name);
 
-  /// Loads shader/[vShaderFile].vert and shader/[fShaderFile].frag.
-  Future<ShaderSource> loadShader(
-          String libName, String vShaderFile, String fShaderFile) =>
-      _loadShader(libName ?? _libName, vShaderFile, fShaderFile);
+  /// Loads shader/[vShaderAsset] and shader/[fShaderAsset].
+  ShaderSource loadShader(TextAsset vShaderAsset, TextAsset fShaderAsset) =>
+      _loadShader(vShaderAsset, fShaderAsset);
 }

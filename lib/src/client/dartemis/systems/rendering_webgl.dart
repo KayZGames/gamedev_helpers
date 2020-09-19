@@ -30,11 +30,11 @@ mixin _WebGlRenderingMixin {
   final Set<String> _usedUniforms = {};
 
   void initProgram() {
-    final vShader = _createShader(
-        WebGL.VERTEX_SHADER, shaderSource.vShader, '$vShaderFile.vert');
+    final vShader =
+        _createShader(WebGL.VERTEX_SHADER, shaderSource.vShader, 'vertex');
     if (success) {
       final fShader = _createShader(
-          WebGL.FRAGMENT_SHADER, shaderSource.fShader, '$fShaderFile.frag');
+          WebGL.FRAGMENT_SHADER, shaderSource.fShader, 'fragment');
       if (success) {
         _createProgram(vShader, fShader);
       }
@@ -88,7 +88,7 @@ ${_uniforms.keys.map((key) => '${key}Location = getUniformLocation(\'$key\');').
     }
   }
 
-  Shader _createShader(int type, String source, String filename) {
+  Shader _createShader(int type, String source, String shaderType) {
     final shader = gl.createShader(type);
     gl
       ..shaderSource(shader, source)
@@ -96,8 +96,9 @@ ${_uniforms.keys.map((key) => '${key}Location = getUniformLocation(\'$key\');').
     final compileSuccess =
         gl.getShaderParameter(shader, WebGL.COMPILE_STATUS) as bool;
     if (!compileSuccess) {
+      // will only kind of work in dev mode and not at all when minified
       print(
-          '''$runtimeType - Error compiling shader $filename: ${gl.getShaderInfoLog(shader)}''');
+          '''$runtimeType - Error compiling $shaderType shader for $runtimeType: ${gl.getShaderInfoLog(shader)}''');
       success = false;
     }
     return shader;
@@ -113,7 +114,7 @@ ${_uniforms.keys.map((key) => '${key}Location = getUniformLocation(\'$key\');').
     final attribLocation = gl.getAttribLocation(program, attribute);
     if (attribLocation == -1) {
       throw ArgumentError(
-          'Attribute $attribute not found in shader $vShaderFile}');
+          'Attribute $attribute not found in vertex shader for $runtimeType}');
     }
     gl
       ..bindBuffer(WebGL.ARRAY_BUFFER, buffer)
@@ -140,7 +141,7 @@ ${_uniforms.keys.map((key) => '${key}Location = getUniformLocation(\'$key\');').
       final attribLocation = gl.getAttribLocation(program, attribute.name);
       if (attribLocation == -1) {
         throw ArgumentError(
-            'Attribute ${attribute.name} not found in shader $vShaderFile}');
+            '''Attribute ${attribute.name} not found in vertex shader for $runtimeType}''');
       }
       gl
         ..vertexAttribPointer(attribLocation, attribute.size, WebGL.FLOAT,
@@ -165,8 +166,8 @@ ${_uniforms.keys.map((key) => '${key}Location = getUniformLocation(\'$key\');').
     gl.drawElements(WebGL.POINTS, length, WebGL.UNSIGNED_SHORT, 0);
   }
 
-  String get vShaderFile;
-  String get fShaderFile;
+  TextAsset get vShaderAsset;
+  TextAsset get fShaderAsset;
   String get libName => null;
   void initUniformLocations();
 }
@@ -304,10 +305,10 @@ class ParticleRenderingSystem extends _$ParticleRenderingSystem {
   }
 
   @override
-  String get vShaderFile => 'ParticleRenderingSystem';
+  TextAsset get vShaderAsset => vShaderParticleRendering;
 
   @override
-  String get fShaderFile => 'ParticleRenderingSystem';
+  TextAsset get fShaderAsset => fShaderParticleRendering;
 
   @override
   String get libName => 'gamedev_helpers';
@@ -460,10 +461,10 @@ abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
   }
 
   @override
-  String get vShaderFile => 'SpriteRenderingSystem';
+  TextAsset get vShaderAsset => vShaderSpriteRendering;
 
   @override
-  String get fShaderFile => 'SpriteRenderingSystem';
+  TextAsset get fShaderAsset => fShaderSpriteRendering;
 
   @override
   String get libName => 'gamedev_helpers';

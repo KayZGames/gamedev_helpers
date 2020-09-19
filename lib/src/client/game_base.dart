@@ -147,11 +147,10 @@ abstract class GameBase {
     });
   }
 
-  Future _initGame() {
+  void _initGame() {
     createEntities();
-    return initSystems().then((_) {
-      world.initialize();
-    });
+    initSystems();
+    world.initialize();
   }
 
   Future<GameBase> start() => _init().then((_) {
@@ -271,23 +270,17 @@ abstract class GameBase {
   /// Return a list of all the [EntitySystem]s required for this game.
   Map<int, List<EntitySystem>> getSystems();
 
-  Future initSystems() {
-    final shaderSourceFutures = <Future>[];
+  void initSystems() {
     getSystems().forEach((group, systems) {
       for (final system in systems) {
         world.addSystem(system, group: group);
         if (system is _WebGlRenderingMixin) {
           final webglMixin = system as _WebGlRenderingMixin;
-          shaderSourceFutures.add(helper
-              .loadShader(webglMixin.libName, webglMixin.vShaderFile,
-                  webglMixin.fShaderFile)
-              .then((shaderSource) {
-            webglMixin.shaderSource = shaderSource;
-          }));
+          webglMixin.shaderSource = helper.loadShader(
+              webglMixin.vShaderAsset, webglMixin.fShaderAsset);
         }
       }
     });
-    return Future.wait(shaderSourceFutures);
   }
 
   int addEntity<T extends Component>(List<T> components) =>

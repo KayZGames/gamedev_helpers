@@ -63,15 +63,8 @@ Future<SpriteSheet> _createSpriteSheet(String imgPath, _AssetJson assets) {
   return completer.future;
 }
 
-Future<ShaderSource> _loadShader(
-    String libName, String vShaderFile, String fShaderFile) {
-  final loaders = [
-    HttpRequest.getString('packages/$libName/assets/shader/$vShaderFile.vert'),
-    HttpRequest.getString('packages/$libName/assets/shader/$fShaderFile.frag')
-  ];
-  return Future.wait(loaders)
-      .then((shaders) => ShaderSource(shaders[0], shaders[1]));
-}
+ShaderSource _loadShader(TextAsset vShaderFile, TextAsset fShaderFile) =>
+    ShaderSource(vShaderFile.text, fShaderFile.text);
 
 class ShaderSource {
   String vShader;

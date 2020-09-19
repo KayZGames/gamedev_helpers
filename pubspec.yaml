@@ -13,9 +13,12 @@ dependencies:
     git: git://github.com/KayZGames/tween-engine-dart.git
   git: ^0.5.1
   path: ^1.5.1
+  aspen: ^0.3.0
+  aspen_assets: ^0.3.0
 executables:
   setup_game:
   publish_game:
 dev_dependencies:
   build_runner: any
   dartemis_builder: ^0.1.0
+  aspen_builder: ^0.3.0
