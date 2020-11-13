@@ -64,11 +64,11 @@ Future<SpriteSheet> _createSpriteSheet(String imgPath, _AssetJson assets) {
 }
 
 ShaderSource _loadShader(TextAsset vShaderFile, TextAsset fShaderFile) =>
-    ShaderSource(vShaderFile.text, fShaderFile.text);
+    ShaderSource(vShaderFile, fShaderFile);
 
 class ShaderSource {
-  String vShader;
-  String fShader;
+  TextAsset vShader;
+  TextAsset fShader;
 
   ShaderSource(this.vShader, this.fShader);
 }

@@ -1,24 +1,29 @@
 name: gamedev_helpers
 version: 0.0.1-dev
 description: Useful stuff for my gamedevelopment needs
-author: Dennis Kaselow <Dennis.Kaselow+gamedev_helpers@gmail.com>
 publish_to: none
 environment:
   sdk: '>=2.2.0 <3.0.0'
 dependencies:
-  vector_math: ^2.0.6
+  aspen: ^0.3.0
+  aspen_assets: ^0.4.0
   dartemis: ^0.8.0
   event_bus: ^1.0.1
-  tweenengine:
-    git: git://github.com/KayZGames/tween-engine-dart.git
   git: ^0.5.1
   path: ^1.5.1
-  aspen: ^0.3.0
-  aspen_assets: ^0.3.0
+  tweenengine:
+    git: git://github.com/KayZGames/tween-engine-dart.git
+  vector_math: ^2.0.6
 executables:
   setup_game:
   publish_game:
 dev_dependencies:
+  aspen_builder: ^0.4.0
   build_runner: any
   dartemis_builder: ^0.1.0
-  aspen_builder: ^0.3.0
+
+dependency_overrides:
+  aspen_assets:
+    path: ../aspen/aspen_assets
+  aspen_builder:
+    path: ../aspen/aspen_builder
