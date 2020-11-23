@@ -1,4 +1,6 @@
-part of gamedev_helpers;
+import 'dart:html';
+
+import 'package:dartemis/dartemis.dart';
 
 class FpsRenderingSystem extends VoidEntitySystem {
   static const _deltaCount = 20;
@@ -40,7 +42,9 @@ class FpsPrintingSystem extends VoidEntitySystem {
     final fps =
         _deltaCount / deltas.reduce((combined, current) => combined + current);
 
+    // ignore: avoid_print
     print('FPS: ${fps.toStringAsFixed(2)}');
+    // ignore: avoid_print
     print('Entities: ${world.entityManager.activeEntityCount}');
   }
 }

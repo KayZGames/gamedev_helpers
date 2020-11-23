@@ -1,4 +1,4 @@
-part of gamedev_helpers;
+import 'dart:html';
 
 // originally part of CanvasQuery
 final Pattern _whitespacePattern = RegExp(r'\s+');

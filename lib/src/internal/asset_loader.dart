@@ -1,22 +1,33 @@
-part of gamedev_helpers;
+import 'dart:async';
+import 'dart:convert';
+import 'dart:html';
+import 'dart:math';
+import 'dart:typed_data';
+import 'dart:web_audio';
 
-Future<Map<String, String>> _loadAchievements(String libName) =>
+import 'package:aspen_assets/aspen_assets.dart';
+import 'package:vector_math/vector_math_64.dart';
+
+import '../shader.dart';
+import '../sprite_sheet.dart';
+
+Future<Map<String, String>> loadAchievements(String libName) =>
     HttpRequest.getString('packages/$libName/assets/achievements.json')
         .then(_processAchievementAssets);
 
-Future<Map<String, List<Polygon>>> _loadPolygons(String libName, String name) =>
+Future<Map<String, List<Polygon>>> loadPolygons(String libName, String name) =>
     HttpRequest.getString('packages/$libName/assets/img/$name.polygons.json')
         .then(_processPolygonAssets)
         .then(_createPolygonMap);
 
-Future<SpriteSheet> _loadSpritesheet(String libName, String name) {
+Future<SpriteSheet> loadSpritesheet(String libName, String name) {
   final imgPath = 'packages/$libName/assets/img/$name.png';
   return HttpRequest.getString('packages/$libName/assets/img/$name.json')
       .then(_processAssets)
       .then((assets) => _createSpriteSheet(imgPath, assets));
 }
 
-Future<AudioBuffer> _loadMusic(
+Future<AudioBuffer> loadMusic(
     AudioContext audioContext, String libName, String name) {
   const goodAnswer = ['probably', 'maybe'];
   final audio = AudioElement();
@@ -50,57 +61,42 @@ Future<Map<String, List<Polygon>>> _createPolygonMap(
 
 Future<SpriteSheet> _createSpriteSheet(String imgPath, _AssetJson assets) {
   final completer = Completer<SpriteSheet>();
-  final img = ImageElement();
+  final img = ImageElement(src: imgPath);
   img.onLoad.listen((_) {
     final sprites = <String, Sprite>{};
     assets.frames.forEach((assetName, assetData) {
-      sprites[assetName] = Sprite(assetData);
+      final spriteData = _SpriteData(assetData);
+      sprites[assetName] = Sprite(spriteData.src, spriteData.dst,
+          spriteData.offset, spriteData.trimmed);
     });
     final sheet = SpriteSheet(img, sprites);
     completer.complete(sheet);
   });
-  img.src = imgPath;
   return completer.future;
 }
 
-ShaderSource _loadShader(TextAsset vShaderFile, TextAsset fShaderFile) =>
+ShaderSource loadShader(TextAsset vShaderFile, TextAsset fShaderFile) =>
     ShaderSource(vShaderFile, fShaderFile);
 
-class ShaderSource {
-  TextAsset vShader;
-  TextAsset fShader;
+class Polygon {
+  List<Vector2> vertices;
 
-  ShaderSource(this.vShader, this.fShader);
+  Polygon(List<double> points) {
+    vertices = List(points.length ~/ 2);
+    for (var i = 0; i < points.length; i += 2) {
+      vertices[i ~/ 2] =
+          Vector2(points[i].toDouble(), points[i + 1].toDouble());
+    }
+  }
 }
 
-class LayeredSpriteSheet {
-  List<SpriteSheet> sheets;
-
-  LayeredSpriteSheet(SpriteSheet initialSpriteSheet)
-      : sheets = [initialSpriteSheet];
-
-  void add(SpriteSheet sheet) => sheets.insert(0, sheet);
-
-  SpriteSheet getLayerFor(String spriteId) =>
-      sheets.where((sheet) => sheet.sprites.containsKey(spriteId)).first;
-}
-
-class SpriteSheet {
-  final ImageElement image;
-  final Map<String, Sprite> sprites;
-
-  SpriteSheet(this.image, this.sprites);
-
-  Sprite operator [](String name) => sprites[name];
-}
-
-class Sprite {
+class _SpriteData {
   Rectangle<int> src;
   Rectangle<int> dst;
   Vector2 offset;
   Vector2 trimmed;
 
-  Sprite(_FrameValue singleAsset) {
+  _SpriteData(_FrameValue singleAsset) {
     final asset = _Asset(singleAsset);
     src = asset.frame;
     int cx, cy;
@@ -116,18 +112,6 @@ class Sprite {
     offset = Vector2(cx.toDouble(), cy.toDouble());
     trimmed = Vector2(asset.spriteSourceSize.left.toDouble(),
         asset.spriteSourceSize.top.toDouble());
-  }
-}
-
-class Polygon {
-  List<Vector2> vertices;
-
-  Polygon(List<double> points) {
-    vertices = List(points.length ~/ 2);
-    for (var i = 0; i < points.length; i += 2) {
-      vertices[i ~/ 2] =
-          Vector2(points[i].toDouble(), points[i + 1].toDouble());
-    }
   }
 }
 

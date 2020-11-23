@@ -1,4 +1,7 @@
-part of gamedev_helpers;
+import 'dart:async';
+import 'dart:html';
+
+import 'package:dartemis/dartemis.dart';
 
 abstract class GenericInputHandlingSystem extends EntityProcessingSystem {
   /// to prevent scrolling

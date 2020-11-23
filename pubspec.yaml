@@ -9,6 +9,8 @@ dependencies:
   aspen_assets: ^0.4.0
   dartemis: ^0.8.0
   event_bus: ^1.0.1
+  gamedev_helpers_core:
+    path: ../gamedev_helpers_core
   git: ^0.5.1
   path: ^1.5.1
   tweenengine:

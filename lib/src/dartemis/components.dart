@@ -1,4 +1,6 @@
-part of gamedev_helpers;
+import 'package:dartemis/dartemis.dart';
+
+import '../sprite_sheet.dart';
 
 class Renderable extends Component {
   String _name;

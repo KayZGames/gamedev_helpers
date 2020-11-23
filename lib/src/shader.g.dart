@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'assets.dart';
+part of 'shader.dart';
 
 // **************************************************************************
 // BundleGenerator
@@ -14,7 +14,7 @@ enum Shaders {
 }
 const _shaders$asset = {
   Shaders.particleRenderingSystem$frag: TextAsset(AssetData(
-      r'gamedev_helpers|lib/assets/shader/particleRenderingSystem.frag',
+      r'gamedev_helpers|assets/shader/particleRenderingSystem.frag',
       r'''#version 100
 
 precision mediump float;
@@ -24,7 +24,7 @@ void main() {
   gl_FragColor = vColor;
 }''')),
   Shaders.particleRenderingSystem$vert: TextAsset(AssetData(
-      r'gamedev_helpers|lib/assets/shader/particleRenderingSystem.vert',
+      r'gamedev_helpers|assets/shader/particleRenderingSystem.vert',
       r'''#version 100
 
 uniform mat4 uViewProjection;
@@ -39,7 +39,7 @@ void main() {
     vColor = aColor;
 }''')),
   Shaders.spriteRenderingSystem$frag: TextAsset(AssetData(
-      r'gamedev_helpers|lib/assets/shader/spriteRenderingSystem.frag',
+      r'gamedev_helpers|assets/shader/spriteRenderingSystem.frag',
       r'''#version 100
 
 precision mediump float;
@@ -54,7 +54,7 @@ void main() {
 	gl_FragColor = color;
 }''')),
   Shaders.spriteRenderingSystem$vert: TextAsset(AssetData(
-      r'gamedev_helpers|lib/assets/shader/spriteRenderingSystem.vert',
+      r'gamedev_helpers|assets/shader/spriteRenderingSystem.vert',
       r'''#version 100
 
 uniform mat4 uViewProjection;

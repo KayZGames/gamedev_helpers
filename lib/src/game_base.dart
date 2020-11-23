@@ -1,4 +1,16 @@
-part of gamedev_helpers;
+import 'dart:async';
+import 'dart:html';
+import 'dart:math';
+import 'dart:web_audio';
+import 'dart:web_gl';
+
+import 'package:dartemis/dartemis.dart';
+import 'package:gamedev_helpers_core/gamedev_helpers_core.dart';
+
+import 'game_helper.dart';
+import 'internal/asset_loader.dart';
+import 'internal/webgl_rendering_mixin.dart';
+import 'sprite_sheet.dart';
 
 abstract class GameBase {
   static const int rendering = 0;
@@ -253,7 +265,7 @@ abstract class GameBase {
     if (paused || isStopped) {
       world
         ..delta = 0.0
-        ..process(GameBase.rendering);
+        ..process();
     }
     if (!webgl) {
       canvas.context2D
@@ -274,8 +286,8 @@ abstract class GameBase {
     getSystems().forEach((group, systems) {
       for (final system in systems) {
         world.addSystem(system, group: group);
-        if (system is _WebGlRenderingMixin) {
-          final webglMixin = system as _WebGlRenderingMixin;
+        if (system is WebGlRenderingMixin) {
+          final webglMixin = system as WebGlRenderingMixin;
           webglMixin.shaderSource = helper.loadShader(
               webglMixin.vShaderAsset, webglMixin.fShaderAsset);
         }
