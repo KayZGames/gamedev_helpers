@@ -20,11 +20,14 @@ Future<Map<String, List<Polygon>>> loadPolygons(String libName, String name) =>
         .then(_processPolygonAssets)
         .then(_createPolygonMap);
 
-Future<SpriteSheet> loadSpritesheet(String libName, String name) {
-  final imgPath = 'packages/$libName/assets/img/$name.png';
-  return HttpRequest.getString('packages/$libName/assets/img/$name.json')
-      .then(_processAssets)
-      .then((assets) => _createSpriteSheet(imgPath, assets));
+Future<SpriteSheet> loadSpritesheet(
+    JsonAsset spriteSheetJson, BinaryAsset spriteSheetImg) {
+  final assets =
+      _AssetJson.fromJson(spriteSheetJson.json() as Map<String, dynamic>);
+  final imgType = spriteSheetImg.assetId.split('.').last;
+  final imgPath =
+      'data:image/$imgType;base64,${base64Encode(spriteSheetImg.decode().toList())}';
+  return _createSpriteSheet(imgPath, assets);
 }
 
 Future<AudioBuffer> loadMusic(
@@ -140,9 +143,6 @@ Future<Map<String, List<Map<String, List<double>>>>> _processPolygonAssets(
         String assetJson) =>
     Future.value(
         json.decode(assetJson) as Map<String, List<Map<String, List<double>>>>);
-
-Future<_AssetJson> _processAssets(String assetJson) => Future.value(
-    _AssetJson.fromJson(json.decode(assetJson) as Map<String, dynamic>));
 
 class _AssetJson {
   Map<String, _FrameValue> frames;

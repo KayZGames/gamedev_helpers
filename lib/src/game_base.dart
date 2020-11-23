@@ -4,6 +4,7 @@ import 'dart:math';
 import 'dart:web_audio';
 import 'dart:web_gl';
 
+import 'package:aspen_assets/aspen_assets.dart';
 import 'package:dartemis/dartemis.dart';
 import 'package:gamedev_helpers_core/gamedev_helpers_core.dart';
 
@@ -22,7 +23,8 @@ abstract class GameBase {
   final CanvasRenderingContext2D ctx;
   final RenderingContext gl;
   final GameHelper helper;
-  final String spriteSheetName;
+  final JsonAsset spriteSheetJson;
+  final BinaryAsset spriteSheetImg;
   final String bodyDefsName;
   final String musicName;
   final bool webgl;
@@ -42,7 +44,8 @@ abstract class GameBase {
   /// [appName] is used to refernce assets and has to be the name of the library
   /// which contains the assets. Usually the game itself.
   GameBase(String appName, String canvasSelector,
-      {this.spriteSheetName = 'assets',
+      {this.spriteSheetJson,
+      this.spriteSheetImg,
       this.bodyDefsName = 'assets',
       this.musicName,
       this.audioContext,
@@ -95,7 +98,6 @@ abstract class GameBase {
       bool blending = true,
       bool useMaxDelta = true})
       : this(appName, canvasSelector,
-            spriteSheetName: null,
             bodyDefsName: null,
             musicName: null,
             webgl: webgl,
@@ -109,8 +111,9 @@ abstract class GameBase {
         gl = null,
         useMaxDelta = true,
         helper = GameHelper(appNahme, null),
+        spriteSheetJson = null,
+        spriteSheetImg = null,
         bodyDefsName = null,
-        spriteSheetName = null,
         musicName = null,
         webgl = false {
     world = createWorld();
@@ -134,9 +137,9 @@ abstract class GameBase {
 
   Future _assetsLoaded() {
     final loader = <Future>[];
-    if (null != spriteSheetName) {
+    if (null != spriteSheetJson && null != spriteSheetImg) {
       loader.add(helper
-          .loadSpritesheet(spriteSheetName)
+          .loadSpritesheet(spriteSheetJson, spriteSheetImg)
           .then((result) => spriteSheet = result));
     }
     if (null != bodyDefsName) {

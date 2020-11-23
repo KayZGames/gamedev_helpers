@@ -21,8 +21,9 @@ class GameHelper {
       assets.loadPolygons(_libName, name);
 
   /// Loads img/[name].png and img/[name].json.
-  Future<SpriteSheet> loadSpritesheet(String name) =>
-      assets.loadSpritesheet(_libName, name);
+  Future<SpriteSheet> loadSpritesheet(
+          JsonAsset spriteSheetJson, BinaryAsset spriteSheetImg) =>
+      assets.loadSpritesheet(spriteSheetJson, spriteSheetImg);
 
   /// Loads music/[name].ogg or music/[name].mp3 depending on browser support.
   Future<AudioBuffer> loadMusic(String name) =>
