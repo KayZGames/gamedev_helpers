@@ -1,5 +1,4 @@
-import 'package:aspen/aspen.dart';
-import 'package:aspen_assets/aspen_assets.dart';
+import 'package:asset_data/asset_data.dart';
 
 part 'shader.g.dart';
 
@@ -11,4 +10,4 @@ class ShaderSource {
 }
 
 @Asset('asset:gamedev_helpers/assets/shader/')
-const shaders = DirAsset<TextAsset, Shaders>(_shaders$asset);
+const ghShaders = DirAsset<TextAsset, GhShaders>(_ghShaders$asset);

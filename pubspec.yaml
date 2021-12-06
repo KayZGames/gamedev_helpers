@@ -3,29 +3,22 @@ version: 0.0.1-dev
 description: Useful stuff for my gamedevelopment needs
 publish_to: none
 environment:
-  sdk: '>=2.2.0 <3.0.0'
+  sdk: '>=2.15.0 <3.0.0'
 dependencies:
-  aspen: ^0.3.0
-  aspen_assets: ^0.4.0
-  dartemis: ^0.8.0
-  event_bus: ^1.0.1
+  asset_data:
+    git:
+      url: git@github.com:KayZGames/asset_data.git
+      ref: tags/1.0.0
+  dartemis: ^0.9.0
+  event_bus: ^2.0.0
   gamedev_helpers_core:
-    git: git@github.com:KayZGames/gamedev_helpers_core.git
-  git: ^0.5.1
-  path: ^1.5.1
-  tweenengine:
-    git: git@github.com:KayZGames/tween-engine-dart.git
+    path: ../gamedev_helpers_core
+#    git: git@github.com:KayZGames/gamedev_helpers_core.git
   vector_math: ^2.0.6
-executables:
-  setup_game:
-  publish_game:
 dev_dependencies:
-  aspen_builder: ^0.4.0
+  asset_builder:
+    git:
+      url: git@github.com:KayZGames/asset_builder.git
+      ref: tags/1.0.0
   build_runner: any
-  dartemis_builder: ^0.1.0
-
-dependency_overrides:
-  aspen_assets:
-    path: ../aspen/aspen_assets
-  aspen_builder:
-    path: ../aspen/aspen_builder
+  dartemis_builder: ^0.2.0

@@ -1,11 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:html';
-import 'dart:math';
 import 'dart:typed_data';
 import 'dart:web_audio';
 
-import 'package:aspen_assets/aspen_assets.dart';
+import 'package:asset_data/asset_data.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import '../shader.dart';
@@ -55,7 +54,7 @@ Future<Map<String, List<Polygon>>> _createPolygonMap(
   polygons.forEach((bodyId, pointMaps) {
     final polygonList = <Polygon>[];
     for (final pointMap in pointMaps) {
-      polygonList.add(Polygon(pointMap['shape']));
+      polygonList.add(Polygon(pointMap['shape']!));
     }
     result[bodyId] = polygonList;
   });
@@ -84,13 +83,11 @@ ShaderSource loadShader(TextAsset vShaderFile, TextAsset fShaderFile) =>
 class Polygon {
   List<Vector2> vertices;
 
-  Polygon(List<double> points) {
-    vertices = List(points.length ~/ 2);
-    for (var i = 0; i < points.length; i += 2) {
-      vertices[i ~/ 2] =
-          Vector2(points[i].toDouble(), points[i + 1].toDouble());
-    }
-  }
+  Polygon(List<double> points)
+      : vertices = [
+          for (var i = 0; i < points.length; i += 2)
+            Vector2(points[i].toDouble(), points[i + 1].toDouble())
+        ];
 }
 
 class _SpriteData {
@@ -99,9 +96,9 @@ class _SpriteData {
   Vector2 offset;
   Vector2 trimmed;
 
-  _SpriteData(_FrameValue singleAsset) {
+  factory _SpriteData(_FrameValue singleAsset) {
     final asset = _Asset(singleAsset);
-    src = asset.frame;
+    final src = asset.frame;
     int cx, cy;
     if (asset.trimmed) {
       cx = -(asset.sourceSize.x ~/ 2 - asset.spriteSourceSize.left);
@@ -111,11 +108,14 @@ class _SpriteData {
       cy = -asset.frame.height ~/ 2;
     }
 
-    dst = Rectangle<int>(cx, cy, src.width, src.height);
-    offset = Vector2(cx.toDouble(), cy.toDouble());
-    trimmed = Vector2(asset.spriteSourceSize.left.toDouble(),
+    final dst = Rectangle<int>(cx, cy, src.width, src.height);
+    final offset = Vector2(cx.toDouble(), cy.toDouble());
+    final trimmed = Vector2(asset.spriteSourceSize.left.toDouble(),
         asset.spriteSourceSize.top.toDouble());
+    return _SpriteData.internal(src, dst, offset, trimmed);
   }
+
+  _SpriteData.internal(this.src, this.dst, this.offset, this.trimmed);
 }
 
 class _Asset {
@@ -149,8 +149,8 @@ class _AssetJson {
   _Meta meta;
 
   _AssetJson({
-    this.frames,
-    this.meta,
+    required this.frames,
+    required this.meta,
   });
 
   factory _AssetJson.fromJson(Map<String, dynamic> json) => _AssetJson(
@@ -175,11 +175,11 @@ class _FrameValue {
   _Size sourceSize;
 
   _FrameValue({
-    this.frame,
-    this.rotated,
-    this.trimmed,
-    this.spriteSourceSize,
-    this.sourceSize,
+    required this.frame,
+    required this.rotated,
+    required this.trimmed,
+    required this.spriteSourceSize,
+    required this.sourceSize,
   });
 
   factory _FrameValue.fromJson(Map<String, dynamic> json) => _FrameValue(
@@ -209,18 +209,18 @@ class _SpriteSourceSizeClass {
   int h;
 
   _SpriteSourceSizeClass({
-    this.x,
-    this.y,
-    this.w,
-    this.h,
+    required this.x,
+    required this.y,
+    required this.w,
+    required this.h,
   });
 
   factory _SpriteSourceSizeClass.fromJson(Map<String, int> json) =>
       _SpriteSourceSizeClass(
         x: json['x'] ?? 0,
         y: json['y'] ?? 0,
-        w: json['w'],
-        h: json['h'],
+        w: json['w']!,
+        h: json['h']!,
       );
 
   Map<String, dynamic> toJson() => {
@@ -236,13 +236,13 @@ class _Size {
   int h;
 
   _Size({
-    this.w,
-    this.h,
+    required this.w,
+    required this.h,
   });
 
   factory _Size.fromJson(Map<String, int> json) => _Size(
-        w: json['w'],
-        h: json['h'],
+        w: json['w']!,
+        h: json['h']!,
       );
 
   Map<String, dynamic> toJson() => {
@@ -261,13 +261,13 @@ class _Meta {
   String smartupdate;
 
   _Meta({
-    this.app,
-    this.version,
-    this.image,
-    this.format,
-    this.size,
-    this.scale,
-    this.smartupdate,
+    required this.app,
+    required this.version,
+    required this.image,
+    required this.format,
+    required this.size,
+    required this.scale,
+    required this.smartupdate,
   });
 
   factory _Meta.fromJson(Map<String, dynamic> json) => _Meta(

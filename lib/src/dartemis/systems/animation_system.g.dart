@@ -7,7 +7,7 @@ part of 'animation_system.dart';
 // **************************************************************************
 
 abstract class _$AnimationSystem extends EntityProcessingSystem {
-  Mapper<Renderable> renderableMapper;
+  late final Mapper<Renderable> renderableMapper;
   _$AnimationSystem() : super(Aspect.empty()..allOf([Renderable]));
   @override
   void initialize() {

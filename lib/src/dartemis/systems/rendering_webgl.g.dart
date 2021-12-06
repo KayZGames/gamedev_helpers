@@ -7,12 +7,12 @@ part of 'rendering_webgl.dart';
 // **************************************************************************
 
 abstract class _$ParticleRenderingSystem extends WebGlRenderingSystem {
-  Mapper<Position> positionMapper;
-  Mapper<Particle> particleMapper;
-  Mapper<Color> colorMapper;
-  ViewProjectionMatrixManager viewProjectionMatrixManager;
-  TagManager tagManager;
-  CameraManager cameraManager;
+  late final Mapper<Position> positionMapper;
+  late final Mapper<Particle> particleMapper;
+  late final Mapper<Color> colorMapper;
+  late final ViewProjectionMatrixManager viewProjectionMatrixManager;
+  late final TagManager tagManager;
+  late final CameraManager cameraManager;
   _$ParticleRenderingSystem(RenderingContext gl)
       : super(gl, Aspect.empty()..allOf([Position, Particle, Color]));
   @override
@@ -29,12 +29,12 @@ abstract class _$ParticleRenderingSystem extends WebGlRenderingSystem {
 }
 
 abstract class _$WebGlSpriteRenderingSystem extends WebGlRenderingSystem {
-  Mapper<Orientation> orientationMapper;
-  Mapper<Renderable> renderableMapper;
-  Mapper<Position> positionMapper;
-  Mapper<Camera> cameraMapper;
-  TagManager tagManager;
-  ViewProjectionMatrixManager viewProjectionMatrixManager;
+  late final Mapper<Orientation> orientationMapper;
+  late final Mapper<Renderable> renderableMapper;
+  late final Mapper<Position> positionMapper;
+  late final Mapper<Camera> cameraMapper;
+  late final TagManager tagManager;
+  late final ViewProjectionMatrixManager viewProjectionMatrixManager;
   _$WebGlSpriteRenderingSystem(RenderingContext gl, Aspect aspect)
       : super(gl, aspect..allOf([Orientation, Renderable]));
   @override

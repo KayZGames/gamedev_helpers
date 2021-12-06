@@ -3,17 +3,17 @@
 part of 'shader.dart';
 
 // **************************************************************************
-// BundleGenerator
+// AssetGenerator
 // **************************************************************************
 
-enum Shaders {
+enum GhShaders {
   particleRenderingSystem$frag,
   particleRenderingSystem$vert,
   spriteRenderingSystem$frag,
   spriteRenderingSystem$vert
 }
-const _shaders$asset = {
-  Shaders.particleRenderingSystem$frag: TextAsset(AssetData(
+const _ghShaders$asset = {
+  GhShaders.particleRenderingSystem$frag: TextAsset(AssetData(
       r'gamedev_helpers|assets/shader/particleRenderingSystem.frag',
       r'''#version 100
 
@@ -23,7 +23,7 @@ varying vec4 vColor;
 void main() {
   gl_FragColor = vColor;
 }''')),
-  Shaders.particleRenderingSystem$vert: TextAsset(AssetData(
+  GhShaders.particleRenderingSystem$vert: TextAsset(AssetData(
       r'gamedev_helpers|assets/shader/particleRenderingSystem.vert',
       r'''#version 100
 
@@ -38,7 +38,7 @@ void main() {
     gl_PointSize = aRadius;
     vColor = aColor;
 }''')),
-  Shaders.spriteRenderingSystem$frag: TextAsset(AssetData(
+  GhShaders.spriteRenderingSystem$frag: TextAsset(AssetData(
       r'gamedev_helpers|assets/shader/spriteRenderingSystem.frag',
       r'''#version 100
 
@@ -53,7 +53,7 @@ void main() {
 	// if (color.a < 1.0) discard;
 	gl_FragColor = color;
 }''')),
-  Shaders.spriteRenderingSystem$vert: TextAsset(AssetData(
+  GhShaders.spriteRenderingSystem$vert: TextAsset(AssetData(
       r'gamedev_helpers|assets/shader/spriteRenderingSystem.vert',
       r'''#version 100
 

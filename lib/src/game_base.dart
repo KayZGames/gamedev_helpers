@@ -4,7 +4,7 @@ import 'dart:math';
 import 'dart:web_audio';
 import 'dart:web_gl';
 
-import 'package:aspen_assets/aspen_assets.dart';
+import 'package:asset_data/asset_data.dart';
 import 'package:dartemis/dartemis.dart';
 import 'package:gamedev_helpers_core/gamedev_helpers_core.dart';
 
@@ -19,23 +19,23 @@ abstract class GameBase {
 
   final StreamController<bool> _pauseStreamController =
       StreamController<bool>();
-  final CanvasElement canvas;
-  final CanvasRenderingContext2D ctx;
-  final RenderingContext gl;
+  final CanvasElement? canvas;
+  final CanvasRenderingContext2D? ctx;
+  final RenderingContext? gl;
   final GameHelper helper;
-  final JsonAsset spriteSheetJson;
-  final BinaryAsset spriteSheetImg;
-  final String bodyDefsName;
-  final String musicName;
+  final JsonAsset? spriteSheetJson;
+  final BinaryAsset? spriteSheetImg;
+  final String? bodyDefsName;
+  final String? musicName;
   final bool webgl;
   final bool useMaxDelta;
-  World world;
-  Map<String, List<Polygon>> bodyDefs;
-  SpriteSheet spriteSheet;
-  AudioBuffer music;
-  AudioContext audioContext;
-  double _lastTime;
-  double _lastTimeP;
+  late World world;
+  Map<String, List<Polygon>>? bodyDefs;
+  SpriteSheet? spriteSheet;
+  AudioBuffer? music;
+  AudioContext? audioContext;
+  double _lastTime = 0;
+  double _lastTimeP = 0;
   bool fullscreen = false;
   bool _stop = false;
   bool _pause = false;
@@ -53,24 +53,26 @@ abstract class GameBase {
       bool depthTest = true,
       bool blending = true,
       this.useMaxDelta = true})
-      : canvas = querySelector(canvasSelector) as CanvasElement,
+      : canvas = querySelector(canvasSelector)! as CanvasElement,
         helper = GameHelper(appName, audioContext),
         ctx = webgl
             ? null
-            : (querySelector(canvasSelector) as CanvasElement).context2D,
+            : (querySelector(canvasSelector)! as CanvasElement).context2D,
         gl = webgl
-            ? (querySelector(canvasSelector) as CanvasElement).getContext3d()
+            ? (querySelector(canvasSelector)! as CanvasElement).getContext3d()
             : null {
-    if (ctx != null) {
-      ctx
+    final localCtx = ctx;
+    final localGl = gl;
+    if (localCtx != null) {
+      localCtx
         ..textBaseline = 'top'
         ..font = '12px Verdana';
-    } else if (gl != null) {
+    } else if (localGl != null) {
       if (depthTest) {
-        gl.enable(WebGL.DEPTH_TEST);
+        localGl.enable(WebGL.DEPTH_TEST);
       }
       if (blending) {
-        gl
+        localGl
           ..enable(WebGL.BLEND)
           ..blendFunc(WebGL.SRC_ALPHA, WebGL.ONE_MINUS_SRC_ALPHA);
       }
@@ -80,13 +82,13 @@ abstract class GameBase {
     } else {
       _errorInitializingWebGL = true;
     }
-    canvas.onFullscreenChange.listen(_handleFullscreen);
+    canvas!.onFullscreenChange.listen(_handleFullscreen);
     world = createWorld()
-      ..addManager(CameraManager(canvas.width, canvas.height));
+      ..addManager(CameraManager(canvas!.width!, canvas!.height!));
     final fullscreenButton = querySelector('button#fullscreen');
     if (null != fullscreenButton) {
       fullscreenButton.onClick
-          .listen((_) => querySelector('canvas').requestFullscreen());
+          .listen((_) => querySelector('canvas')!.requestFullscreen());
     }
   }
 
@@ -137,23 +139,28 @@ abstract class GameBase {
 
   Future _assetsLoaded() {
     final loader = <Future>[];
-    if (null != spriteSheetJson && null != spriteSheetImg) {
+    final localSpriteSheetJson = spriteSheetJson;
+    final localSpriteSheetImg = spriteSheetImg;
+    if (null != localSpriteSheetJson && null != localSpriteSheetImg) {
       loader.add(helper
-          .loadSpritesheet(spriteSheetJson, spriteSheetImg)
+          .loadSpritesheet(localSpriteSheetJson, localSpriteSheetImg)
           .then((result) => spriteSheet = result));
     }
-    if (null != bodyDefsName) {
+    final localBodyDefsName = bodyDefsName;
+    if (null != localBodyDefsName) {
       loader.add(helper
-          .loadPolygons(bodyDefsName)
+          .loadPolygons(localBodyDefsName)
           .then((result) => bodyDefs = result));
     }
-    if (null != musicName && null != audioContext) {
-      loader.add(helper.loadMusic(musicName).then((result) => music = result));
+    final localMusicName = musicName;
+    if (null != localMusicName && null != audioContext) {
+      loader.add(
+          helper.loadMusic(localMusicName).then((result) => music = result));
     }
     return Future.wait(loader).then((_) {
       bodyDefs?.forEach((bodyId, shapes) {
-        final offset = spriteSheet.sprites['$bodyId.png'].offset -
-            spriteSheet.sprites['$bodyId.png'].trimmed;
+        final sprite = spriteSheet!.sprites['$bodyId.png']!;
+        final offset = sprite.offset - sprite.trimmed;
         for (final shape in shapes) {
           shape.vertices =
               shape.vertices.map((vertex) => vertex + offset).toList();
@@ -163,9 +170,10 @@ abstract class GameBase {
   }
 
   void _initGame() {
-    createEntities();
-    initSystems();
+    _initSystems();
+    _initManagers();
     world.initialize();
+    createEntities();
   }
 
   Future<GameBase> start() => _init().then((_) {
@@ -176,9 +184,7 @@ abstract class GameBase {
   void _startGameLoops() {
     _lastTimeP = window.performance.now().toDouble();
 
-    final physicsSystem = world.systems
-        .firstWhere((system) => system.group == 1, orElse: () => null);
-    if (null != physicsSystem) {
+    if (world.systems.any((system) => system.group == 1)) {
       physicsLoop();
     }
     window.requestAnimationFrame(_firstUpdate);
@@ -230,7 +236,7 @@ abstract class GameBase {
     window.animationFrame.then((time) => update(time: time / 1000.0));
   }
 
-  void update({double time}) {
+  void update({required double time}) {
     _resize();
     var delta = time - _lastTime;
     if (useMaxDelta) {
@@ -252,7 +258,7 @@ abstract class GameBase {
   void _resize() {
     if (null != canvas) {
       _updateCameraManager(
-          document.body.clientWidth, document.body.clientHeight);
+          document.body!.clientWidth, document.body!.clientHeight);
       handleResize();
     }
   }
@@ -264,18 +270,21 @@ abstract class GameBase {
   }
 
   void handleResize() {
-    resizeCanvas(canvas);
-    if (paused || isStopped) {
-      world
-        ..delta = 0.0
-        ..process();
-    }
-    if (!webgl) {
-      canvas.context2D
-        ..textBaseline = 'top'
-        ..font = '12px Verdana';
-    } else {
-      gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+    final localCanvas = canvas;
+    if (localCanvas != null) {
+      resizeCanvas(localCanvas);
+      if (paused || isStopped) {
+        world
+          ..delta = 0.0
+          ..process();
+      }
+      if (!webgl) {
+        localCanvas.context2D
+          ..textBaseline = 'top'
+          ..font = '12px Verdana';
+      } else {
+        gl!.viewport(0, 0, gl!.drawingBufferWidth!, gl!.drawingBufferHeight!);
+      }
     }
   }
 
@@ -285,7 +294,10 @@ abstract class GameBase {
   /// Return a list of all the [EntitySystem]s required for this game.
   Map<int, List<EntitySystem>> getSystems();
 
-  void initSystems() {
+  /// Return a list of all [Manager]s required for this game.
+  List<Manager> getManagers();
+
+  void _initSystems() {
     getSystems().forEach((group, systems) {
       for (final system in systems) {
         world.addSystem(system, group: group);
@@ -296,6 +308,10 @@ abstract class GameBase {
         }
       }
     });
+  }
+
+  void _initManagers() {
+    getManagers().forEach(world.addManager);
   }
 
   int addEntity<T extends Component>(List<T> components) =>

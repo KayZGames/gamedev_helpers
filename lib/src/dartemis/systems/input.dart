@@ -14,8 +14,8 @@ abstract class GenericInputHandlingSystem extends EntityProcessingSystem {
   };
   final Map<int, bool> keyState = <int, bool>{};
   final Map<int, bool> unpress = <int, bool>{};
-  StreamSubscription _onKeyUpSubscription;
-  StreamSubscription _onKeyDownSubscription;
+  late final StreamSubscription _onKeyUpSubscription;
+  late final StreamSubscription _onKeyDownSubscription;
   List<Element> ignoreInputFromElements;
   GenericInputHandlingSystem(Aspect aspect, this.ignoreInputFromElements)
       : super(aspect);

@@ -7,7 +7,7 @@ final Pattern _whitespacePattern = RegExp(r'\s+');
 void wrappedText(
     CanvasRenderingContext2D ctx, String text, int x, int y, num maxWidth) {
   final regexp = RegExp(r'(\d+)');
-  final h = int.parse(regexp.firstMatch(ctx.font).group(0)) * 2;
+  final h = int.parse(regexp.firstMatch(ctx.font)!.group(0)!) * 2;
   final lines = _getLines(ctx, text, maxWidth);
 
   for (var i = 0; i < lines.length; i++) {
@@ -22,29 +22,29 @@ void wrappedText(
 /// Returns a [Rectangle] with the size of a given [text]. If [maxWidth]
 /// is given, the [text] will be wrapped.
 Rectangle textBoundaries(CanvasRenderingContext2D ctx, String text,
-    [num maxWidth]) {
+    [num? maxWidth]) {
   final regexp = RegExp(r'(\d+)');
-  final h = int.parse(regexp.firstMatch(ctx.font).group(0)) * 2;
+  final h = int.parse(regexp.firstMatch(ctx.font)!.group(0)!) * 2;
   final lines = _getLines(ctx, text, maxWidth);
-  maxWidth ??= ctx.measureText(text).width;
+  maxWidth ??= ctx.measureText(text).width!;
   return Rectangle(0, 0, maxWidth, (lines.length * h * 0.6).toInt());
 }
 
 /// Splits the [text] at [maxWidth] and returns a list of lines.
 List<String> _getLines(CanvasRenderingContext2D ctx, String text,
-    [num maxWidth]) {
+    [num? maxWidth]) {
   final words = text.split(_whitespacePattern);
 
   var ox = 0.0;
 
   var lines = List<String>.from(['']);
-  final spaceWidth = ctx.measureText(' ').width;
-  if (null != maxWidth) {
+  final spaceWidth = ctx.measureText(' ').width!;
+  if (maxWidth != null) {
     final totalMaxWidth = maxWidth + spaceWidth;
     var line = 0;
     for (var i = 0; i < words.length; i++) {
       final word = '${words[i]} ';
-      final wordWidth = ctx.measureText(word).width;
+      final wordWidth = ctx.measureText(word).width!;
 
       if (ox + wordWidth > totalMaxWidth) {
         lines.add('');

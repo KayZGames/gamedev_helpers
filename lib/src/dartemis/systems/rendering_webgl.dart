@@ -2,7 +2,7 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'dart:web_gl';
 
-import 'package:aspen_assets/aspen_assets.dart';
+import 'package:asset_data/asset_data.dart';
 import 'package:dartemis/dartemis.dart';
 import 'package:gamedev_helpers_core/gamedev_helpers_core.dart';
 
@@ -10,6 +10,8 @@ import '../../internal/webgl_rendering_mixin.dart';
 import '../../shader.dart';
 import '../../sprite_sheet.dart';
 import '../components.dart';
+
+export '../../internal/webgl_rendering_mixin.dart' show Attrib;
 
 part 'rendering_webgl.g.dart';
 
@@ -103,11 +105,11 @@ abstract class VoidWebGlRenderingSystem extends VoidEntitySystem
   ],
 )
 class ParticleRenderingSystem extends _$ParticleRenderingSystem {
-  Float32List positions;
-  Float32List colors;
-  Float32List radius;
+  late Float32List positions;
+  late Float32List colors;
+  late Float32List radius;
 
-  UniformLocation uViewProjectionLocation;
+  late UniformLocation uViewProjectionLocation;
 
   ParticleRenderingSystem(RenderingContext gl) : super(gl);
 
@@ -133,7 +135,7 @@ class ParticleRenderingSystem extends _$ParticleRenderingSystem {
 
   @override
   void render(int length) {
-    final cameraEntity = tagManager.getEntity(cameraTag);
+    final cameraEntity = tagManager.getEntity(cameraTag)!;
     gl.uniformMatrix4fv(
         uViewProjectionLocation,
         false,
@@ -156,10 +158,12 @@ class ParticleRenderingSystem extends _$ParticleRenderingSystem {
   }
 
   @override
-  TextAsset get vShaderAsset => shaders[Shaders.particleRenderingSystem$vert];
+  TextAsset get vShaderAsset =>
+      ghShaders[GhShaders.particleRenderingSystem$vert];
 
   @override
-  TextAsset get fShaderAsset => shaders[Shaders.particleRenderingSystem$vert];
+  TextAsset get fShaderAsset =>
+      ghShaders[GhShaders.particleRenderingSystem$vert];
 
   @override
   String get libName => 'gamedev_helpers';
@@ -192,8 +196,8 @@ abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
     const Attrib('aPosition', 2),
     const Attrib('aTexCoord', 2)
   ];
-  Float32List values;
-  Uint16List indices;
+  late Float32List values;
+  late Uint16List indices;
 
   WebGlSpriteRenderingSystem(RenderingContext gl, this.sheet, Aspect aspect)
       : super(gl, aspect);
@@ -216,8 +220,8 @@ abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
       ..texImage2D(WebGL.TEXTURE_2D, 0, WebGL.RGBA, WebGL.RGBA,
           WebGL.UNSIGNED_BYTE, sheet.image)
       ..uniform1i(uTexture, 0)
-      ..uniform2f(gl.getUniformLocation(program, 'uSize'), sheet.image.width,
-          sheet.image.height);
+      ..uniform2f(gl.getUniformLocation(program, 'uSize'), sheet.image.width!,
+          sheet.image.height!);
   }
 
   @override
@@ -303,7 +307,7 @@ abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
 
   @override
   void render(int length) {
-    final cameraEntity = tagManager.getEntity(cameraTag);
+    final cameraEntity = tagManager.getEntity(cameraTag)!;
     bufferElements(attributes, values, indices);
 
     gl
@@ -323,10 +327,10 @@ abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
   }
 
   @override
-  TextAsset get vShaderAsset => shaders[Shaders.spriteRenderingSystem$vert];
+  TextAsset get vShaderAsset => ghShaders[GhShaders.spriteRenderingSystem$vert];
 
   @override
-  TextAsset get fShaderAsset => shaders[Shaders.spriteRenderingSystem$frag];
+  TextAsset get fShaderAsset => ghShaders[GhShaders.spriteRenderingSystem$frag];
 
   @override
   String get libName => 'gamedev_helpers';

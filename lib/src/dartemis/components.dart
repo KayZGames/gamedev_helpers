@@ -3,14 +3,14 @@ import 'package:dartemis/dartemis.dart';
 import '../sprite_sheet.dart';
 
 class Renderable extends Component {
+  final SpriteSheet _sheet;
   String _name;
   int _maxFrames;
   double _timePerFrame;
   double _time;
   double scale;
   bool facesRight;
-  Sprite _sprite;
-  SpriteSheet _sheet;
+  late Sprite _sprite;
   bool _spriteNeedsUpdate = true;
   Renderable(this._sheet, this._name,
       {int maxFrames = 1,
@@ -24,6 +24,7 @@ class Renderable extends Component {
 
   Renderable.fromRenderable(Renderable other, this._time, this.scale)
       : _name = other._name,
+        _sheet = other._sheet,
         _maxFrames = other._maxFrames,
         _timePerFrame = other._timePerFrame,
         facesRight = other.facesRight;

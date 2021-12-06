@@ -1,18 +1,18 @@
 import 'dart:typed_data';
 import 'dart:web_gl';
 
-import 'package:aspen_assets/aspen_assets.dart';
+import 'package:asset_data/asset_data.dart';
 
 import '../shader.dart';
 
 mixin WebGlRenderingMixin {
   static const int fsize = Float32List.bytesPerElement;
 
-  RenderingContext gl;
-  Program program;
-  ShaderSource shaderSource;
-  Buffer elementBuffer;
-  Buffer indexBuffer;
+  late final RenderingContext gl;
+  late final Program program;
+  late final ShaderSource shaderSource;
+  Buffer? elementBuffer;
+  Buffer? indexBuffer;
   Map<String, Buffer> buffers = <String, Buffer>{};
   bool success = true;
   final Map<String, UniformLocation> _uniforms = {};
@@ -61,10 +61,10 @@ ${_uniforms.keys.map((key) => '''${key}Location = getUniformLocation('$key');'''
       ..attachShader(program, fShader)
       ..linkProgram(program);
     final linkSuccess =
-        gl.getProgramParameter(program, WebGL.LINK_STATUS) as bool;
+        gl.getProgramParameter(program, WebGL.LINK_STATUS)! as bool;
     if (linkSuccess) {
       final uniformCount =
-          gl.getProgramParameter(program, WebGL.ACTIVE_UNIFORMS) as int;
+          gl.getProgramParameter(program, WebGL.ACTIVE_UNIFORMS)! as int;
       for (var i = 0; i < uniformCount; i++) {
         final uniformName = gl.getActiveUniform(program, i).name;
         _uniforms[uniformName] = gl.getUniformLocation(program, uniformName);
@@ -79,10 +79,10 @@ ${_uniforms.keys.map((key) => '''${key}Location = getUniformLocation('$key');'''
   Shader _createShader(int type, TextAsset source) {
     final shader = gl.createShader(type);
     gl
-      ..shaderSource(shader, source.text)
+      ..shaderSource(shader, source.content)
       ..compileShader(shader);
     final compileSuccess =
-        gl.getShaderParameter(shader, WebGL.COMPILE_STATUS) as bool;
+        gl.getShaderParameter(shader, WebGL.COMPILE_STATUS)! as bool;
     if (!compileSuccess) {
       success = false;
       throw Exception(
@@ -112,7 +112,7 @@ ${_uniforms.keys.map((key) => '''${key}Location = getUniformLocation('$key');'''
 
   void bufferElements(
       List<Attrib> attributes, Float32List items, Uint16List indices) {
-    if (null == elementBuffer) {
+    if (elementBuffer == null) {
       elementBuffer = gl.createBuffer();
       indexBuffer = gl.createBuffer();
     }
@@ -155,7 +155,7 @@ ${_uniforms.keys.map((key) => '''${key}Location = getUniformLocation('$key');'''
 
   TextAsset get vShaderAsset;
   TextAsset get fShaderAsset;
-  String get libName => null;
+  String? get libName => null;
   void initUniformLocations();
 }
 

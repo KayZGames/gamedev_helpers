@@ -1,5 +1,4 @@
 import 'dart:html';
-import 'dart:math';
 
 import 'package:vector_math/vector_math_64.dart';
 
@@ -21,7 +20,14 @@ class SpriteSheet {
 
   SpriteSheet(this.image, this.sprites);
 
-  Sprite operator [](String name) => sprites[name];
+  Sprite operator [](String name) {
+    final sprite = sprites[name];
+    if (sprite != null) {
+      return sprite;
+    }
+    throw ArgumentError.value(name, 'name',
+        '''no sprite with name $name in map of sprites ${sprites.keys.join(', ')}''');
+  }
 }
 
 class Sprite {
