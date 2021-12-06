@@ -33,11 +33,13 @@ mixin WebGlRenderingMixin {
   void _initUniformLocations() {
     initUniformLocations();
     if (_uniforms.isNotEmpty) {
-      throw Exception('''
+      throw Exception(
+        '''
 unused uniforms: ${_uniforms.keys} in $runtimeType
 use this:
 ${_uniforms.keys.map((key) => '''${key}Location = getUniformLocation('$key');''').join('\n')}
-''');
+''',
+      );
     }
   }
 
@@ -48,7 +50,8 @@ ${_uniforms.keys.map((key) => '''${key}Location = getUniformLocation('$key');'''
     final result = _uniforms.remove(name);
     if (result == null) {
       throw Exception(
-          '''tried to get uniform location of unknown name $name from ${_uniforms.keys} in $runtimeType''');
+        '''tried to get uniform location of unknown name $name from ${_uniforms.keys} in $runtimeType''',
+      );
     }
     _usedUniforms.add(name);
     return result;
@@ -72,7 +75,8 @@ ${_uniforms.keys.map((key) => '''${key}Location = getUniformLocation('$key');'''
     } else {
       success = false;
       throw Exception(
-          '''$runtimeType - Error linking program: ${gl.getProgramInfoLog(program)}''');
+        '''$runtimeType - Error linking program: ${gl.getProgramInfoLog(program)}''',
+      );
     }
   }
 
@@ -86,13 +90,18 @@ ${_uniforms.keys.map((key) => '''${key}Location = getUniformLocation('$key');'''
     if (!compileSuccess) {
       success = false;
       throw Exception(
-          '''$runtimeType - Error compiling ${source.assetId} shader for $runtimeType: ${gl.getShaderInfoLog(shader)}''');
+        '''$runtimeType - Error compiling ${source.assetId} shader for $runtimeType: ${gl.getShaderInfoLog(shader)}''',
+      );
     }
     return shader;
   }
 
-  void buffer(String attribute, Float32List items, int itemSize,
-      {int usage = WebGL.DYNAMIC_DRAW}) {
+  void buffer(
+    String attribute,
+    Float32List items,
+    int itemSize, {
+    int usage = WebGL.DYNAMIC_DRAW,
+  }) {
     var buffer = buffers[attribute];
     if (null == buffer) {
       buffer = gl.createBuffer();
@@ -101,7 +110,8 @@ ${_uniforms.keys.map((key) => '''${key}Location = getUniformLocation('$key');'''
     final attribLocation = gl.getAttribLocation(program, attribute);
     if (attribLocation == -1) {
       throw ArgumentError(
-          '''Attribute $attribute not found in vertex shader for ${vShaderAsset.assetId}''');
+        '''Attribute $attribute not found in vertex shader for ${vShaderAsset.assetId}''',
+      );
     }
     gl
       ..bindBuffer(WebGL.ARRAY_BUFFER, buffer)
@@ -111,7 +121,10 @@ ${_uniforms.keys.map((key) => '''${key}Location = getUniformLocation('$key');'''
   }
 
   void bufferElements(
-      List<Attrib> attributes, Float32List items, Uint16List indices) {
+    List<Attrib> attributes,
+    Float32List items,
+    Uint16List indices,
+  ) {
     if (elementBuffer == null) {
       elementBuffer = gl.createBuffer();
       indexBuffer = gl.createBuffer();
@@ -128,11 +141,18 @@ ${_uniforms.keys.map((key) => '''${key}Location = getUniformLocation('$key');'''
       final attribLocation = gl.getAttribLocation(program, attribute.name);
       if (attribLocation == -1) {
         throw ArgumentError(
-            '''Attribute ${attribute.name} not found in vertex shader for ${vShaderAsset.assetId}}''');
+          '''Attribute ${attribute.name} not found in vertex shader for ${vShaderAsset.assetId}}''',
+        );
       }
       gl
-        ..vertexAttribPointer(attribLocation, attribute.size, WebGL.FLOAT,
-            false, fsize * elementsPerItem, fsize * offset)
+        ..vertexAttribPointer(
+          attribLocation,
+          attribute.size,
+          WebGL.FLOAT,
+          false,
+          fsize * elementsPerItem,
+          fsize * offset,
+        )
         ..enableVertexAttribArray(attribLocation);
       offset += attribute.size;
     }
@@ -141,14 +161,22 @@ ${_uniforms.keys.map((key) => '''${key}Location = getUniformLocation('$key');'''
       ..bufferData(WebGL.ELEMENT_ARRAY_BUFFER, indices, WebGL.DYNAMIC_DRAW);
   }
 
-  void drawTriangles(List<Attrib> attributes, Float32List items,
-      Uint16List indices, int length) {
+  void drawTriangles(
+    List<Attrib> attributes,
+    Float32List items,
+    Uint16List indices,
+    int length,
+  ) {
     bufferElements(attributes, items, indices);
     gl.drawElements(WebGL.TRIANGLES, length, WebGL.UNSIGNED_SHORT, 0);
   }
 
-  void drawPoints(List<Attrib> attributes, Float32List items,
-      Uint16List indices, int length) {
+  void drawPoints(
+    List<Attrib> attributes,
+    Float32List items,
+    Uint16List indices,
+    int length,
+  ) {
     bufferElements(attributes, items, indices);
     gl.drawElements(WebGL.POINTS, length, WebGL.UNSIGNED_SHORT, 0);
   }

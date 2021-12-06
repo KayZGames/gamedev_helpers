@@ -137,11 +137,12 @@ class ParticleRenderingSystem extends _$ParticleRenderingSystem {
   void render(int length) {
     final cameraEntity = tagManager.getEntity(cameraTag)!;
     gl.uniformMatrix4fv(
-        uViewProjectionLocation,
-        false,
-        viewProjectionMatrixManager
-            .create2dViewProjectionMatrix(cameraEntity)
-            .storage);
+      uViewProjectionLocation,
+      false,
+      viewProjectionMatrixManager
+          .create2dViewProjectionMatrix(cameraEntity)
+          .storage,
+    );
 
     buffer('aPosition', positions, 2);
     buffer('aRadius', radius, 1);
@@ -216,12 +217,24 @@ abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
       ..bindTexture(WebGL.TEXTURE_2D, texture)
       ..texParameteri(WebGL.TEXTURE_2D, WebGL.TEXTURE_MIN_FILTER, WebGL.LINEAR)
       ..texParameteri(
-          WebGL.TEXTURE_2D, WebGL.TEXTURE_WRAP_S, WebGL.CLAMP_TO_EDGE)
-      ..texImage2D(WebGL.TEXTURE_2D, 0, WebGL.RGBA, WebGL.RGBA,
-          WebGL.UNSIGNED_BYTE, sheet.image)
+        WebGL.TEXTURE_2D,
+        WebGL.TEXTURE_WRAP_S,
+        WebGL.CLAMP_TO_EDGE,
+      )
+      ..texImage2D(
+        WebGL.TEXTURE_2D,
+        0,
+        WebGL.RGBA,
+        WebGL.RGBA,
+        WebGL.UNSIGNED_BYTE,
+        sheet.image,
+      )
       ..uniform1i(uTexture, 0)
-      ..uniform2f(gl.getUniformLocation(program, 'uSize'), sheet.image.width!,
-          sheet.image.height!);
+      ..uniform2f(
+        gl.getUniformLocation(program, 'uSize'),
+        sheet.image.width!,
+        sheet.image.height!,
+      );
   }
 
   @override
@@ -312,11 +325,12 @@ abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
 
     gl
       ..uniformMatrix4fv(
-          gl.getUniformLocation(program, 'uViewProjection'),
-          false,
-          viewProjectionMatrixManager
-              .create2dViewProjectionMatrix(cameraEntity)
-              .storage)
+        gl.getUniformLocation(program, 'uViewProjection'),
+        false,
+        viewProjectionMatrixManager
+            .create2dViewProjectionMatrix(cameraEntity)
+            .storage,
+      )
       ..drawElements(WebGL.TRIANGLES, length * 6, WebGL.UNSIGNED_SHORT, 0);
   }
 

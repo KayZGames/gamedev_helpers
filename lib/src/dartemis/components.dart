@@ -12,13 +12,15 @@ class Renderable extends Component {
   bool facesRight;
   late Sprite _sprite;
   bool _spriteNeedsUpdate = true;
-  Renderable(this._sheet, this._name,
-      {int maxFrames = 1,
-      double timePerFrame = 0.2,
-      this.facesRight = true,
-      double time = 0.0,
-      this.scale = 1.0})
-      : _maxFrames = maxFrames,
+  Renderable(
+    this._sheet,
+    this._name, {
+    int maxFrames = 1,
+    double timePerFrame = 0.2,
+    this.facesRight = true,
+    double time = 0.0,
+    this.scale = 1.0,
+  })  : _maxFrames = maxFrames,
         _timePerFrame = timePerFrame,
         _time = time;
 

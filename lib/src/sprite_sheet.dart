@@ -25,8 +25,11 @@ class SpriteSheet {
     if (sprite != null) {
       return sprite;
     }
-    throw ArgumentError.value(name, 'name',
-        '''no sprite with name $name in map of sprites ${sprites.keys.join(', ')}''');
+    throw ArgumentError.value(
+      name,
+      'name',
+      '''no sprite with name $name in map of sprites ${sprites.keys.join(', ')}''',
+    );
   }
 }
 

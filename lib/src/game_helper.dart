@@ -24,7 +24,9 @@ class GameHelper {
   /// Loads image based on [spriteSheetJson] and [spriteSheetImg] created using
   /// assert_data and asset_builder.
   Future<SpriteSheet> loadSpritesheet(
-          JsonAsset spriteSheetJson, BinaryAsset spriteSheetImg) =>
+    JsonAsset spriteSheetJson,
+    BinaryAsset spriteSheetImg,
+  ) =>
       assets.loadSpritesheet(spriteSheetJson, spriteSheetImg);
 
   /// Loads music/[name].ogg or music/[name].mp3 depending on browser support.

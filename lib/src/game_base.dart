@@ -43,17 +43,19 @@ abstract class GameBase {
 
   /// [appName] is used to refernce assets and has to be the name of the library
   /// which contains the assets. Usually the game itself.
-  GameBase(String appName, String canvasSelector,
-      {this.spriteSheetJson,
-      this.spriteSheetImg,
-      this.bodyDefsName = 'assets',
-      this.musicName,
-      this.audioContext,
-      this.webgl = false,
-      bool depthTest = true,
-      bool blending = true,
-      this.useMaxDelta = true})
-      : canvas = querySelector(canvasSelector)! as CanvasElement,
+  GameBase(
+    String appName,
+    String canvasSelector, {
+    this.spriteSheetJson,
+    this.spriteSheetImg,
+    this.bodyDefsName = 'assets',
+    this.musicName,
+    this.audioContext,
+    this.webgl = false,
+    bool depthTest = true,
+    bool blending = true,
+    this.useMaxDelta = true,
+  })  : canvas = querySelector(canvasSelector)! as CanvasElement,
         helper = GameHelper(appName, audioContext),
         ctx = webgl
             ? null
@@ -94,18 +96,23 @@ abstract class GameBase {
 
   /// [appName] is used to refernce assets and has to be the name of the library
   /// which contains the assets. Usually the game itself.
-  GameBase.noAssets(String appName, String canvasSelector,
-      {bool webgl = false,
-      bool depthTest = true,
-      bool blending = true,
-      bool useMaxDelta = true})
-      : this(appName, canvasSelector,
-            bodyDefsName: null,
-            musicName: null,
-            webgl: webgl,
-            useMaxDelta: useMaxDelta,
-            depthTest: depthTest,
-            blending: blending);
+  GameBase.noAssets(
+    String appName,
+    String canvasSelector, {
+    bool webgl = false,
+    bool depthTest = true,
+    bool blending = true,
+    bool useMaxDelta = true,
+  }) : this(
+          appName,
+          canvasSelector,
+          bodyDefsName: null,
+          musicName: null,
+          webgl: webgl,
+          useMaxDelta: useMaxDelta,
+          depthTest: depthTest,
+          blending: blending,
+        );
 
   GameBase.noCanvas(String appNahme)
       : canvas = null,
@@ -142,20 +149,25 @@ abstract class GameBase {
     final localSpriteSheetJson = spriteSheetJson;
     final localSpriteSheetImg = spriteSheetImg;
     if (null != localSpriteSheetJson && null != localSpriteSheetImg) {
-      loader.add(helper
-          .loadSpritesheet(localSpriteSheetJson, localSpriteSheetImg)
-          .then((result) => spriteSheet = result));
+      loader.add(
+        helper
+            .loadSpritesheet(localSpriteSheetJson, localSpriteSheetImg)
+            .then((result) => spriteSheet = result),
+      );
     }
     final localBodyDefsName = bodyDefsName;
     if (null != localBodyDefsName) {
-      loader.add(helper
-          .loadPolygons(localBodyDefsName)
-          .then((result) => bodyDefs = result));
+      loader.add(
+        helper
+            .loadPolygons(localBodyDefsName)
+            .then((result) => bodyDefs = result),
+      );
     }
     final localMusicName = musicName;
     if (null != localMusicName && null != audioContext) {
       loader.add(
-          helper.loadMusic(localMusicName).then((result) => music = result));
+        helper.loadMusic(localMusicName).then((result) => music = result),
+      );
     }
     return Future.wait(loader).then((_) {
       bodyDefs?.forEach((bodyId, shapes) {
@@ -182,7 +194,7 @@ abstract class GameBase {
       });
 
   void _startGameLoops() {
-    _lastTimeP = window.performance.now().toDouble();
+    _lastTimeP = window.performance.now();
 
     if (world.systems.any((system) => system.group == 1)) {
       physicsLoop();
@@ -217,7 +229,7 @@ abstract class GameBase {
   }
 
   void physicsLoop() {
-    final time = window.performance.now().toDouble();
+    final time = window.performance.now();
     world.delta = (time - _lastTimeP) / 1000;
     _lastTimeP = time;
     world.process(1);
@@ -258,7 +270,9 @@ abstract class GameBase {
   void _resize() {
     if (null != canvas) {
       _updateCameraManager(
-          document.body!.clientWidth, document.body!.clientHeight);
+        document.body!.clientWidth,
+        document.body!.clientHeight,
+      );
       handleResize();
     }
   }
@@ -304,7 +318,9 @@ abstract class GameBase {
         if (system is WebGlRenderingMixin) {
           final webglMixin = system as WebGlRenderingMixin;
           webglMixin.shaderSource = helper.loadShader(
-              webglMixin.vShaderAsset, webglMixin.fShaderAsset);
+            webglMixin.vShaderAsset,
+            webglMixin.fShaderAsset,
+          );
         }
       }
     });

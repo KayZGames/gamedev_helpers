@@ -36,7 +36,7 @@ abstract class GenericInputHandlingSystem extends EntityProcessingSystem {
   void handleInput(KeyboardEvent event, {bool keyDown = true}) {
     if (!ignoreInputFromElements.contains(event.target)) {
       keyState[event.keyCode] = keyDown;
-      if (!keyDown && unpress[event.keyCode] == true) {
+      if (!keyDown && (unpress[event.keyCode] ?? false)) {
         unpress[event.keyCode] = false;
       }
       if (preventDefaultKeys.contains(event.keyCode)) {
@@ -51,5 +51,5 @@ abstract class GenericInputHandlingSystem extends EntityProcessingSystem {
   bool get down => isPressed(KeyCode.S) || isPressed(KeyCode.DOWN);
 
   bool isPressed(int keyCode) =>
-      keyState[keyCode] == true && unpress[keyCode] != true;
+      (keyState[keyCode] ?? false) && !(unpress[keyCode] ?? false);
 }
