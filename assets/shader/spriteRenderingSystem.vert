@@ -1,9 +1,9 @@
-#version 100
+#version 300 es
 
 uniform mat4 uViewProjection;
-attribute vec4 aPosition;
-attribute vec2 aTexCoord;
-varying vec2 vTexCoord;
+in vec4 aPosition;
+in vec2 aTexCoord;
+out vec2 vTexCoord;
 
 void main() {
   gl_Position = uViewProjection * aPosition;

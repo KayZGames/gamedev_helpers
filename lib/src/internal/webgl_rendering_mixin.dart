@@ -8,7 +8,7 @@ import '../shader.dart';
 mixin WebGlRenderingMixin {
   static const int fsize = Float32List.bytesPerElement;
 
-  late final RenderingContext gl;
+  late final RenderingContext2 gl;
   late final Program program;
   late final ShaderSource shaderSource;
   Buffer? elementBuffer;

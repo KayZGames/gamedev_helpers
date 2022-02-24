@@ -21,7 +21,7 @@ abstract class GameBase {
       StreamController<bool>();
   final CanvasElement? canvas;
   final CanvasRenderingContext2D? ctx;
-  final RenderingContext? gl;
+  final RenderingContext2? gl;
   final GameHelper helper;
   final JsonAsset? spriteSheetJson;
   final BinaryAsset? spriteSheetImg;
@@ -61,7 +61,8 @@ abstract class GameBase {
             ? null
             : (querySelector(canvasSelector)! as CanvasElement).context2D,
         gl = webgl
-            ? (querySelector(canvasSelector)! as CanvasElement).getContext3d()
+            ? (querySelector(canvasSelector)! as CanvasElement)
+                .getContext('webgl2')! as RenderingContext2
             : null {
     final localCtx = ctx;
     final localGl = gl;
@@ -78,7 +79,7 @@ abstract class GameBase {
           ..enable(WebGL.BLEND)
           ..blendFunc(WebGL.SRC_ALPHA, WebGL.ONE_MINUS_SRC_ALPHA);
       }
-//      (ctx as RenderingContext)
+//      (ctx as RenderingContext2)
 //                               ..enable(WebGL.POLYGON_OFFSET_FILL);
 //                               ..polygonOffset(1.0, 1.0);
     } else {

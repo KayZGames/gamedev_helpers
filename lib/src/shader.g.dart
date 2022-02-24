@@ -15,23 +15,24 @@ enum GhShaders {
 const _ghShaders$asset = {
   GhShaders.particleRenderingSystem$frag: TextAsset(AssetData(
       r'gamedev_helpers|assets/shader/particleRenderingSystem.frag',
-      r'''#version 100
+      r'''#version 300 es
 
 precision mediump float;
-varying vec4 vColor;
+in vec4 vColor;
+out vec4 fragColor;
 
 void main() {
-  gl_FragColor = vColor;
+  fragColor = vColor;
 }''')),
   GhShaders.particleRenderingSystem$vert: TextAsset(AssetData(
       r'gamedev_helpers|assets/shader/particleRenderingSystem.vert',
-      r'''#version 100
+      r'''#version 300 es
 
 uniform mat4 uViewProjection;
-attribute vec2 aPosition;
-attribute float aRadius;
-attribute vec4 aColor;
-varying vec4 vColor;
+in vec2 aPosition;
+in float aRadius;
+in vec4 aColor;
+out vec4 vColor;
 
 void main() {
     gl_Position = uViewProjection * vec4(aPosition, 0.0, 1.0);
@@ -40,27 +41,28 @@ void main() {
 }''')),
   GhShaders.spriteRenderingSystem$frag: TextAsset(AssetData(
       r'gamedev_helpers|assets/shader/spriteRenderingSystem.frag',
-      r'''#version 100
+      r'''#version 300 es
 
 precision mediump float;
 
 uniform sampler2D uSheet;
 uniform vec2 uSize;
-varying vec2 vTexCoord;
+in vec2 vTexCoord;
+out vec4 fragColor;
 
 void main() {
-	vec4 color = texture2D(uSheet, vTexCoord / uSize);;
+	vec4 color = texture(uSheet, vTexCoord / uSize);;
 	// if (color.a < 1.0) discard;
-	gl_FragColor = color;
+	fragColor = color;
 }''')),
   GhShaders.spriteRenderingSystem$vert: TextAsset(AssetData(
       r'gamedev_helpers|assets/shader/spriteRenderingSystem.vert',
-      r'''#version 100
+      r'''#version 300 es
 
 uniform mat4 uViewProjection;
-attribute vec4 aPosition;
-attribute vec2 aTexCoord;
-varying vec2 vTexCoord;
+in vec4 aPosition;
+in vec2 aTexCoord;
+out vec2 vTexCoord;
 
 void main() {
   gl_Position = uViewProjection * aPosition;

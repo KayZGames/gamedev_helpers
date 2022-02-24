@@ -16,7 +16,7 @@ export '../../internal/webgl_rendering_mixin.dart' show Attrib;
 part 'rendering_webgl.g.dart';
 
 class WebGlCanvasCleaningSystem extends VoidEntitySystem {
-  RenderingContext gl;
+  RenderingContext2 gl;
 
   WebGlCanvasCleaningSystem(this.gl);
 
@@ -35,7 +35,7 @@ abstract class WebGlRenderingSystem extends EntitySystem
     with WebGlRenderingMixin {
   int maxLength = 0;
 
-  WebGlRenderingSystem(RenderingContext gl, Aspect aspect) : super(aspect) {
+  WebGlRenderingSystem(RenderingContext2 gl, Aspect aspect) : super(aspect) {
     this.gl = gl;
   }
 
@@ -73,7 +73,7 @@ abstract class WebGlRenderingSystem extends EntitySystem
 
 abstract class VoidWebGlRenderingSystem extends VoidEntitySystem
     with WebGlRenderingMixin {
-  VoidWebGlRenderingSystem(RenderingContext gl) {
+  VoidWebGlRenderingSystem(RenderingContext2 gl) {
     this.gl = gl;
   }
 
@@ -111,7 +111,7 @@ class ParticleRenderingSystem extends _$ParticleRenderingSystem {
 
   late UniformLocation uViewProjectionLocation;
 
-  ParticleRenderingSystem(RenderingContext gl) : super(gl);
+  ParticleRenderingSystem(RenderingContext2 gl) : super(gl);
 
   @override
   bool processEntity(int index, int entity) {
@@ -200,7 +200,7 @@ abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
   late Float32List values;
   late Uint16List indices;
 
-  WebGlSpriteRenderingSystem(RenderingContext gl, this.sheet, Aspect aspect)
+  WebGlSpriteRenderingSystem(RenderingContext2 gl, this.sheet, Aspect aspect)
       : super(gl, aspect);
 
   @override
