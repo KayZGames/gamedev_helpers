@@ -1,5 +1,5 @@
 name: gamedev_helpers
-version: 0.0.1-dev
+version: 1.0.0
 description: Useful stuff for my gamedevelopment needs
 publish_to: none
 environment:
@@ -12,13 +12,14 @@ dependencies:
   dartemis: ^0.9.0
   event_bus: ^2.0.0
   gamedev_helpers_core:
-    path: ../gamedev_helpers_core
-#    git: git@github.com:KayZGames/gamedev_helpers_core.git
+    git:
+      url: git@github.com:KayZGames/gamedev_helpers_core.git
+      ref: tags/1.1.0
   vector_math: ^2.0.6
 dev_dependencies:
   asset_builder:
     git:
       url: git@github.com:KayZGames/asset_builder.git
-      ref: tags/1.0.0
+      ref: tags/1.0.1
   build_runner: any
   dartemis_builder: ^0.2.0
