@@ -91,7 +91,7 @@ abstract class GameBase {
     final fullscreenButton = querySelector('button#fullscreen');
     if (null != fullscreenButton) {
       fullscreenButton.onClick
-          .listen((_) => querySelector('canvas')!.requestFullscreen());
+          .listen((_) async => querySelector('canvas')!.requestFullscreen());
     }
   }
 
@@ -203,9 +203,9 @@ abstract class GameBase {
     window.requestAnimationFrame(_firstUpdate);
   }
 
-  void stop() {
+  Future<void> stop() async {
     _stop = true;
-    _pauseStreamController.close();
+    await _pauseStreamController.close();
   }
 
   bool get isStopped => _stop;
@@ -240,16 +240,16 @@ abstract class GameBase {
     }
   }
 
-  void _firstUpdate(num time) {
+  Future<void> _firstUpdate(num time) async {
     _resize();
     _lastTime = time / 1000.0;
     world
       ..delta = 1 / 60
       ..process();
-    window.animationFrame.then((time) => update(time: time / 1000.0));
+    await update(time: await window.animationFrame / 1000.0);
   }
 
-  void update({required double time}) {
+  Future<void> update({required double time}) async {
     _resize();
     var delta = time - _lastTime;
     if (useMaxDelta) {
@@ -259,7 +259,7 @@ abstract class GameBase {
     _lastTime = time;
     world.process();
     if (!_stop && !_pause) {
-      window.animationFrame.then((time) => update(time: time / 1000.0));
+      await update(time: await window.animationFrame / 1000.0);
     }
   }
 

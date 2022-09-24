@@ -17,8 +17,7 @@ abstract class GenericInputHandlingSystem extends EntityProcessingSystem {
   late final StreamSubscription _onKeyUpSubscription;
   late final StreamSubscription _onKeyDownSubscription;
   List<Element> ignoreInputFromElements;
-  GenericInputHandlingSystem(Aspect aspect, this.ignoreInputFromElements)
-      : super(aspect);
+  GenericInputHandlingSystem(super.aspect, this.ignoreInputFromElements);
 
   @override
   void initialize() {
@@ -28,9 +27,9 @@ abstract class GenericInputHandlingSystem extends EntityProcessingSystem {
   }
 
   @override
-  void destroy() {
-    _onKeyDownSubscription.cancel();
-    _onKeyUpSubscription.cancel();
+  Future<void> destroy() async {
+    await _onKeyDownSubscription.cancel();
+    await _onKeyUpSubscription.cancel();
   }
 
   void handleInput(KeyboardEvent event, {bool keyDown = true}) {

@@ -111,7 +111,7 @@ class ParticleRenderingSystem extends _$ParticleRenderingSystem {
 
   late UniformLocation uViewProjectionLocation;
 
-  ParticleRenderingSystem(RenderingContext2 gl) : super(gl);
+  ParticleRenderingSystem(super.gl);
 
   @override
   bool processEntity(int index, int entity) {

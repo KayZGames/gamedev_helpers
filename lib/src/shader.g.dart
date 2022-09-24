@@ -12,6 +12,7 @@ enum GhShaders {
   spriteRenderingSystem$frag,
   spriteRenderingSystem$vert
 }
+
 const _ghShaders$asset = {
   GhShaders.particleRenderingSystem$frag: TextAsset(AssetData(
       r'gamedev_helpers|assets/shader/particleRenderingSystem.frag',
