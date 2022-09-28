@@ -212,7 +212,6 @@ abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
 
     gl
       ..useProgram(program)
-      ..pixelStorei(WebGL.UNPACK_FLIP_Y_WEBGL, 0)
       ..activeTexture(WebGL.TEXTURE0)
       ..bindTexture(WebGL.TEXTURE_2D, texture)
       ..texParameteri(WebGL.TEXTURE_2D, WebGL.TEXTURE_MIN_FILTER, WebGL.LINEAR)
@@ -263,8 +262,8 @@ abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
     final dstTop = (dst.top * renderable.scale).toInt();
     final dstBottom = (dst.bottom * renderable.scale).toInt();
 
-    final bottom = src.bottom.toDouble();
-    final top = src.top.toDouble();
+    final bottom = src.top.toDouble();
+    final top = src.bottom.toDouble();
 
     final bottomLeftAngle = atan2(dstBottom, dstLeft);
     values[index * 16] = position.x +
