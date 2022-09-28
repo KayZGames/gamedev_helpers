@@ -19,15 +19,17 @@ abstract class GameBase {
 
   final StreamController<bool> _pauseStreamController =
       StreamController<bool>();
-  final CanvasElement? canvas;
-  final CanvasRenderingContext2D? ctx;
-  final RenderingContext2? gl;
+  final CanvasElement canvas;
+  final CanvasElement glCanvas;
+  final CanvasElement hudCanvas;
+  final CanvasRenderingContext2D ctx;
+  final CanvasRenderingContext2D hudCtx;
+  final RenderingContext2 gl;
   final GameHelper helper;
   final JsonAsset? spriteSheetJson;
   final BinaryAsset? spriteSheetImg;
   final String? bodyDefsName;
   final String? musicName;
-  final bool webgl;
   final bool useMaxDelta;
   late World world;
   Map<String, List<Polygon>>? bodyDefs;
@@ -39,55 +41,60 @@ abstract class GameBase {
   bool fullscreen = false;
   bool _stop = false;
   bool _pause = false;
-  bool _errorInitializingWebGL = false;
 
   /// [appName] is used to refernce assets and has to be the name of the library
   /// which contains the assets. Usually the game itself.
   GameBase(
-    String appName,
-    String canvasSelector, {
+    String appName, {
     this.spriteSheetJson,
     this.spriteSheetImg,
     this.bodyDefsName = 'assets',
     this.musicName,
     this.audioContext,
-    this.webgl = false,
     bool depthTest = true,
     bool blending = true,
     this.useMaxDelta = true,
-  })  : canvas = querySelector(canvasSelector)! as CanvasElement,
+  })  : assert(
+          querySelector('#game') is CanvasElement,
+          'Canvas with id "canvas" required',
+        ),
+        assert(
+          querySelector('#webgl') is CanvasElement,
+          'Canvas with id "webgl" required',
+        ),
+        assert(
+          querySelector('#hud') is CanvasElement,
+          'Canvas with id "hud" required',
+        ),
+        canvas = querySelector('#game')! as CanvasElement,
+        glCanvas = querySelector('#webgl')! as CanvasElement,
+        hudCanvas = querySelector('#hud')! as CanvasElement,
         helper = GameHelper(appName, audioContext),
-        ctx = webgl
-            ? null
-            : (querySelector(canvasSelector)! as CanvasElement).context2D,
-        gl = webgl
-            ? (querySelector(canvasSelector)! as CanvasElement)
-                .getContext('webgl2')! as RenderingContext2
-            : null {
-    final localCtx = ctx;
-    final localGl = gl;
-    if (localCtx != null) {
-      localCtx
-        ..textBaseline = 'top'
-        ..font = '12px Verdana';
-    } else if (localGl != null) {
-      if (depthTest) {
-        localGl.enable(WebGL.DEPTH_TEST);
-      }
-      if (blending) {
-        localGl
-          ..enable(WebGL.BLEND)
-          ..blendFunc(WebGL.SRC_ALPHA, WebGL.ONE_MINUS_SRC_ALPHA);
-      }
-//      (ctx as RenderingContext2)
-//                               ..enable(WebGL.POLYGON_OFFSET_FILL);
-//                               ..polygonOffset(1.0, 1.0);
-    } else {
-      _errorInitializingWebGL = true;
+        ctx = (querySelector('#game')! as CanvasElement).context2D,
+        hudCtx = (querySelector('#hud')! as CanvasElement).context2D,
+        gl = (querySelector('#webgl')! as CanvasElement).getContext('webgl2')!
+            as RenderingContext2 {
+    ctx
+      ..textBaseline = 'top'
+      ..font = '12px Verdana';
+
+    if (depthTest) {
+      gl
+        ..enable(WebGL.DEPTH_TEST)
+        ..depthFunc(WebGL.LEQUAL);
     }
-    canvas!.onFullscreenChange.listen(_handleFullscreen);
+    if (blending) {
+      gl
+        ..enable(WebGL.BLEND)
+        ..blendFunc(WebGL.SRC_ALPHA, WebGL.ONE_MINUS_SRC_ALPHA);
+    }
+    gl
+      ..enable(WebGL.POLYGON_OFFSET_FILL)
+      ..polygonOffset(1.0, 1.0);
+
+    canvas.onFullscreenChange.listen(_handleFullscreen);
     world = createWorld()
-      ..addManager(CameraManager(canvas!.width!, canvas!.height!));
+      ..addManager(CameraManager(canvas.width!, canvas.height!));
     final fullscreenButton = querySelector('button#fullscreen');
     if (null != fullscreenButton) {
       fullscreenButton.onClick
@@ -98,40 +105,20 @@ abstract class GameBase {
   /// [appName] is used to refernce assets and has to be the name of the library
   /// which contains the assets. Usually the game itself.
   GameBase.noAssets(
-    String appName,
-    String canvasSelector, {
-    bool webgl = false,
+    String appName, {
     bool depthTest = true,
     bool blending = true,
     bool useMaxDelta = true,
   }) : this(
           appName,
-          canvasSelector,
           bodyDefsName: null,
           musicName: null,
-          webgl: webgl,
           useMaxDelta: useMaxDelta,
           depthTest: depthTest,
           blending: blending,
         );
 
-  GameBase.noCanvas(String appNahme)
-      : canvas = null,
-        ctx = null,
-        gl = null,
-        useMaxDelta = true,
-        helper = GameHelper(appNahme, null),
-        spriteSheetJson = null,
-        spriteSheetImg = null,
-        bodyDefsName = null,
-        musicName = null,
-        webgl = false {
-    world = createWorld();
-  }
-
   World createWorld() => World();
-
-  bool get webGlInitialized => webgl && !_errorInitializingWebGL;
 
   Future _init() => _assetsLoaded()
       .then((_) => onInit())
@@ -269,13 +256,11 @@ abstract class GameBase {
   }
 
   void _resize() {
-    if (null != canvas) {
-      _updateCameraManager(
-        document.body!.clientWidth,
-        document.body!.clientHeight,
-      );
-      handleResize();
-    }
+    _updateCameraManager(
+      document.body!.clientWidth,
+      document.body!.clientHeight,
+    );
+    handleResize();
   }
 
   void _updateCameraManager(int width, int height) {
@@ -285,22 +270,21 @@ abstract class GameBase {
   }
 
   void handleResize() {
-    final localCanvas = canvas;
-    if (localCanvas != null) {
-      resizeCanvas(localCanvas);
-      if (paused || isStopped) {
-        world
-          ..delta = 0.0
-          ..process();
-      }
-      if (!webgl) {
-        localCanvas.context2D
-          ..textBaseline = 'top'
-          ..font = '12px Verdana';
-      } else {
-        gl!.viewport(0, 0, gl!.drawingBufferWidth!, gl!.drawingBufferHeight!);
-      }
+    resizeCanvas(canvas);
+    resizeCanvas(hudCanvas);
+    resizeCanvas(glCanvas);
+    if (paused || isStopped) {
+      world
+        ..delta = 0.0
+        ..process();
     }
+    ctx
+      ..textBaseline = 'top'
+      ..font = '12px Verdana';
+    hudCtx
+      ..textBaseline = 'top'
+      ..font = '12px Verdana';
+    gl.viewport(0, 0, gl.drawingBufferWidth!, gl.drawingBufferHeight!);
   }
 
   /// Create your entities
