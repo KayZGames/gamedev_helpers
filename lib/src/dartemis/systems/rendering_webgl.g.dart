@@ -13,11 +13,15 @@ abstract class _$ParticleRenderingSystem extends WebGlRenderingSystem {
   late final ViewProjectionMatrixManager viewProjectionMatrixManager;
   late final TagManager tagManager;
   late final CameraManager cameraManager;
-  _$ParticleRenderingSystem(RenderingContext2 gl)
-      : super(gl, Aspect.empty()..allOf([Position, Particle, Color]));
+  _$ParticleRenderingSystem(WebGL2RenderingContext gl)
+      : super(
+            gl,
+            Aspect(
+              allOf: [Position, Particle, Color],
+            ));
   @override
-  void initialize() {
-    super.initialize();
+  void initialize(World world) {
+    super.initialize(world);
     positionMapper = Mapper<Position>(world);
     particleMapper = Mapper<Particle>(world);
     colorMapper = Mapper<Color>(world);
@@ -35,11 +39,11 @@ abstract class _$WebGlSpriteRenderingSystem extends WebGlRenderingSystem {
   late final Mapper<Camera> cameraMapper;
   late final TagManager tagManager;
   late final ViewProjectionMatrixManager viewProjectionMatrixManager;
-  _$WebGlSpriteRenderingSystem(RenderingContext2 gl, Aspect aspect)
+  _$WebGlSpriteRenderingSystem(WebGL2RenderingContext gl, Aspect aspect)
       : super(gl, aspect..allOf([Orientation, Renderable]));
   @override
-  void initialize() {
-    super.initialize();
+  void initialize(World world) {
+    super.initialize(world);
     orientationMapper = Mapper<Orientation>(world);
     renderableMapper = Mapper<Renderable>(world);
     positionMapper = Mapper<Position>(world);

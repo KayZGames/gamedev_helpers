@@ -1,6 +1,5 @@
-import 'dart:web_audio';
-
 import 'package:asset_data/asset_data.dart';
+import 'package:web/web.dart';
 
 import 'internal/asset_loader.dart' as assets;
 import 'shader.dart';

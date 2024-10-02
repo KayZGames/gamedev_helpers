@@ -12,7 +12,7 @@ part 'animation_system.g.dart';
 )
 class AnimationSystem extends _$AnimationSystem {
   @override
-  void processEntity(int entity, Renderable renderable) {
+  void processEntity(Entity entity, Renderable renderable) {
     renderable.time += world.delta;
   }
 }

@@ -8,20 +8,23 @@ part of 'animation_system.dart';
 
 abstract class _$AnimationSystem extends EntitySystem {
   late final Mapper<Renderable> renderableMapper;
-  _$AnimationSystem() : super(Aspect.empty()..allOf([Renderable]));
+  _$AnimationSystem({super.group, super.passive})
+      : super(Aspect(
+          allOf: [Renderable],
+        ));
   @override
-  void initialize() {
-    super.initialize();
+  void initialize(World world) {
+    super.initialize(world);
     renderableMapper = Mapper<Renderable>(world);
   }
 
   @override
-  void processEntities(Iterable<int> entities) {
+  void processEntities(Iterable<Entity> entities) {
     final renderableMapper = this.renderableMapper;
     for (final entity in entities) {
       processEntity(entity, renderableMapper[entity]);
     }
   }
 
-  void processEntity(int entity, Renderable renderable);
+  void processEntity(Entity entity, Renderable renderable);
 }

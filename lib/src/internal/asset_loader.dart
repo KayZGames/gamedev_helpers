@@ -1,21 +1,25 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:html';
-import 'dart:typed_data';
-import 'dart:web_audio';
+import 'dart:js_interop';
+import 'dart:math';
 
 import 'package:asset_data/asset_data.dart';
+import 'package:http/browser_client.dart';
 import 'package:vector_math/vector_math_64.dart';
+import 'package:web/web.dart';
 
 import '../shader.dart';
 import '../sprite_sheet.dart';
 
-Future<Map<String, String>> loadAchievements(String libName) =>
-    HttpRequest.getString('packages/$libName/assets/achievements.json')
-        .then(_processAchievementAssets);
+Future<Map<String, String>> loadAchievements(String libName) => BrowserClient()
+    .get(Uri(path: 'packages/$libName/assets/achievements.json'))
+    .then((value) => value.body)
+    .then(_processAchievementAssets);
 
 Future<Map<String, List<Polygon>>> loadPolygons(String libName, String name) =>
-    HttpRequest.getString('packages/$libName/assets/img/$name.polygons.json')
+    BrowserClient()
+        .get(Uri(path: 'packages/$libName/assets/img/$name.polygons.json'))
+        .then((value) => value.body)
         .then(_processPolygonAssets)
         .then(_createPolygonMap);
 
@@ -37,7 +41,7 @@ Future<AudioBuffer> loadMusic(
   String name,
 ) {
   const goodAnswer = ['probably', 'maybe'];
-  final audio = AudioElement();
+  final audio = HTMLAudioElement();
   var fileExtension = 'ogg';
   if (goodAnswer.contains(audio.canPlayType('audio/ogg'))) {
     fileExtension = 'ogg';
@@ -47,10 +51,11 @@ Future<AudioBuffer> loadMusic(
     fileExtension = 'mp3';
   }
   final musicPath = 'packages/$libName/assets/music/$name.$fileExtension';
-  return HttpRequest.request(musicPath, responseType: 'arraybuffer').then(
-    (request) async =>
+  return BrowserClient()
+      .get(Uri(path: musicPath), headers: {'responseType': 'arraybuffer'}).then(
+    (response) async =>
         // ignore: avoid_as
-        audioContext.decodeAudioData(request.response as ByteBuffer),
+        audioContext.decodeAudioData(response as JSArrayBuffer).toDart,
   );
 }
 
@@ -70,7 +75,7 @@ Future<Map<String, List<Polygon>>> _createPolygonMap(
 
 Future<SpriteSheet> _createSpriteSheet(String imgPath, _AssetJson assets) {
   final completer = Completer<SpriteSheet>();
-  final img = ImageElement(src: imgPath);
+  final img = HTMLImageElement()..src = imgPath;
   img.onLoad.listen((_) {
     final sprites = <String, Sprite>{};
     assets.frames.forEach((assetName, assetData) {
@@ -97,7 +102,7 @@ class Polygon {
   Polygon(List<double> points)
       : vertices = [
           for (var i = 0; i < points.length; i += 2)
-            Vector2(points[i], points[i + 1])
+            Vector2(points[i], points[i + 1]),
         ];
 }
 

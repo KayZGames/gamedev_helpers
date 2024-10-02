@@ -1,9 +1,9 @@
 name: gamedev_helpers
-version: 2.1.0
+version: 3.0.0
 description: Useful stuff for my gamedevelopment needs
 publish_to: none
 environment:
-  sdk: '>=2.17.0 <3.0.0'
+  sdk: ^3.3.0
 dependencies:
   asset_data:
     git:
@@ -15,11 +15,21 @@ dependencies:
     git:
       url: https://github.com/KayZGames/gamedev_helpers_core.git
       ref: tags/2.0.0
+  http: ^1.2.2
   vector_math: ^2.0.6
+  web: ^1.1.0
 dev_dependencies:
   asset_builder:
     git:
       url: https://github.com/KayZGames/asset_builder.git
-      ref: tags/1.0.1
+      ref: tags/1.0.3
   build_runner: any
   dartemis_builder: ^0.3.0
+
+dependency_overrides:
+  dartemis:
+    path: ../dartemis
+  dartemis_builder:
+    path: ../dartemis_builder
+  gamedev_helpers_core:
+    path: ../gamedev_helpers_core

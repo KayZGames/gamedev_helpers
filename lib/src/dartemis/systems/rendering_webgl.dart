@@ -1,10 +1,11 @@
+import 'dart:js_interop';
 import 'dart:math';
 import 'dart:typed_data';
-import 'dart:web_gl';
 
 import 'package:asset_data/asset_data.dart';
 import 'package:dartemis/dartemis.dart';
 import 'package:gamedev_helpers_core/gamedev_helpers_core.dart';
+import 'package:web/web.dart' hide Float32List;
 
 import '../../internal/webgl_rendering_mixin.dart';
 import '../../shader.dart';
@@ -16,18 +17,22 @@ export '../../internal/webgl_rendering_mixin.dart' show Attrib;
 part 'rendering_webgl.g.dart';
 
 class WebGlCanvasCleaningSystem extends VoidEntitySystem {
-  RenderingContext2 gl;
+  WebGL2RenderingContext gl;
 
   WebGlCanvasCleaningSystem(this.gl);
 
   @override
-  void initialize() {
+  void initialize(World world) {
+    super.initialize(world);
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
   }
 
   @override
   void processSystem() {
-    gl.clear(WebGL.COLOR_BUFFER_BIT | WebGL.DEPTH_BUFFER_BIT);
+    gl.clear(
+      WebGLRenderingContext.COLOR_BUFFER_BIT |
+          WebGLRenderingContext.DEPTH_BUFFER_BIT,
+    );
   }
 }
 
@@ -35,17 +40,19 @@ abstract class WebGlRenderingSystem extends EntitySystem
     with WebGlRenderingMixin {
   int maxLength = 0;
 
-  WebGlRenderingSystem(RenderingContext2 gl, Aspect aspect) : super(aspect) {
+  WebGlRenderingSystem(WebGL2RenderingContext gl, Aspect aspect)
+      : super(aspect) {
     this.gl = gl;
   }
 
   @override
-  void initialize() {
+  void initialize(World world) {
+    super.initialize(world);
     initProgram();
   }
 
   @override
-  void processEntities(Iterable<int> entities) {
+  void processEntities(Iterable<Entity> entities) {
     final length = entities.length;
     if (length > 0) {
       gl.useProgram(program);
@@ -67,18 +74,19 @@ abstract class WebGlRenderingSystem extends EntitySystem
   bool checkProcessing() => success;
 
   void updateLength(int length);
-  bool processEntity(int index, int entity);
+  bool processEntity(int index, Entity entity);
   void render(int length);
 }
 
 abstract class VoidWebGlRenderingSystem extends VoidEntitySystem
     with WebGlRenderingMixin {
-  VoidWebGlRenderingSystem(RenderingContext2 gl) {
+  VoidWebGlRenderingSystem(WebGL2RenderingContext gl) {
     this.gl = gl;
   }
 
   @override
-  void initialize() {
+  void initialize(World world) {
+    super.initialize(world);
     initProgram();
   }
 
@@ -109,12 +117,12 @@ class ParticleRenderingSystem extends _$ParticleRenderingSystem {
   late Float32List colors;
   late Float32List radius;
 
-  late UniformLocation uViewProjectionLocation;
+  late WebGLUniformLocation uViewProjectionLocation;
 
   ParticleRenderingSystem(super.gl);
 
   @override
-  bool processEntity(int index, int entity) {
+  bool processEntity(int index, Entity entity) {
     final position = positionMapper[entity];
     final color = colorMapper[entity];
 
@@ -141,14 +149,15 @@ class ParticleRenderingSystem extends _$ParticleRenderingSystem {
       false,
       viewProjectionMatrixManager
           .create2dViewProjectionMatrix(cameraEntity)
-          .storage,
+          .storage
+          .toJS,
     );
 
     buffer('aPosition', positions, 2);
     buffer('aRadius', radius, 1);
     buffer('aColor', colors, 4);
 
-    gl.drawArrays(WebGL.POINTS, 0, length);
+    gl.drawArrays(WebGLRenderingContext.POINTS, 0, length);
   }
 
   @override
@@ -195,49 +204,56 @@ abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
 
   List<Attrib> attributes = [
     const Attrib('aPosition', 2),
-    const Attrib('aTexCoord', 2)
+    const Attrib('aTexCoord', 2),
   ];
   late Float32List values;
   late Uint16List indices;
 
-  WebGlSpriteRenderingSystem(RenderingContext2 gl, this.sheet, Aspect aspect)
-      : super(gl, aspect);
+  WebGlSpriteRenderingSystem(
+    WebGL2RenderingContext gl,
+    this.sheet,
+    Aspect aspect,
+  ) : super(gl, aspect);
 
   @override
-  void initialize() {
-    super.initialize();
+  void initialize(World world) {
+    super.initialize(world);
 
     final texture = gl.createTexture();
     final uTexture = gl.getUniformLocation(program, 'uTexture');
 
     gl
       ..useProgram(program)
-      ..activeTexture(WebGL.TEXTURE0)
-      ..bindTexture(WebGL.TEXTURE_2D, texture)
-      ..texParameteri(WebGL.TEXTURE_2D, WebGL.TEXTURE_MIN_FILTER, WebGL.LINEAR)
+      ..activeTexture(WebGLRenderingContext.TEXTURE0)
+      ..bindTexture(WebGLRenderingContext.TEXTURE_2D, texture)
       ..texParameteri(
-        WebGL.TEXTURE_2D,
-        WebGL.TEXTURE_WRAP_S,
-        WebGL.CLAMP_TO_EDGE,
+        WebGLRenderingContext.TEXTURE_2D,
+        WebGLRenderingContext.TEXTURE_MIN_FILTER,
+        WebGLRenderingContext.LINEAR,
+      )
+      ..texParameteri(
+        WebGLRenderingContext.TEXTURE_2D,
+        WebGLRenderingContext.TEXTURE_WRAP_S,
+        WebGLRenderingContext.CLAMP_TO_EDGE,
       )
       ..texImage2D(
-        WebGL.TEXTURE_2D,
+        WebGLRenderingContext.TEXTURE_2D,
         0,
-        WebGL.RGBA,
-        WebGL.RGBA,
-        WebGL.UNSIGNED_BYTE,
+        WebGLRenderingContext.RGBA,
+        WebGLRenderingContext.RGBA.toJS,
+        WebGLRenderingContext.UNSIGNED_BYTE.toJS,
         sheet.image,
       )
       ..uniform1i(uTexture, 0)
       ..uniform2f(
         gl.getUniformLocation(program, 'uSize'),
-        sheet.image.width!,
-        sheet.image.height!,
+        sheet.image.width,
+        sheet.image.height,
       );
   }
 
   @override
-  bool processEntity(int index, int entity) {
+  bool processEntity(int index, Entity entity) {
     final position = getPosition(entity);
     final orientation = orientationMapper[entity];
     final renderable = renderableMapper[entity];
@@ -315,7 +331,7 @@ abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
     return true;
   }
 
-  Position getPosition(int entity) => positionMapper[entity];
+  Position getPosition(Entity entity) => positionMapper[entity];
 
   @override
   void render(int length) {
@@ -328,9 +344,15 @@ abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
         false,
         viewProjectionMatrixManager
             .create2dViewProjectionMatrix(cameraEntity)
-            .storage,
+            .storage
+            .toJS,
       )
-      ..drawElements(WebGL.TRIANGLES, length * 6, WebGL.UNSIGNED_SHORT, 0);
+      ..drawElements(
+        WebGLRenderingContext.TRIANGLES,
+        length * 6,
+        WebGLRenderingContext.UNSIGNED_SHORT,
+        0,
+      );
   }
 
   @override

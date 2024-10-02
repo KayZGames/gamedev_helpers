@@ -1,6 +1,7 @@
-import 'dart:html';
+import 'dart:js_interop';
 
 import 'package:dartemis/dartemis.dart';
+import 'package:web/web.dart';
 
 class FpsRenderingSystem extends VoidEntitySystem {
   static const _deltaCount = 20;
@@ -22,7 +23,7 @@ class FpsRenderingSystem extends VoidEntitySystem {
       ..save()
       ..font = '10px Verdana'
       ..textBaseline = 'top'
-      ..fillStyle = fillStyle
+      ..fillStyle = fillStyle.toJS
       ..fillText('FPS: ${fps.toStringAsFixed(2)}', 5, 5)
       ..restore();
   }

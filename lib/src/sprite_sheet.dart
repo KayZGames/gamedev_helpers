@@ -1,6 +1,7 @@
-import 'dart:html';
+import 'dart:math';
 
 import 'package:vector_math/vector_math_64.dart';
+import 'package:web/web.dart';
 
 class LayeredSpriteSheet {
   List<SpriteSheet> sheets;
@@ -15,7 +16,7 @@ class LayeredSpriteSheet {
 }
 
 class SpriteSheet {
-  final ImageElement image;
+  final HTMLImageElement image;
   final Map<String, Sprite> sprites;
 
   SpriteSheet(this.image, this.sprites);

@@ -1,28 +1,34 @@
+import 'dart:js_interop';
 import 'dart:typed_data';
-import 'dart:web_gl';
 
 import 'package:asset_data/asset_data.dart';
+import 'package:web/web.dart' hide Float32List;
 
 import '../shader.dart';
 
 mixin WebGlRenderingMixin {
   static const int fsize = Float32List.bytesPerElement;
 
-  late final RenderingContext2 gl;
-  late final Program program;
+  late final WebGL2RenderingContext gl;
+  late final WebGLProgram program;
   late final ShaderSource shaderSource;
-  Buffer? elementBuffer;
-  Buffer? indexBuffer;
-  Map<String, Buffer> buffers = <String, Buffer>{};
+  WebGLBuffer? elementBuffer;
+  WebGLBuffer? indexBuffer;
+  Map<String, WebGLBuffer> buffers = <String, WebGLBuffer>{};
   bool success = true;
-  final Map<String, UniformLocation> _uniforms = {};
+  final Map<String, WebGLUniformLocation> _uniforms = {};
   final Set<String> _usedUniforms = {};
 
   void initProgram() {
-    final vShader = _createShader(WebGL.VERTEX_SHADER, shaderSource.vShader);
+    final vShader = _createShader(
+      WebGLRenderingContext.VERTEX_SHADER,
+      shaderSource.vShader,
+    );
     if (success) {
-      final fShader =
-          _createShader(WebGL.FRAGMENT_SHADER, shaderSource.fShader);
+      final fShader = _createShader(
+        WebGLRenderingContext.FRAGMENT_SHADER,
+        shaderSource.fShader,
+      );
       if (success) {
         _createProgram(vShader, fShader);
       }
@@ -43,7 +49,7 @@ ${_uniforms.keys.map((key) => '''${key}Location = getUniformLocation('$key');'''
     }
   }
 
-  UniformLocation getUniformLocation(String name) {
+  WebGLUniformLocation getUniformLocation(String name) {
     if (_usedUniforms.contains(name)) {
       throw Exception('uniform $name already initialized in $runtimeType');
     }
@@ -57,20 +63,28 @@ ${_uniforms.keys.map((key) => '''${key}Location = getUniformLocation('$key');'''
     return result;
   }
 
-  void _createProgram(Shader vShader, Shader fShader) {
-    program = gl.createProgram();
+  void _createProgram(WebGLShader vShader, WebGLShader fShader) {
+    program = gl.createProgram()!;
     gl
       ..attachShader(program, vShader)
       ..attachShader(program, fShader)
       ..linkProgram(program);
-    final linkSuccess =
-        gl.getProgramParameter(program, WebGL.LINK_STATUS)! as bool;
+    final linkSuccess = gl
+        .getProgramParameter(
+          program,
+          WebGLRenderingContext.LINK_STATUS,
+        )
+        .dartify()! as bool;
     if (linkSuccess) {
-      final uniformCount =
-          gl.getProgramParameter(program, WebGL.ACTIVE_UNIFORMS)! as int;
+      final uniformCount = gl
+          .getProgramParameter(
+            program,
+            WebGLRenderingContext.ACTIVE_UNIFORMS,
+          )
+          .dartify()! as double;
       for (var i = 0; i < uniformCount; i++) {
-        final uniformName = gl.getActiveUniform(program, i).name;
-        _uniforms[uniformName] = gl.getUniformLocation(program, uniformName);
+        final uniformName = gl.getActiveUniform(program, i)!.name;
+        _uniforms[uniformName] = gl.getUniformLocation(program, uniformName)!;
       }
     } else {
       success = false;
@@ -80,13 +94,17 @@ ${_uniforms.keys.map((key) => '''${key}Location = getUniformLocation('$key');'''
     }
   }
 
-  Shader _createShader(int type, TextAsset source) {
-    final shader = gl.createShader(type);
+  WebGLShader _createShader(int type, TextAsset source) {
+    final shader = gl.createShader(type)!;
     gl
       ..shaderSource(shader, source.content)
       ..compileShader(shader);
-    final compileSuccess =
-        gl.getShaderParameter(shader, WebGL.COMPILE_STATUS)! as bool;
+    final compileSuccess = gl
+        .getShaderParameter(
+          shader,
+          WebGLRenderingContext.COMPILE_STATUS,
+        )
+        .dartify()! as bool;
     if (!compileSuccess) {
       success = false;
       throw Exception(
@@ -100,12 +118,12 @@ ${_uniforms.keys.map((key) => '''${key}Location = getUniformLocation('$key');'''
     String attribute,
     Float32List items,
     int itemSize, {
-    int usage = WebGL.DYNAMIC_DRAW,
+    int usage = WebGLRenderingContext.DYNAMIC_DRAW,
   }) {
     var buffer = buffers[attribute];
     if (null == buffer) {
       buffer = gl.createBuffer();
-      buffers[attribute] = buffer;
+      buffers[attribute] = buffer!;
     }
     final attribLocation = gl.getAttribLocation(program, attribute);
     if (attribLocation == -1) {
@@ -114,9 +132,16 @@ ${_uniforms.keys.map((key) => '''${key}Location = getUniformLocation('$key');'''
       );
     }
     gl
-      ..bindBuffer(WebGL.ARRAY_BUFFER, buffer)
-      ..bufferData(WebGL.ARRAY_BUFFER, items, usage)
-      ..vertexAttribPointer(attribLocation, itemSize, WebGL.FLOAT, false, 0, 0)
+      ..bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, buffer)
+      ..bufferData(WebGLRenderingContext.ARRAY_BUFFER, items.toJS, usage)
+      ..vertexAttribPointer(
+        attribLocation,
+        itemSize,
+        WebGLRenderingContext.FLOAT,
+        false,
+        0,
+        0,
+      )
       ..enableVertexAttribArray(attribLocation);
   }
 
@@ -130,8 +155,12 @@ ${_uniforms.keys.map((key) => '''${key}Location = getUniformLocation('$key');'''
       indexBuffer = gl.createBuffer();
     }
     gl
-      ..bindBuffer(WebGL.ARRAY_BUFFER, elementBuffer)
-      ..bufferData(WebGL.ARRAY_BUFFER, items, WebGL.DYNAMIC_DRAW);
+      ..bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, elementBuffer)
+      ..bufferData(
+        WebGLRenderingContext.ARRAY_BUFFER,
+        items.toJS,
+        WebGLRenderingContext.DYNAMIC_DRAW,
+      );
     var offset = 0;
     var elementsPerItem = 0;
     for (final attribute in attributes) {
@@ -148,7 +177,7 @@ ${_uniforms.keys.map((key) => '''${key}Location = getUniformLocation('$key');'''
         ..vertexAttribPointer(
           attribLocation,
           attribute.size,
-          WebGL.FLOAT,
+          WebGLRenderingContext.FLOAT,
           false,
           fsize * elementsPerItem,
           fsize * offset,
@@ -157,8 +186,12 @@ ${_uniforms.keys.map((key) => '''${key}Location = getUniformLocation('$key');'''
       offset += attribute.size;
     }
     gl
-      ..bindBuffer(WebGL.ELEMENT_ARRAY_BUFFER, indexBuffer)
-      ..bufferData(WebGL.ELEMENT_ARRAY_BUFFER, indices, WebGL.DYNAMIC_DRAW);
+      ..bindBuffer(WebGLRenderingContext.ELEMENT_ARRAY_BUFFER, indexBuffer)
+      ..bufferData(
+        WebGLRenderingContext.ELEMENT_ARRAY_BUFFER,
+        indices.toJS,
+        WebGLRenderingContext.DYNAMIC_DRAW,
+      );
   }
 
   void drawTriangles(
@@ -168,7 +201,12 @@ ${_uniforms.keys.map((key) => '''${key}Location = getUniformLocation('$key');'''
     int length,
   ) {
     bufferElements(attributes, items, indices);
-    gl.drawElements(WebGL.TRIANGLES, length, WebGL.UNSIGNED_SHORT, 0);
+    gl.drawElements(
+      WebGLRenderingContext.TRIANGLES,
+      length,
+      WebGLRenderingContext.UNSIGNED_SHORT,
+      0,
+    );
   }
 
   void drawPoints(
@@ -178,7 +216,12 @@ ${_uniforms.keys.map((key) => '''${key}Location = getUniformLocation('$key');'''
     int length,
   ) {
     bufferElements(attributes, items, indices);
-    gl.drawElements(WebGL.POINTS, length, WebGL.UNSIGNED_SHORT, 0);
+    gl.drawElements(
+      WebGLRenderingContext.POINTS,
+      length,
+      WebGLRenderingContext.UNSIGNED_SHORT,
+      0,
+    );
   }
 
   TextAsset get vShaderAsset;

@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'dart:html';
 
 import 'package:dartemis/dartemis.dart';
+import 'package:web/web.dart';
 
 abstract class GenericInputHandlingSystem extends EntityProcessingSystem {
   /// to prevent scrolling
@@ -10,7 +10,7 @@ abstract class GenericInputHandlingSystem extends EntityProcessingSystem {
     KeyCode.DOWN,
     KeyCode.LEFT,
     KeyCode.RIGHT,
-    KeyCode.SPACE
+    KeyCode.SPACE,
   };
   final Map<int, bool> keyState = <int, bool>{};
   final Map<int, bool> unpress = <int, bool>{};
@@ -20,10 +20,12 @@ abstract class GenericInputHandlingSystem extends EntityProcessingSystem {
   GenericInputHandlingSystem(super.aspect, this.ignoreInputFromElements);
 
   @override
-  void initialize() {
+  void initialize(World world) {
+    super.initialize(world);
     _onKeyDownSubscription = window.onKeyDown.listen(handleInput);
-    _onKeyUpSubscription =
-        window.onKeyUp.listen((event) => handleInput(event, keyDown: false));
+    _onKeyUpSubscription = EventStreamProviders.keyUpEvent
+        .forTarget(window)
+        .listen((event) => handleInput(event, keyDown: false));
   }
 
   @override

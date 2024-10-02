@@ -1,12 +1,11 @@
 import 'dart:async';
-import 'dart:html';
+import 'dart:js_interop';
 import 'dart:math';
-import 'dart:web_audio';
-import 'dart:web_gl';
 
 import 'package:asset_data/asset_data.dart';
 import 'package:dartemis/dartemis.dart';
 import 'package:gamedev_helpers_core/gamedev_helpers_core.dart';
+import 'package:web/web.dart';
 
 import 'game_helper.dart';
 import 'internal/asset_loader.dart';
@@ -19,12 +18,12 @@ abstract class GameBase {
 
   final StreamController<bool> _pauseStreamController =
       StreamController<bool>();
-  final CanvasElement canvas;
-  final CanvasElement glCanvas;
-  final CanvasElement hudCanvas;
+  final HTMLCanvasElement canvas;
+  final HTMLCanvasElement glCanvas;
+  final HTMLCanvasElement hudCanvas;
   final CanvasRenderingContext2D ctx;
   final CanvasRenderingContext2D hudCtx;
-  final RenderingContext2 gl;
+  final WebGL2RenderingContext gl;
   final GameHelper helper;
   final JsonAsset? spriteSheetJson;
   final BinaryAsset? spriteSheetImg;
@@ -55,50 +54,55 @@ abstract class GameBase {
     bool blending = true,
     this.useMaxDelta = true,
   })  : assert(
-          querySelector('#game') is CanvasElement,
-          'Canvas with id "canvas" required',
+          document.querySelector('#game') is HTMLCanvasElement,
+          'Canvas with id "game" required',
         ),
         assert(
-          querySelector('#webgl') is CanvasElement,
+          document.querySelector('#webgl') is HTMLCanvasElement,
           'Canvas with id "webgl" required',
         ),
         assert(
-          querySelector('#hud') is CanvasElement,
+          document.querySelector('#hud') is HTMLCanvasElement,
           'Canvas with id "hud" required',
         ),
-        canvas = querySelector('#game')! as CanvasElement,
-        glCanvas = querySelector('#webgl')! as CanvasElement,
-        hudCanvas = querySelector('#hud')! as CanvasElement,
+        canvas = document.querySelector('#game')! as HTMLCanvasElement,
+        glCanvas = document.querySelector('#webgl')! as HTMLCanvasElement,
+        hudCanvas = document.querySelector('#hud')! as HTMLCanvasElement,
         helper = GameHelper(appName, audioContext),
-        ctx = (querySelector('#game')! as CanvasElement).context2D,
-        hudCtx = (querySelector('#hud')! as CanvasElement).context2D,
-        gl = (querySelector('#webgl')! as CanvasElement).getContext('webgl2')!
-            as RenderingContext2 {
+        ctx = (document.querySelector('#game')! as HTMLCanvasElement).context2D,
+        hudCtx =
+            (document.querySelector('#hud')! as HTMLCanvasElement).context2D,
+        gl = (document.querySelector('#webgl')! as HTMLCanvasElement)
+            .getContext('webgl2')! as WebGL2RenderingContext {
     ctx
       ..textBaseline = 'top'
       ..font = '12px Verdana';
 
     if (depthTest) {
       gl
-        ..enable(WebGL.DEPTH_TEST)
-        ..depthFunc(WebGL.LEQUAL);
+        ..enable(WebGLRenderingContext.DEPTH_TEST)
+        ..depthFunc(WebGLRenderingContext.LEQUAL);
     }
     if (blending) {
       gl
-        ..enable(WebGL.BLEND)
-        ..blendFunc(WebGL.SRC_ALPHA, WebGL.ONE_MINUS_SRC_ALPHA);
+        ..enable(WebGLRenderingContext.BLEND)
+        ..blendFunc(
+          WebGLRenderingContext.SRC_ALPHA,
+          WebGLRenderingContext.ONE_MINUS_SRC_ALPHA,
+        );
     }
     gl
-      ..enable(WebGL.POLYGON_OFFSET_FILL)
+      ..enable(WebGLRenderingContext.POLYGON_OFFSET_FILL)
       ..polygonOffset(1.0, 1.0);
 
     canvas.onFullscreenChange.listen(_handleFullscreen);
     world = createWorld()
-      ..addManager(CameraManager(canvas.width!, canvas.height!));
-    final fullscreenButton = querySelector('button#fullscreen');
+      ..addManager(CameraManager(canvas.width, canvas.height));
+    final fullscreenButton = document.querySelector('button#fullscreen');
     if (null != fullscreenButton) {
-      fullscreenButton.onClick
-          .listen((_) async => querySelector('canvas')!.requestFullscreen());
+      fullscreenButton.onClick.listen(
+        (_) async => document.querySelector('canvas')!.requestFullscreen(),
+      );
     }
   }
 
@@ -187,7 +191,7 @@ abstract class GameBase {
     if (world.systems.any((system) => system.group == 1)) {
       physicsLoop();
     }
-    window.requestAnimationFrame(_firstUpdate);
+    window.requestAnimationFrame(_firstUpdate.toJS);
   }
 
   Future<void> stop() async {
@@ -227,26 +231,27 @@ abstract class GameBase {
     }
   }
 
-  Future<void> _firstUpdate(num time) async {
+  void _firstUpdate(num time) {
     _resize();
     _lastTime = time / 1000.0;
     world
       ..delta = 1 / 60
       ..process();
-    await update(time: await window.animationFrame / 1000.0);
+    window.requestAnimationFrame(update.toJS);
   }
 
-  Future<void> update({required double time}) async {
+  void update(double timeInMs) {
     _resize();
-    var delta = time - _lastTime;
+    final timeInS = timeInMs / 1000.0;
+    var delta = timeInS - _lastTime;
     if (useMaxDelta) {
       delta = min(0.05, delta);
     }
     world.delta = delta;
-    _lastTime = time;
+    _lastTime = timeInS;
     world.process();
     if (!_stop && !_pause) {
-      await update(time: await window.animationFrame / 1000.0);
+      window.requestAnimationFrame(update.toJS);
     }
   }
 
@@ -284,7 +289,7 @@ abstract class GameBase {
     hudCtx
       ..textBaseline = 'top'
       ..font = '12px Verdana';
-    gl.viewport(0, 0, gl.drawingBufferWidth!, gl.drawingBufferHeight!);
+    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
   }
 
   /// Create your entities
@@ -299,7 +304,7 @@ abstract class GameBase {
   void _initSystems() {
     getSystems().forEach((group, systems) {
       for (final system in systems) {
-        world.addSystem(system, group: group);
+        world.addSystem(system);
         if (system is WebGlRenderingMixin) {
           final webglMixin = system as WebGlRenderingMixin;
           webglMixin.shaderSource = helper.loadShader(
@@ -315,10 +320,10 @@ abstract class GameBase {
     getManagers().forEach(world.addManager);
   }
 
-  int addEntity<T extends Component>(List<T> components) =>
+  Entity addEntity<T extends Component>(List<T> components) =>
       world.createEntity(components);
 
-  void resizeCanvas(CanvasElement canvas) {
+  void resizeCanvas(HTMLCanvasElement canvas) {
     final camera = world.getManager<CameraManager>();
     canvas
       ..width = camera.clientWidth

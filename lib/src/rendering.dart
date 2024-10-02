@@ -1,4 +1,6 @@
-import 'dart:html';
+import 'dart:math';
+
+import 'package:web/web.dart';
 
 // originally part of CanvasQuery
 final Pattern _whitespacePattern = RegExp(r'\s+');
@@ -34,7 +36,7 @@ Rectangle textBoundaries(
   final regexp = RegExp(r'(\d+)');
   final h = int.parse(regexp.firstMatch(ctx.font)!.group(0)!) * 2;
   final lines = _getLines(ctx, text, maxWidth);
-  maxWidth ??= ctx.measureText(text).width!;
+  maxWidth ??= ctx.measureText(text).width;
   return Rectangle(0, 0, maxWidth, (lines.length * h * 0.6).toInt());
 }
 
@@ -49,13 +51,13 @@ List<String> _getLines(
   var ox = 0.0;
 
   var lines = List<String>.from(['']);
-  final spaceWidth = ctx.measureText(' ').width!;
+  final spaceWidth = ctx.measureText(' ').width;
   if (maxWidth != null) {
     final totalMaxWidth = maxWidth + spaceWidth;
     var line = 0;
     for (var i = 0; i < words.length; i++) {
       final word = '${words[i]} ';
-      final wordWidth = ctx.measureText(word).width!;
+      final wordWidth = ctx.measureText(word).width;
 
       if (ox + wordWidth > totalMaxWidth) {
         lines.add('');

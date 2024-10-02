@@ -1,9 +1,10 @@
-import 'dart:html';
+import 'dart:js_interop';
 
 import 'package:dartemis/dartemis.dart';
+import 'package:web/web.dart';
 
 class CanvasCleaningSystem extends VoidEntitySystem {
-  CanvasElement canvas;
+  HTMLCanvasElement canvas;
   String fillStyle;
 
   CanvasCleaningSystem(this.canvas, {this.fillStyle = 'white'});
@@ -11,7 +12,7 @@ class CanvasCleaningSystem extends VoidEntitySystem {
   @override
   void processSystem() {
     canvas.context2D
-      ..fillStyle = fillStyle
-      ..clearRect(0, 0, canvas.width!, canvas.height!);
+      ..fillStyle = fillStyle.toJS
+      ..clearRect(0, 0, canvas.width, canvas.height);
   }
 }
