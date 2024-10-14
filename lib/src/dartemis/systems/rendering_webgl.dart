@@ -203,8 +203,8 @@ abstract class WebGlSpriteRenderingSystem extends _$WebGlSpriteRenderingSystem {
   SpriteSheet sheet;
 
   List<Attrib> attributes = [
-    const Attrib('aPosition', 2),
-    const Attrib('aTexCoord', 2),
+    Attrib('aPosition', 2),
+    Attrib('aTexCoord', 2),
   ];
   late Float32List values;
   late Uint16List indices;

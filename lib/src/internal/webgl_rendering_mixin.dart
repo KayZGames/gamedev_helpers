@@ -134,6 +134,7 @@ ${_uniforms.keys.map((key) => '''${key}Location = getUniformLocation('$key');'''
     gl
       ..bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, buffer)
       ..bufferData(WebGLRenderingContext.ARRAY_BUFFER, items.toJS, usage)
+      ..enableVertexAttribArray(attribLocation)
       ..vertexAttribPointer(
         attribLocation,
         itemSize,
@@ -141,8 +142,7 @@ ${_uniforms.keys.map((key) => '''${key}Location = getUniformLocation('$key');'''
         false,
         0,
         0,
-      )
-      ..enableVertexAttribArray(attribLocation);
+      );
   }
 
   void bufferElements(
@@ -153,27 +153,25 @@ ${_uniforms.keys.map((key) => '''${key}Location = getUniformLocation('$key');'''
     if (elementBuffer == null) {
       elementBuffer = gl.createBuffer();
       indexBuffer = gl.createBuffer();
+      gl
+        ..bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, elementBuffer)
+        ..bindBuffer(WebGLRenderingContext.ELEMENT_ARRAY_BUFFER, indexBuffer);
     }
-    gl
-      ..bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, elementBuffer)
-      ..bufferData(
-        WebGLRenderingContext.ARRAY_BUFFER,
-        items.toJS,
-        WebGLRenderingContext.DYNAMIC_DRAW,
-      );
     var offset = 0;
     var elementsPerItem = 0;
     for (final attribute in attributes) {
       elementsPerItem += attribute.size;
     }
     for (final attribute in attributes) {
-      final attribLocation = gl.getAttribLocation(program, attribute.name);
+      final attribLocation = attribute._location ??
+          (attribute._location = gl.getAttribLocation(program, attribute.name));
       if (attribLocation == -1) {
         throw ArgumentError(
-          '''Attribute ${attribute.name} not found in vertex shader for ${vShaderAsset.assetId}}''',
+          '''Attribute ${attribute.name} not found in vertex shader for ${vShaderAsset.assetId}} (may be unused)''',
         );
       }
       gl
+        ..enableVertexAttribArray(attribLocation)
         ..vertexAttribPointer(
           attribLocation,
           attribute.size,
@@ -181,12 +179,15 @@ ${_uniforms.keys.map((key) => '''${key}Location = getUniformLocation('$key');'''
           false,
           fsize * elementsPerItem,
           fsize * offset,
-        )
-        ..enableVertexAttribArray(attribLocation);
+        );
       offset += attribute.size;
     }
     gl
-      ..bindBuffer(WebGLRenderingContext.ELEMENT_ARRAY_BUFFER, indexBuffer)
+      ..bufferData(
+        WebGLRenderingContext.ARRAY_BUFFER,
+        items.toJS,
+        WebGLRenderingContext.DYNAMIC_DRAW,
+      )
       ..bufferData(
         WebGLRenderingContext.ELEMENT_ARRAY_BUFFER,
         indices.toJS,
@@ -233,5 +234,6 @@ ${_uniforms.keys.map((key) => '''${key}Location = getUniformLocation('$key');'''
 class Attrib {
   final String name;
   final int size;
-  const Attrib(this.name, this.size);
+  int? _location;
+  Attrib(this.name, this.size);
 }
