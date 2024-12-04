@@ -124,20 +124,20 @@ abstract class GameBase {
 
   World createWorld() => World();
 
-  Future _init() => _assetsLoaded()
+  Future<void> _init() => _assetsLoaded()
       .then((_) => onInit())
       .then((_) => _initGame())
       .then((_) => onInitDone());
 
-  /// Do whatever you have to do before starting to create [int]s and
+  /// Do whatever you have to do before starting to create [Entity]s and
   /// [EntitySystem]s.
-  Future onInit() async => null;
+  Future<void> onInit() async => Future.value();
 
   /// Do whatever you have to do after world.initialize() was called.
-  Future onInitDone() async => null;
+  Future<void> onInitDone() async => Future.value();
 
-  Future _assetsLoaded() {
-    final loader = <Future>[];
+  Future<void> _assetsLoaded() {
+    final loader = <Future<void>>[];
     final localSpriteSheetJson = spriteSheetJson;
     final localSpriteSheetImg = spriteSheetImg;
     if (null != localSpriteSheetJson && null != localSpriteSheetImg) {
