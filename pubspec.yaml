@@ -9,12 +9,12 @@ dependencies:
     git:
       url: https://github.com/KayZGames/asset_data.git
       ref: tags/1.0.0
-  dartemis: ^0.9.0
+  dartemis: ^0.10.0
   event_bus: ^2.0.0
   gamedev_helpers_core:
     git:
       url: https://github.com/KayZGames/gamedev_helpers_core.git
-      ref: tags/2.0.0
+      ref: tags/3.0.0
   http: ^1.2.2
   vector_math: ^2.0.6
   web: ^1.1.0
@@ -24,12 +24,4 @@ dev_dependencies:
       url: https://github.com/KayZGames/asset_builder.git
       ref: tags/1.0.3
   build_runner: any
-  dartemis_builder: ^0.3.0
-
-dependency_overrides:
-  dartemis:
-    path: ../dartemis
-  dartemis_builder:
-    path: ../dartemis_builder
-  gamedev_helpers_core:
-    path: ../gamedev_helpers_core
+  dartemis_builder: ^0.4.0
